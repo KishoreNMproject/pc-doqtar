@@ -15,10 +15,7 @@ public class ServerConnection {
     public static boolean checkConnection()
             throws IOException, InterruptedException {
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(SERVER_URL + "/sessions"))
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(SERVER_URL + "/sessions")).GET().build();
 
         HttpResponse<String> response =
                 CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
