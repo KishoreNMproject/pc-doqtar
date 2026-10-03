@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.net.http.HttpResponse;	
 
 public class ServerConnection {
 
-    private static final String SERVER_URL = "https://pc-doqtar-connection-service.vercel.app/";
+    private static final String SERVER_URL = "https://pc-doqtar-connection-service.vercel.app";
 
     private static final HttpClient CLIENT = HttpClient.newHttpClient();
 
