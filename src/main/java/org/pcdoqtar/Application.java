@@ -9,11 +9,12 @@ public class Application {
 
             boolean sessionAvailable = ServerConnection.checkConnection();
             System.out.println("Session available: " + sessionAvailable);
-            System.out.println("Session ID: " + sessionId);
+            
 
 
             if (sessionAvailable) {
                 sessionId = ServerConnection.getSessionId();
+                System.out.println("Session ID: " + sessionId);
             }
 
             
