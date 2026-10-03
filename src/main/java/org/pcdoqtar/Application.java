@@ -11,7 +11,7 @@ public class Application {
             boolean sessionAvailable = ServerConnection.checkConnection();
             System.out.println("Session available: " + sessionAvailable);
 
-            if (sessionAvailable) {
+            if (!sessionAvailable) {
                 sessionId = ServerConnection.getSessionId();
                 System.out.println("Session ID: " + sessionId);
             }
@@ -22,6 +22,7 @@ public class Application {
         } catch (Exception e) {
 
             System.out.println("Unable to contact PC DOQTAR server.");
+            System.err.println(e);
         }
     }
 }
