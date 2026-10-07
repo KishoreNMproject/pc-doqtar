@@ -1,5 +1,9 @@
 package org.pcdoqtar;
 
+import org.hibernate.Session;
+
+import jakarta.transaction.Transaction;
+
 public class Application {
 
     public static void main(String[] args) {
@@ -11,7 +15,7 @@ public class Application {
             boolean sessionAvailable = ServerConnection.checkConnection();
             System.out.println("Session available: " + sessionAvailable);
 
-            if (!sessionAvailable) {
+            if (sessionAvailable) {
                 sessionId = ServerConnection.getSessionId();
                 System.out.println("Session ID: " + sessionId);
             }
@@ -24,5 +28,7 @@ public class Application {
             System.out.println("Unable to contact PC DOQTAR server.");
             System.err.println(e);
         }
+        
+        
     }
 }
