@@ -1,4 +1,4 @@
-package org.pcdoqtar;
+package org.pcdoqtar.connection;
 
 import java.io.IOException;
 import java.net.URI;

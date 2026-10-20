@@ -1,14 +1,15 @@
-package org.pcdoqtar;
+package org.pcdoqtar.app;
 
-import org.hibernate.Session;
-
-import jakarta.transaction.Transaction;
+import org.pcdoqtar.connection.ServerConnection;
+import org.pcdoqtar.diagnostics.SystemDiagnostics;
 
 public class Application {
 
     public static void main(String[] args) {
 
         String sessionId = null;
+        SystemDiagnostics diagnostics = new SystemDiagnostics();
+        diagnostics.runBasicCheck();
 
         try {
 
