@@ -1,0 +1,14 @@
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\app\Application.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\app\DashboardApp.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\connection\ServerConnection.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\cpu\CpuDiagnostics.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\HealthEvaluator.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\memory\MemoryDiagnostics.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\network\NetworkDiagnostics.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\network\NetworkPerformanceTest.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\process\ProcessDiagnostics.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\storage\StorageDiagnostics.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\SystemDiagnostics.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\model\DiagnosticResult.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\model\HealthStatus.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\model\SystemHealthSnapshot.java

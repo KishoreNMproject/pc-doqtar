@@ -1,0 +1,75 @@
+
+.root {
+    -fx-background-color: #090909;
+    -fx-font-family: "Segoe UI";
+}
+
+.scroll-pane,
+.scroll-pane > .viewport {
+    -fx-background-color: #090909;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: #090909;
+    -fx-pref-width: 10px;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #383838;
+    -fx-background-radius: 5px;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: #111111;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.chart {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 0 0 0;
+}
+
+.chart-plot-background {
+    -fx-background-color: #0D0D0D;
+}
+
+.chart-horizontal-grid-lines,
+.chart-vertical-grid-lines {
+    -fx-stroke: #292929;
+    -fx-stroke-dash-array: 3 5;
+}
+
+.axis {
+    -fx-tick-label-fill: #929292;
+}
+
+.axis-label {
+    -fx-text-fill: #B0B0B0;
+    -fx-font-size: 10px;
+}
+
+.axis-tick-mark,
+.axis-minor-tick-mark {
+    -fx-stroke: #444444;
+}
+
+.chart-bar {
+    -fx-background-radius: 3px 3px 0 0;
+}
+
+.button {
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #222222;
+}
+
+.label {
+    -fx-text-fill: #F5F5F5;
+}

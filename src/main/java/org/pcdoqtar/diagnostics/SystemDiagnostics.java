@@ -7,6 +7,9 @@ import org.pcdoqtar.diagnostics.storage.StorageDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
 import org.pcdoqtar.diagnostics.process.ProcessDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkPerformanceTest;
+import java.time.LocalDateTime;
+import org.pcdoqtar.model.DiagnosticResult;
+import org.pcdoqtar.model.SystemHealthSnapshot;
 
 public class SystemDiagnostics {
 
@@ -41,5 +44,18 @@ public class SystemDiagnostics {
         
 
         System.out.println("PC DOQTAR Master PC Check complete.");
+    }
+    public SystemHealthSnapshot collectSnapshot() {
+        DiagnosticResult cpu = cpuDiagnostics.diagnose();
+        DiagnosticResult memory = memoryDiagnostics.diagnose();
+
+        java.util.List<DiagnosticResult> storage =
+                storageDiagnostics.diagnose();
+
+        return new SystemHealthSnapshot(
+                LocalDateTime.now(),
+                cpu,
+                memory,
+                storage);
     }
 }
