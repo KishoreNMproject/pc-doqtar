@@ -1,5 +1,8 @@
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\app\Application.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\app\DashboardApp.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\AuthSession.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\FirebaseAuthService.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\LoginDialog.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\connection\ServerConnection.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\cpu\CpuDiagnostics.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\HealthEvaluator.java

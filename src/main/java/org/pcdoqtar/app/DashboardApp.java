@@ -10,7 +10,20 @@ import org.pcdoqtar.diagnostics.network.NetworkPerformanceTest;
 import org.pcdoqtar.model.DiagnosticResult;
 import org.pcdoqtar.model.HealthStatus;
 import org.pcdoqtar.model.SystemHealthSnapshot;
+import java.util.Optional;
+import java.util.prefs.Preferences;
 
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonType;
+
+import org.pcdoqtar.auth.AuthSession;
+import org.pcdoqtar.auth.FirebaseAuthService;
+import org.pcdoqtar.auth.LoginDialog;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -37,21 +50,29 @@ import org.pcdoqtar.diagnostics.network.NetworkPerformanceTest.LatencyResult;
 
 public class DashboardApp extends Application {
 
-    private static final String BG = "#090909";
-    private static final String PANEL = "#141414";
-    private static final String BORDER = "#292929";
-    private static final String TEXT = "#F5F5F5";
-    private static final String MUTED = "#929292";
-    private static final String LIME = "#B8FF3B";
-    private static final String AMBER = "#FFB020";
-    private static final String RED = "#FF5555";
-    private static final String GREY = "#454545";
 
+
+
+    private static String BG = "#090909";
+    private static String PANEL = "#141414";
+    private static String BORDER = "#292929";
+    private static String TEXT = "#F5F5F5";
+    private static String MUTED = "#929292";
+    private static String LIME = "#B8FF3B";
+    private static String AMBER = "#FFB020";
+    private static String RED = "#FF5555";
+    private static String GREY = "#454545";
     private final SystemDiagnostics diagnostics = new SystemDiagnostics();
     private final NetworkPerformanceTest networkTest = new NetworkPerformanceTest();
     private final NetworkDiagnostics networkDiagnostics =
             new NetworkDiagnostics();
+    private final Preferences settings =
+            Preferences.userNodeForPackage(DashboardApp.class);
 
+    private final AuthSession authSession = new AuthSession();
+    private FirebaseAuthService firebaseAuthService;
+
+    private Stage primaryStage;
     private List<AdapterInfo> latestAdapters = List.of();
 
     private LatencyResult latestLatency;

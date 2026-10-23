@@ -163,7 +163,8 @@ public class ProcessesPage extends VBox {
         return card;
     }
 
-    private void configureTable() {
+    @SuppressWarnings("unchecked")
+	private void configureTable() {
         TableColumn<ProcessRow, Integer> pidColumn =
                 new TableColumn<>("PID");
         pidColumn.setCellValueFactory(
