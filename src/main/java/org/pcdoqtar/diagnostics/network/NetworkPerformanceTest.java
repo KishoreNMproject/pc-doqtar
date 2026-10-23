@@ -19,6 +19,7 @@ public class NetworkPerformanceTest {
     private static final int DOWNLOAD_BYTES = 5_000_000;
     private static final int UPLOAD_BYTES = 1_000_000;
     private static final int PING_COUNT = 5;
+    private static final int SPEED_TEST_COUNT = 5;
 
     private final HttpClient httpClient;
 
@@ -29,7 +30,9 @@ public class NetworkPerformanceTest {
                 .build();
     }
 
-    private long measureLatency() throws IOException, InterruptedException {
+    private long measureLatency()
+            throws IOException, InterruptedException {
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(DOWNLOAD_URL + "0"))
                 .timeout(Duration.ofSeconds(15))
@@ -62,13 +65,11 @@ public class NetworkPerformanceTest {
         for (int i = 0; i < PING_COUNT; i++) {
             try {
                 long latency = measureLatency();
-
                 totalLatency += latency;
                 successfulRequests++;
 
                 System.out.printf(
-                        "Request %d: %d ms%n",
-                        i + 1, latency);
+                        "Request %d: %d ms%n", i + 1, latency);
 
             } catch (IOException e) {
                 System.out.printf(
@@ -98,7 +99,7 @@ public class NetworkPerformanceTest {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(DOWNLOAD_URL + DOWNLOAD_BYTES))
-                .timeout(Duration.ofSeconds(15))
+                .timeout(Duration.ofSeconds(20))
                 .GET()
                 .build();
 
@@ -122,7 +123,8 @@ public class NetworkPerformanceTest {
             throw new IOException("No download data received.");
         }
 
-        return receivedBytes * 8.0 / (elapsed / 1_000_000_000.0)
+        return receivedBytes * 8.0
+                / (elapsed / 1_000_000_000.0)
                 / 1_000_000.0;
     }
 
@@ -133,7 +135,7 @@ public class NetworkPerformanceTest {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(UPLOAD_URL))
-                .timeout(Duration.ofSeconds(15))
+                .timeout(Duration.ofSeconds(20))
                 .header("Content-Type", "application/octet-stream")
                 .POST(HttpRequest.BodyPublishers.ofByteArray(data))
                 .build();
@@ -162,42 +164,91 @@ public class NetworkPerformanceTest {
                 / 1_000_000.0;
     }
 
+    private double measureBestOfFive(boolean download)
+            throws IOException, InterruptedException {
+
+        double bestSpeed = -1;
+        int successfulTests = 0;
+
+        for (int i = 1; i <= SPEED_TEST_COUNT; i++) {
+            try {
+                double speed = download
+                        ? measureDownloadSpeed()
+                        : measureUploadSpeed();
+
+                successfulTests++;
+
+                System.out.printf(
+                        "%s test %d: %.2f Mbps%n",
+                        download ? "Download" : "Upload",
+                        i, speed);
+
+                if (speed > bestSpeed) {
+                    bestSpeed = speed;
+                }
+
+            } catch (IOException e) {
+                System.out.printf(
+                        "%s test %d failed: %s%n",
+                        download ? "Download" : "Upload",
+                        i, e.getMessage());
+            }
+        }
+
+        if (successfulTests == 0) {
+            throw new IOException(
+                    "All five " + (download ? "download" : "upload")
+                            + " tests failed.");
+        }
+
+        System.out.printf(
+                "Best %s speed (%d successful tests): %.2f Mbps%n",
+                download ? "download" : "upload",
+                successfulTests, bestSpeed);
+
+        return bestSpeed;
+    }
+
+    /**
+     * Returns {best download Mbps, best upload Mbps}.
+     * Each direction attempts five measurements.
+     */
+    public double[] measureSpeeds()
+            throws IOException, InterruptedException {
+
+        System.out.println("----- BEST-OF-5 SPEED TEST -----");
+
+        double download = measureBestOfFive(true);
+        double upload = measureBestOfFive(false);
+
+        System.out.println("--------------------------------");
+
+        return new double[] { download, upload };
+    }
+
     public void runCheck() {
         System.out.println("===== INTERNET PERFORMANCE TEST =====");
 
         runLatencyTest();
 
         try {
-            double downloadMbps = measureDownloadSpeed();
+            double[] speeds = measureSpeeds();
 
             System.out.printf(
-                    "Download speed: %.2f Mbps%n",
-                    downloadMbps);
+                    "Final best download speed: %.2f Mbps%n",
+                    speeds[0]);
+
+            System.out.printf(
+                    "Final best upload speed: %.2f Mbps%n",
+                    speeds[1]);
 
         } catch (IOException e) {
             System.out.println(
-                    "Download test unavailable: " + e.getMessage());
+                    "Speed test unavailable: " + e.getMessage());
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.out.println("Download test interrupted.");
-            return;
-        }
-
-        try {
-            double uploadMbps = measureUploadSpeed();
-
-            System.out.printf(
-                    "Upload speed: %.2f Mbps%n",
-                    uploadMbps);
-
-        } catch (IOException e) {
-            System.out.println(
-                    "Upload test unavailable: " + e.getMessage());
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.out.println("Upload test interrupted.");
+            System.out.println("Speed test interrupted.");
         }
 
         System.out.println("Internet performance test complete.");

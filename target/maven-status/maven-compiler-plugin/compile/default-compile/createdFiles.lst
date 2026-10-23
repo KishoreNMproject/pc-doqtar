@@ -2,6 +2,8 @@ org\pcdoqtar\app\DashboardApp.class
 org\pcdoqtar\model\DiagnosticResult.class
 org\pcdoqtar\diagnostics\network\NetworkDiagnostics.class
 org\pcdoqtar\app\DashboardApp$1.class
+org\pcdoqtar\ui\ProcessesPage$ProcessRow.class
+org\pcdoqtar\ui\ProcessesPage.class
 org\pcdoqtar\diagnostics\HealthEvaluator.class
 org\pcdoqtar\connection\ServerConnection.class
 org\pcdoqtar\diagnostics\cpu\CpuDiagnostics.class

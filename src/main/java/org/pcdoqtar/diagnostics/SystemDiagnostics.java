@@ -3,13 +3,14 @@ package org.pcdoqtar.diagnostics;
 
 import org.pcdoqtar.diagnostics.cpu.CpuDiagnostics;
 import org.pcdoqtar.diagnostics.memory.MemoryDiagnostics;
-import org.pcdoqtar.diagnostics.storage.StorageDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
-import org.pcdoqtar.diagnostics.process.ProcessDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkPerformanceTest;
-import java.time.LocalDateTime;
+import org.pcdoqtar.diagnostics.process.ProcessDiagnostics;
+import org.pcdoqtar.diagnostics.storage.StorageDiagnostics;
 import org.pcdoqtar.model.DiagnosticResult;
 import org.pcdoqtar.model.SystemHealthSnapshot;
+
+import java.time.LocalDateTime;
 
 public class SystemDiagnostics {
 
