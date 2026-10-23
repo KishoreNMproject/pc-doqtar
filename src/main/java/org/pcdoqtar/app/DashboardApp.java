@@ -596,11 +596,8 @@ public class DashboardApp extends Application {
         }
 
         private VBox createLatencyDetails() {
-            VBox details = new VBox(7);
-
-            details.getChildren().add(
-                    headingLabel("HTTP latency samples")
-            );
+            // The accordion header already names this section; do not repeat it here.
+            VBox details = new VBox(9);
 
             if (latestLatency == null) {
                 details.getChildren().add(
@@ -1212,7 +1209,7 @@ public class DashboardApp extends Application {
     private Label caption(String text) {
         Label label = new Label(text);
         label.setStyle(
-                "-fx-font-size: 14px;" +
+                "-fx-font-size: 13px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: " + MUTED + ";"
         );
