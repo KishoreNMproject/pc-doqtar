@@ -140,7 +140,7 @@ public class DashboardApp extends Application {
 
         Label subtitle = new Label("SYSTEM INTELLIGENCE");
         subtitle.setStyle(
-                "-fx-font-size: 9px;" +
+                "-fx-font-size: 14px;" +
                 "-fx-text-fill: " + MUTED + ";"
         );
 
@@ -148,7 +148,7 @@ public class DashboardApp extends Application {
 
         Label section = new Label("WORKSPACE");
         section.setStyle(
-                "-fx-font-size: 9px;" +
+                "-fx-font-size: 14px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: #666666;"
         );
@@ -166,10 +166,10 @@ public class DashboardApp extends Application {
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
         Label local = new Label("●  LOCAL DIAGNOSTICS");
-        local.setStyle("-fx-text-fill: " + LIME + "; -fx-font-size: 9px;");
+        local.setStyle("-fx-text-fill: " + LIME + "; -fx-font-size: 14px;");
 
         Label footer = new Label("SINGLE-RUN HEALTH CHECK");
-        footer.setStyle("-fx-text-fill: " + MUTED + "; -fx-font-size: 9px;");
+        footer.setStyle("-fx-text-fill: " + MUTED + "; -fx-font-size: 14px;");
 
         sidebar.getChildren().addAll(
                 branding, navBlock, spacer, local, footer
@@ -190,7 +190,7 @@ public class DashboardApp extends Application {
                         + ";" +
                 "-fx-text-fill: "
                         + (page.equals(currentPage) ? LIME : MUTED) + ";" +
-                "-fx-font-size: 12px;" +
+                "-fx-font-size: 14px;" +
                 "-fx-background-radius: 5;"
         );
 
@@ -220,7 +220,7 @@ public class DashboardApp extends Application {
         VBox content = pageContainer();
 
         Label eyebrow = new Label("SYSTEM MONITORING / OVERVIEW");
-        eyebrow.setStyle("-fx-text-fill: " + LIME + "; -fx-font-size: 10px;");
+        eyebrow.setStyle("-fx-text-fill: " + LIME + "; -fx-font-size: 14px;");
 
         Label title = new Label("System Overview");
         title.setStyle(
@@ -307,7 +307,7 @@ public class DashboardApp extends Application {
 
         Label unit = new Label("Mbps");
         unit.setStyle(
-                "-fx-font-size: 10px;" +
+                "-fx-font-size: 14px;" +
                 "-fx-text-fill: " + MUTED + ";"
         );
 
@@ -515,7 +515,7 @@ public class DashboardApp extends Application {
         Label title = new Label(titleText);
         title.setStyle(
                 "-fx-text-fill: " + TEXT + ";" +
-                "-fx-font-size: 15px;" +
+                "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;"
         );
 
@@ -692,7 +692,7 @@ public class DashboardApp extends Application {
             );
 
             card.getChildren().get(1).setStyle(
-                    "-fx-text-fill: " + statusColour + "; -fx-font-size: 11px;"
+                    "-fx-text-fill: " + statusColour + "; -fx-font-size: 14px;"
             );
 
             card.setPadding(new Insets(15));
@@ -1012,7 +1012,7 @@ public class DashboardApp extends Application {
                 + String.format("%.2f %s", result.getValue(), result.getUnit())
         );
         value.setStyle(
-                "-fx-font-size: 12px;" +
+                "-fx-font-size: 14px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: " + colour + ";"
         );
@@ -1212,7 +1212,7 @@ public class DashboardApp extends Application {
     private Label caption(String text) {
         Label label = new Label(text);
         label.setStyle(
-                "-fx-font-size: 12px;" +
+                "-fx-font-size: 14px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: " + MUTED + ";"
         );
@@ -1223,7 +1223,7 @@ public class DashboardApp extends Application {
         Label label = new Label(text);
         label.setWrapText(true);
         label.setStyle(
-                "-fx-font-size: 13px;" +
+                "-fx-font-size: 14px;" +
                 "-fx-text-fill: " + MUTED + ";"
         );
         return label;
