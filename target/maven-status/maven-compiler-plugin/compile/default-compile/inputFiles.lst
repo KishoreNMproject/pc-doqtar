@@ -1,11 +1,12 @@
-E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\app\Application.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\app\DashboardApp.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\AuthenticationCoordinator.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\AuthSession.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\FirebaseAuthService.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\LoginDialog.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\connection\ServerConnection.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\connection\ServerHandover.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\cpu\CpuDiagnostics.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\DiagnosticTaskManager.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\HealthEvaluator.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\memory\MemoryDiagnostics.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\network\NetworkDiagnostics.java
@@ -13,8 +14,13 @@ E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnos
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\process\ProcessDiagnostics.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\storage\StorageDiagnostics.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\SystemDiagnostics.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\lifecycle\ApplicationErrorHandler.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\lifecycle\ApplicationLifecycle.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\lifecycle\ApplicationServices.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\lifecycle\JavaFxTaskBridge.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\lifecycle\ShutdownManager.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\lifecycle\StartupConfiguration.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\lifecycle\StartupStatusDialog.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\model\DiagnosticResult.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\model\HealthStatus.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\model\SystemHealthSnapshot.java
@@ -22,6 +28,8 @@ E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\setting
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\components\DiagnosticResultCard.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\components\MetricCard.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\components\WarningCard.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\DashboardView.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\DashboardViewFactory.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\DiagnosticsPage.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\navigation\NavigationController.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\navigation\PageRegistry.java
