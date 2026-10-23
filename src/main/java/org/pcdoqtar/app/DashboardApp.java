@@ -106,7 +106,7 @@ public class DashboardApp extends Application {
     private double uploadMbps = -1;
     private String networkMessage = "Network test pending";
     
-
+    
     @Override
     public void start(Stage stage) {
         root = new BorderPane();
