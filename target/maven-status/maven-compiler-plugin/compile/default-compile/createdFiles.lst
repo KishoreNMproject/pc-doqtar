@@ -7,9 +7,11 @@ org\pcdoqtar\diagnostics\network\NetworkPerformanceTest.class
 org\pcdoqtar\model\SystemHealthSnapshot.class
 org\pcdoqtar\ui\OverviewPage$1.class
 org\pcdoqtar\ui\OverviewPage.class
+org\pcdoqtar\ui\components\DiagnosticPageSupport.class
 org\pcdoqtar\connection\ServerHandover$HandoverResult.class
 org\pcdoqtar\diagnostics\storage\StorageDiagnostics.class
 org\pcdoqtar\model\DiagnosticResult.class
+org\pcdoqtar\ui\components\DiagnosticPageRefresh.class
 org\pcdoqtar\lifecycle\StartupConfiguration.class
 org\pcdoqtar\auth\AuthenticationCoordinator.class
 org\pcdoqtar\auth\AuthenticationCoordinator$AuthenticationResult.class
