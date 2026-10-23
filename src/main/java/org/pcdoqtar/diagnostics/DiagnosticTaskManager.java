@@ -4,18 +4,17 @@ package org.pcdoqtar.diagnostics;
 import java.net.SocketException;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.pcdoqtar.diagnostics.network.AdapterInfo;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
+import org.pcdoqtar.diagnostics.network.NetworkDiagnostics.AdapterInfo;
 import org.pcdoqtar.model.SystemHealthSnapshot;
 
 public final class DiagnosticTaskManager implements AutoCloseable {
@@ -25,7 +24,7 @@ public final class DiagnosticTaskManager implements AutoCloseable {
 
     private final SystemDiagnostics systemDiagnostics;
     private final NetworkDiagnostics networkDiagnostics;
-    private final ExecutorService executor;
+    private final ThreadPoolExecutor executor;
 
     private volatile boolean closed;
 
@@ -39,7 +38,7 @@ public final class DiagnosticTaskManager implements AutoCloseable {
         this.networkDiagnostics = Objects.requireNonNull(
                 networkDiagnostics, "Network diagnostics is required.");
 
-        this.executor = new ThreadPoolExecutor(
+        executor = new ThreadPoolExecutor(
                 WORKER_COUNT,
                 WORKER_COUNT,
                 0L,
@@ -49,16 +48,10 @@ public final class DiagnosticTaskManager implements AutoCloseable {
                 new ThreadPoolExecutor.AbortPolicy());
     }
 
-    /**
-     * Collects a CPU, memory and storage snapshot in the background.
-     */
     public CompletableFuture<SystemHealthSnapshot> collectSnapshot() {
         return submit(systemDiagnostics::collectSnapshot);
     }
 
-    /**
-     * Collects network adapter information in the background.
-     */
     public CompletableFuture<List<AdapterInfo>> collectNetworkAdapters() {
         return submit(() -> {
             try {
@@ -71,12 +64,6 @@ public final class DiagnosticTaskManager implements AutoCloseable {
         });
     }
 
-    /**
-     * Runs a diagnostic operation using the shared worker pool.
-     *
-     * Do not use this method for JavaFX UI updates. Apply results
-     * to controls on the JavaFX Application Thread.
-     */
     public <T> CompletableFuture<T> submit(Supplier<T> operation) {
         Objects.requireNonNull(operation, "Operation is required.");
 
@@ -86,22 +73,31 @@ public final class DiagnosticTaskManager implements AutoCloseable {
                             "Diagnostic task manager is closed."));
         }
 
+        CompletableFuture<T> future = new CompletableFuture<>();
+
         try {
-            return CompletableFuture.supplyAsync(() -> {
+            executor.execute(() -> {
                 if (closed) {
-                    throw new IllegalStateException(
-                            "Diagnostic task manager is closed.");
+                    future.completeExceptionally(
+                            new IllegalStateException(
+                                    "Diagnostic task manager is closed."));
+                    return;
                 }
 
-                return operation.get();
-            }, executor);
-
+                try {
+                    future.complete(operation.get());
+                } catch (Throwable failure) {
+                    future.completeExceptionally(failure);
+                }
+            });
         } catch (RejectedExecutionException exception) {
-            return CompletableFuture.failedFuture(
+            future.completeExceptionally(
                     new IllegalStateException(
                             "Diagnostic queue is full or shutting down.",
                             exception));
         }
+
+        return future;
     }
 
     public boolean isClosed() {
@@ -125,7 +121,6 @@ public final class DiagnosticTaskManager implements AutoCloseable {
             Thread thread = new Thread(
                     task,
                     "pc-doqtar-diagnostics-" + counter.getAndIncrement());
-
             thread.setDaemon(true);
             return thread;
         };
