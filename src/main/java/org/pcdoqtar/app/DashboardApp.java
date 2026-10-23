@@ -31,6 +31,11 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.pcdoqtar.ui.ProcessesPage;
+import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
+import org.pcdoqtar.diagnostics.network.NetworkDiagnostics.AdapterInfo;
+import org.pcdoqtar.diagnostics.network.NetworkPerformanceTest.LatencyResult;
+import javafx.scene.control.TitledPane;
+
 
 public class DashboardApp extends Application {
 
@@ -46,6 +51,17 @@ public class DashboardApp extends Application {
 
     private final SystemDiagnostics diagnostics = new SystemDiagnostics();
     private final NetworkPerformanceTest networkTest = new NetworkPerformanceTest();
+    private final NetworkDiagnostics networkDiagnostics =
+            new NetworkDiagnostics();
+
+    private List<AdapterInfo> latestAdapters = List.of();
+
+    private LatencyResult latestLatency;
+
+    private Label latencyValue;
+    private VBox adapterList;
+    private VBox trafficList;
+    private Label networkTestSummary;
 
     private final Set<String> ignoredWarnings = new HashSet<>();
 
@@ -70,6 +86,7 @@ public class DashboardApp extends Application {
     private double downloadMbps = -1;
     private double uploadMbps = -1;
     private String networkMessage = "Network test pending";
+    
 
     @Override
     public void start(Stage stage) {
@@ -424,21 +441,302 @@ public class DashboardApp extends Application {
         return content;
     }
 
-    private VBox createNetworkPage() {
-        VBox content = pageContainer();
 
-        content.getChildren().addAll(
-                headingLabel("Network"),
-                muted("Internet performance from the initial network test."),
-                speedDetail("↓", "Download", downloadMbps, LIME),
-                speedDetail("↑", "Upload", uploadMbps, "#42B8FF"),
-                muted(networkMessage)
-        );
+private VBox createNetworkPage() {
+    VBox content = pageContainer();
 
-        return content;
+    content.getChildren().addAll(
+            headingLabel("Network diagnostics"),
+            muted("Internet performance and local network adapter details.")
+    );
+
+    // Internet performance summary cards (always visible)
+    latencyValue = valueLabel(formatLatency(latestLatency));
+
+    VBox latencyCard = networkMetricCard(
+            "AVERAGE HTTP LATENCY", latencyValue, "Response time"
+    );
+
+    Label download = valueLabel(formatSpeed(downloadMbps));
+    VBox downloadCard = networkMetricCard(
+            "DOWNLOAD SPEED", download, "Best successful test · Mbps"
+    );
+
+    Label upload = valueLabel(formatSpeed(uploadMbps));
+    VBox uploadCard = networkMetricCard(
+            "UPLOAD SPEED", upload, "Best successful test · Mbps"
+    );
+
+    HBox performanceCards = new HBox(
+            12, latencyCard, downloadCard, uploadCard
+    );
+
+    for (Node card : performanceCards.getChildren()) {
+        HBox.setHgrow(card, Priority.ALWAYS);
     }
 
-    private VBox speedDetail(
+    networkTestSummary = muted(networkMessage);
+
+    // Detailed latency samples
+    VBox latencyDetails = createLatencyDetails();
+    latencyDetails.setStyle(
+            "-fx-font-size: 14px;"
+    );
+
+    TitledPane latencyPane = new TitledPane(
+            "HTTP latency samples",
+            latencyDetails
+    );
+    latencyPane.setExpanded(false);
+    latencyPane.setCollapsible(true);
+
+    VBox performancePanel = new VBox(
+            14,
+            headingLabel("Internet performance"),
+            performanceCards,
+            networkTestSummary,
+            latencyPane
+    );
+    performancePanel.setPadding(new Insets(20));
+    performancePanel.setStyle(panelStyle());
+
+    // Adapter traffic counters
+    trafficList = new VBox(10);
+
+    TitledPane trafficPane = new TitledPane(
+            "Adapter traffic counters",
+            trafficList
+    );
+    trafficPane.setExpanded(false);
+    trafficPane.setCollapsible(true);
+
+    VBox trafficPanel = new VBox(
+            14,
+            headingLabel("Adapter traffic counters"),
+            muted("Cumulative bytes received and sent, as reported by the OS."),
+            trafficPane
+    );
+    trafficPanel.setPadding(new Insets(20));
+    trafficPanel.setStyle(panelStyle());
+
+    // Network adapter inventory
+    adapterList = new VBox(12);
+
+    TitledPane adaptersPane = new TitledPane(
+            "Detected network adapters",
+            adapterList
+    );
+    adaptersPane.setExpanded(false);
+    adaptersPane.setCollapsible(true);
+
+    VBox adapterPanel = new VBox(
+            14,
+            headingLabel("Network adapters"),
+            muted("Includes physical and virtual interfaces detected by the OS."),
+            adaptersPane
+    );
+    adapterPanel.setPadding(new Insets(20));
+    adapterPanel.setStyle(panelStyle());
+
+    // Improve readability of collapsible section headers
+    String titledPaneStyle =
+            "-fx-font-size: 15px;";
+
+    latencyPane.setStyle(titledPaneStyle);
+    trafficPane.setStyle(titledPaneStyle);
+    adaptersPane.setStyle(titledPaneStyle);
+
+    content.getChildren().addAll(
+            performancePanel,
+            trafficPanel,
+            adapterPanel
+    );
+
+    displayNetworkDetails();
+
+    return content;
+}
+
+        private VBox networkMetricCard(
+                String title, Label value, String description) {
+
+            VBox card = new VBox(
+                    10,
+                    caption(title),
+                    value,
+                    muted(description)
+            );
+
+            card.setPadding(new Insets(16));
+            card.setMinWidth(150);
+            card.setStyle(panelStyle());
+
+            return card;
+        }
+
+        private VBox createLatencyDetails() {
+            VBox details = new VBox(7);
+
+            details.getChildren().add(
+                    headingLabel("HTTP latency samples")
+            );
+
+            if (latestLatency == null) {
+                details.getChildren().add(
+                        muted("Latency test has not completed.")
+                );
+                return details;
+            }
+
+            if (latestLatency.getSamples().isEmpty()) {
+                details.getChildren().add(
+                        muted("No successful latency measurements.")
+                );
+            } else {
+                List<Long> samples = latestLatency.getSamples();
+
+                for (int i = 0; i < samples.size(); i++) {
+                    details.getChildren().add(
+                            muted("Successful sample "
+                                    + (i + 1) + ": " + samples.get(i) + " ms")
+                    );
+                }
+
+                details.getChildren().add(
+                        muted("Minimum: " + latestLatency.getMinimumMs()
+                                + " ms  |  Maximum: "
+                                + latestLatency.getMaximumMs() + " ms")
+                );
+            }
+
+            if (!latestLatency.getFailures().isEmpty()) {
+                details.getChildren().add(
+                        muted("Failed requests: "
+                                + latestLatency.getFailedCount())
+                );
+            }
+
+            return details;
+        }
+
+        private void displayNetworkDetails() {
+            if (latencyValue == null
+                    || adapterList == null
+                    || trafficList == null) {
+                return;
+            }
+
+            latencyValue.setText(formatLatency(latestLatency));
+
+            if (networkTestSummary != null) {
+                networkTestSummary.setText(networkMessage);
+            }
+
+            adapterList.getChildren().clear();
+            trafficList.getChildren().clear();
+
+            if (latestAdapters.isEmpty()) {
+                adapterList.getChildren().add(
+                        muted("No adapter information available yet.")
+                );
+                trafficList.getChildren().add(
+                        muted("No traffic counters available yet.")
+                );
+            } else {
+                for (AdapterInfo adapter : latestAdapters) {
+                    adapterList.getChildren().add(createAdapterCard(adapter));
+                    trafficList.getChildren().add(createTrafficCard(adapter));
+                }
+            }
+        }
+
+        private VBox createAdapterCard(AdapterInfo adapter) {
+            String status = adapter.isUp() ? "UP" : "DOWN";
+            String statusColour = adapter.isUp() ? LIME : MUTED;
+
+            VBox card = new VBox(
+                    8,
+                    headingLabel(adapter.getDisplayName()),
+                    muted("Interface: " + adapter.getName()
+                            + "  |  Status: " + status),
+                    muted("Type: " + (adapter.isLoopback()
+                            ? "Loopback"
+                            : adapter.isVirtual() ? "Virtual / software"
+                            : "Non-virtual interface")),
+                    muted("MAC address: " + adapter.getMacAddress()),
+                    muted("IPv4: " + adapter.getIpv4()),
+                    muted("IPv6: " + adapter.getIpv6()),
+                    muted("Reported link speed: "
+                            + formatSpeed(adapter.getLinkSpeedMbps()))
+            );
+
+            card.getChildren().get(1).setStyle(
+                    "-fx-text-fill: " + statusColour + "; -fx-font-size: 11px;"
+            );
+
+            card.setPadding(new Insets(15));
+            card.setStyle(panelStyle());
+
+            return card;
+        }
+
+        private VBox createTrafficCard(AdapterInfo adapter) {
+            VBox card = new VBox(
+                    7,
+                    headingLabel(adapter.getDisplayName()),
+                    muted("Received: "
+                            + formatBytes(adapter.getReceivedBytes())),
+                    muted("Sent: "
+                            + formatBytes(adapter.getSentBytes()))
+            );
+
+            card.setPadding(new Insets(12));
+            card.setStyle(panelStyle());
+
+            return card;
+        }
+
+        private String formatLatency(LatencyResult result) {
+            if (result == null || result.getAverageMs() < 0) {
+                return "Unavailable";
+            }
+
+            return String.format("%.2f ms", result.getAverageMs());
+        }
+
+        private String formatSpeed(double speed) {
+            if (!Double.isFinite(speed) || speed < 0) {
+                return "Unavailable";
+            }
+
+            return String.format("%.2f Mbps", speed);
+        }
+
+        private String formatSpeed(long speedMbps) {
+            return speedMbps < 0
+                    ? "Unavailable"
+                    : speedMbps + " Mbps";
+        }
+
+        private String formatBytes(long bytes) {
+            if (bytes < 0) {
+                return "Unavailable";
+            }
+
+            double value = bytes;
+            String[] units = {"B", "KB", "MB", "GB", "TB"};
+            int unit = 0;
+
+            while (value >= 1024 && unit < units.length - 1) {
+                value /= 1024;
+                unit++;
+            }
+
+            return String.format("%.2f %s", value, units[unit]);
+        }
+
+    @SuppressWarnings("unused")
+	private VBox speedDetail(
             String arrow, String title, double speed, String colour) {
 
         Label arrowLabel = new Label(arrow);
@@ -520,28 +818,87 @@ public class DashboardApp extends Application {
         thread.setDaemon(true);
         thread.start();
 
-        // Run the network performance test once, separately from the
-        // CPU/RAM/storage snapshot.
+     // Run adapter discovery, HTTP latency and the speed test once.
         Thread speedThread = new Thread(() -> {
+
+            // Collect local network-interface information.
+            try {
+                List<AdapterInfo> adapters =
+                        networkDiagnostics.collectAdapters();
+
+                Platform.runLater(() -> {
+                    latestAdapters = adapters;
+                    displayNetworkDetails();
+                });
+
+            } catch (Exception exception) {
+                Platform.runLater(() -> {
+                    networkMessage = "Adapter discovery failed: "
+                            + exception.getMessage();
+                    displayNetworkDetails();
+                });
+            }
+
+            // Measure HTTP latency separately so a speed-test failure
+            // does not discard successful latency results.
+            try {
+                LatencyResult latency =
+                        networkTest.measureLatencySamples();
+
+                Platform.runLater(() -> {
+                    latestLatency = latency;
+                    displayNetworkDetails();
+                });
+
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+
+                Platform.runLater(() -> {
+                    networkMessage = "Latency test interrupted.";
+                    displayNetworkDetails();
+                });
+                return;
+            } catch (Exception exception) {
+                Platform.runLater(() -> {
+                    networkMessage = "Latency test failed: "
+                            + exception.getMessage();
+                    displayNetworkDetails();
+                });
+            }
+
+            // Run the existing best-of-five download/upload measurements.
             try {
                 double[] speeds = networkTest.measureSpeeds();
+
                 Platform.runLater(() -> {
                     downloadMbps = speeds[0];
                     uploadMbps = speeds[1];
-                    networkMessage = "Internet speed test completed.";
+                    networkMessage = "Internet performance test completed.";
                     updateSpeedCards();
+                    displayNetworkDetails();
                 });
+
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+
+                Platform.runLater(() -> {
+                    networkMessage = "Speed test interrupted.";
+                    displayNetworkDetails();
+                });
+
             } catch (Exception exception) {
                 Platform.runLater(() -> {
-                    networkMessage = "Network speed test failed: "
+                    networkMessage = "Speed test failed: "
                             + exception.getMessage();
-                    updateSpeedCards();
+                    displayNetworkDetails();
                 });
             }
+
         }, "PC-DOQTAR-Network-Test");
 
         speedThread.setDaemon(true);
         speedThread.start();
+
     }
 
     private void updateSpeedCards() {

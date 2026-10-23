@@ -1,3 +1,4 @@
+org\pcdoqtar\diagnostics\network\NetworkDiagnostics$AdapterInfo.class
 org\pcdoqtar\app\DashboardApp.class
 org\pcdoqtar\model\DiagnosticResult.class
 org\pcdoqtar\diagnostics\network\NetworkDiagnostics.class
@@ -12,6 +13,7 @@ org\pcdoqtar\diagnostics\network\NetworkPerformanceTest.class
 org\pcdoqtar\model\SystemHealthSnapshot.class
 org\pcdoqtar\diagnostics\process\ProcessDiagnostics.class
 org\pcdoqtar\diagnostics\SystemDiagnostics.class
+org\pcdoqtar\diagnostics\network\NetworkPerformanceTest$LatencyResult.class
 org\pcdoqtar\app\Application.class
 org\pcdoqtar\model\HealthStatus.class
 org\pcdoqtar\diagnostics\storage\StorageDiagnostics.class

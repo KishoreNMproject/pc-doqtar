@@ -73,3 +73,24 @@
 .label {
     -fx-text-fill: #F5F5F5;
 }
+/* Network page: improve readability */
+.network-caption {
+    -fx-font-size: 13px;
+}
+
+.network-detail {
+    -fx-font-size: 14px;
+}
+
+.network-section-title {
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+}
+
+.network-metric-label {
+    -fx-font-size: 12px;
+}
+
+.network-metric-value {
+    -fx-font-size: 21px;
+}

@@ -1,4 +1,3 @@
-
 package org.pcdoqtar.diagnostics.network;
 
 import java.io.IOException;
@@ -7,6 +6,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NetworkPerformanceTest {
 
@@ -43,55 +44,68 @@ public class NetworkPerformanceTest {
 
         HttpResponse<Void> response = httpClient.send(
                 request,
-                HttpResponse.BodyHandlers.discarding());
+                HttpResponse.BodyHandlers.discarding()
+        );
 
         long elapsed = System.nanoTime() - start;
 
         if (response.statusCode() != 200) {
             throw new IOException(
                     "Latency request failed with HTTP "
-                            + response.statusCode());
+                            + response.statusCode()
+            );
         }
 
         return elapsed / 1_000_000;
     }
 
-    private void runLatencyTest() {
-        System.out.println("----- INTERNET LATENCY TEST -----");
+    public LatencyResult measureLatencySamples()
+            throws InterruptedException {
 
-        long totalLatency = 0;
-        int successfulRequests = 0;
+        List<Long> samples = new ArrayList<>();
+        List<String> failures = new ArrayList<>();
 
-        for (int i = 0; i < PING_COUNT; i++) {
+        for (int i = 1; i <= PING_COUNT; i++) {
             try {
                 long latency = measureLatency();
-                totalLatency += latency;
-                successfulRequests++;
+                samples.add(latency);
 
                 System.out.printf(
-                        "Request %d: %d ms%n", i + 1, latency);
+                        "HTTP latency sample %d: %d ms%n",
+                        i, latency
+                );
 
-            } catch (IOException e) {
-                System.out.printf(
-                        "Request %d failed: %s%n",
-                        i + 1, e.getMessage());
-
-            } catch (InterruptedException e) {
+            } catch (IOException exception) {
+                failures.add(
+                        "Sample " + i + ": " + exception.getMessage()
+                );
+            } catch (InterruptedException exception) {
                 Thread.currentThread().interrupt();
-                System.out.println("Latency test interrupted.");
-                return;
+                throw exception;
             }
         }
 
-        if (successfulRequests > 0) {
-            System.out.printf(
-                    "Average HTTP latency: %.2f ms%n",
-                    totalLatency / (double) successfulRequests);
-        } else {
-            System.out.println("Latency test unavailable.");
+        double average = -1;
+        long minimum = -1;
+        long maximum = -1;
+
+        if (!samples.isEmpty()) {
+            long total = 0;
+            minimum = Long.MAX_VALUE;
+            maximum = Long.MIN_VALUE;
+
+            for (long sample : samples) {
+                total += sample;
+                minimum = Math.min(minimum, sample);
+                maximum = Math.max(maximum, sample);
+            }
+
+            average = total / (double) samples.size();
         }
 
-        System.out.println("---------------------------------");
+        return new LatencyResult(
+                samples, failures, average, minimum, maximum
+        );
     }
 
     private double measureDownloadSpeed()
@@ -107,14 +121,16 @@ public class NetworkPerformanceTest {
 
         HttpResponse<byte[]> response = httpClient.send(
                 request,
-                HttpResponse.BodyHandlers.ofByteArray());
+                HttpResponse.BodyHandlers.ofByteArray()
+        );
 
         long elapsed = System.nanoTime() - start;
 
         if (response.statusCode() != 200) {
             throw new IOException(
                     "Download failed with HTTP "
-                            + response.statusCode());
+                            + response.statusCode()
+            );
         }
 
         long receivedBytes = response.body().length;
@@ -144,7 +160,8 @@ public class NetworkPerformanceTest {
 
         HttpResponse<Void> response = httpClient.send(
                 request,
-                HttpResponse.BodyHandlers.discarding());
+                HttpResponse.BodyHandlers.discarding()
+        );
 
         long elapsed = System.nanoTime() - start;
 
@@ -152,7 +169,8 @@ public class NetworkPerformanceTest {
                 || response.statusCode() >= 300) {
             throw new IOException(
                     "Upload failed with HTTP "
-                            + response.statusCode());
+                            + response.statusCode()
+            );
         }
 
         if (elapsed <= 0) {
@@ -181,37 +199,38 @@ public class NetworkPerformanceTest {
                 System.out.printf(
                         "%s test %d: %.2f Mbps%n",
                         download ? "Download" : "Upload",
-                        i, speed);
+                        i, speed
+                );
 
                 if (speed > bestSpeed) {
                     bestSpeed = speed;
                 }
 
-            } catch (IOException e) {
+            } catch (IOException exception) {
                 System.out.printf(
                         "%s test %d failed: %s%n",
                         download ? "Download" : "Upload",
-                        i, e.getMessage());
+                        i, exception.getMessage()
+                );
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                throw exception;
             }
         }
 
         if (successfulTests == 0) {
             throw new IOException(
-                    "All five " + (download ? "download" : "upload")
-                            + " tests failed.");
+                    "All five "
+                            + (download ? "download" : "upload")
+                            + " tests failed."
+            );
         }
-
-        System.out.printf(
-                "Best %s speed (%d successful tests): %.2f Mbps%n",
-                download ? "download" : "upload",
-                successfulTests, bestSpeed);
 
         return bestSpeed;
     }
 
     /**
      * Returns {best download Mbps, best upload Mbps}.
-     * Each direction attempts five measurements.
      */
     public double[] measureSpeeds()
             throws IOException, InterruptedException {
@@ -229,29 +248,89 @@ public class NetworkPerformanceTest {
     public void runCheck() {
         System.out.println("===== INTERNET PERFORMANCE TEST =====");
 
-        runLatencyTest();
-
         try {
+            LatencyResult latency = measureLatencySamples();
+
+            if (latency.getAverageMs() >= 0) {
+                System.out.printf(
+                        "Average HTTP latency: %.2f ms%n",
+                        latency.getAverageMs()
+                );
+            } else {
+                System.out.println("HTTP latency unavailable.");
+            }
+
             double[] speeds = measureSpeeds();
 
             System.out.printf(
                     "Final best download speed: %.2f Mbps%n",
-                    speeds[0]);
+                    speeds[0]
+            );
 
             System.out.printf(
                     "Final best upload speed: %.2f Mbps%n",
-                    speeds[1]);
+                    speeds[1]
+            );
 
-        } catch (IOException e) {
+        } catch (IOException exception) {
             System.out.println(
-                    "Speed test unavailable: " + e.getMessage());
-
-        } catch (InterruptedException e) {
+                    "Network test unavailable: " + exception.getMessage()
+            );
+        } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            System.out.println("Speed test interrupted.");
+            System.out.println("Network test interrupted.");
         }
 
-        System.out.println("Internet performance test complete.");
         System.out.println("======================================");
+    }
+
+    public static class LatencyResult {
+        private final List<Long> samples;
+        private final List<String> failures;
+        private final double averageMs;
+        private final long minimumMs;
+        private final long maximumMs;
+
+        public LatencyResult(
+                List<Long> samples,
+                List<String> failures,
+                double averageMs,
+                long minimumMs,
+                long maximumMs) {
+
+            this.samples = List.copyOf(samples);
+            this.failures = List.copyOf(failures);
+            this.averageMs = averageMs;
+            this.minimumMs = minimumMs;
+            this.maximumMs = maximumMs;
+        }
+
+        public List<Long> getSamples() {
+            return samples;
+        }
+
+        public List<String> getFailures() {
+            return failures;
+        }
+
+        public double getAverageMs() {
+            return averageMs;
+        }
+
+        public long getMinimumMs() {
+            return minimumMs;
+        }
+
+        public long getMaximumMs() {
+            return maximumMs;
+        }
+
+        public int getSuccessfulCount() {
+            return samples.size();
+        }
+
+        public int getFailedCount() {
+            return failures.size();
+        }
     }
 }
