@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.pcdoqtar.diagnostics.SystemDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkPerformanceTest;
 import org.pcdoqtar.model.DiagnosticResult;
@@ -34,7 +33,6 @@ import org.pcdoqtar.ui.ProcessesPage;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics.AdapterInfo;
 import org.pcdoqtar.diagnostics.network.NetworkPerformanceTest.LatencyResult;
-import javafx.scene.control.TitledPane;
 
 
 public class DashboardApp extends Application {
@@ -230,7 +228,6 @@ public class DashboardApp extends Application {
                 "-fx-font-size: 30px;" +
                 "-fx-font-weight: bold;"
         );
-
         Label subtitle = muted(
                 "Current health, resource utilisation and network performance."
         );
@@ -442,120 +439,144 @@ public class DashboardApp extends Application {
     }
 
 
-private VBox createNetworkPage() {
-    VBox content = pageContainer();
+    private VBox createNetworkPage() {
+        VBox content = pageContainer();
+        content.getChildren().addAll(
+                headingLabel("Network diagnostics"),
+                muted("Internet performance and local network adapter details.")
+        );
 
-    content.getChildren().addAll(
-            headingLabel("Network diagnostics"),
-            muted("Internet performance and local network adapter details.")
-    );
+        latencyValue = valueLabel(formatLatency(latestLatency));
+        VBox latencyCard = networkMetricCard(
+                "AVERAGE HTTP LATENCY", latencyValue, "Response time"
+        );
+        Label download = valueLabel(formatSpeed(downloadMbps));
+        VBox downloadCard = networkMetricCard(
+                "DOWNLOAD SPEED", download, "Best successful test · Mbps"
+        );
+        Label upload = valueLabel(formatSpeed(uploadMbps));
+        VBox uploadCard = networkMetricCard(
+                "UPLOAD SPEED", upload, "Best successful test · Mbps"
+        );
 
-    // Internet performance summary cards (always visible)
-    latencyValue = valueLabel(formatLatency(latestLatency));
+        HBox performanceCards = new HBox(12, latencyCard, downloadCard, uploadCard);
+        for (Node card : performanceCards.getChildren()) {
+            HBox.setHgrow(card, Priority.ALWAYS);
+        }
+        networkTestSummary = muted(networkMessage);
 
-    VBox latencyCard = networkMetricCard(
-            "AVERAGE HTTP LATENCY", latencyValue, "Response time"
-    );
+        VBox latencyDetails = createLatencyDetails();
+        VBox latencySection = collapsibleSection("HTTP latency samples", latencyDetails);
+        VBox performancePanel = new VBox(
+                14, headingLabel("Internet performance"), performanceCards,
+                networkTestSummary, latencySection
+        );
+        performancePanel.setPadding(new Insets(20));
+        performancePanel.setStyle(panelStyle());
 
-    Label download = valueLabel(formatSpeed(downloadMbps));
-    VBox downloadCard = networkMetricCard(
-            "DOWNLOAD SPEED", download, "Best successful test · Mbps"
-    );
+        trafficList = new VBox(10);
+        VBox trafficSection = collapsibleSection("Adapter traffic counters", trafficList);
+        VBox trafficPanel = new VBox(
+                14,
+                headingLabel("Adapter traffic counters"),
+                muted("Cumulative bytes received and sent, as reported by the OS."),
+                trafficSection
+        );
+        trafficPanel.setPadding(new Insets(20));
+        trafficPanel.setStyle(panelStyle());
 
-    Label upload = valueLabel(formatSpeed(uploadMbps));
-    VBox uploadCard = networkMetricCard(
-            "UPLOAD SPEED", upload, "Best successful test · Mbps"
-    );
+        adapterList = new VBox(12);
+        VBox adaptersSection = collapsibleSection("Detected network adapters", adapterList);
+        VBox adapterPanel = new VBox(
+                14,
+                headingLabel("Network adapters"),
+                muted("Includes physical and virtual interfaces detected by the OS."),
+                adaptersSection
+        );
+        adapterPanel.setPadding(new Insets(20));
+        adapterPanel.setStyle(panelStyle());
 
-    HBox performanceCards = new HBox(
-            12, latencyCard, downloadCard, uploadCard
-    );
-
-    for (Node card : performanceCards.getChildren()) {
-        HBox.setHgrow(card, Priority.ALWAYS);
+        content.getChildren().addAll(performancePanel, trafficPanel, adapterPanel);
+        displayNetworkDetails();
+        return content;
     }
 
-    networkTestSummary = muted(networkMessage);
+    /** Creates a dark accordion row with a left chevron, like a modern settings list. */
+    private VBox collapsibleSection(String titleText, Node body) {
+        Label arrow = new Label("›");
+        arrow.setMinWidth(18);
+        arrow.setAlignment(Pos.CENTER);
+        arrow.setStyle(
+                "-fx-text-fill: " + LIME + ";" +
+                "-fx-font-size: 25px;" +
+                "-fx-font-weight: bold;"
+        );
 
-    // Detailed latency samples
-    VBox latencyDetails = createLatencyDetails();
-    latencyDetails.setStyle(
-            "-fx-font-size: 14px;"
-    );
+        Label title = new Label(titleText);
+        title.setStyle(
+                "-fx-text-fill: " + TEXT + ";" +
+                "-fx-font-size: 15px;" +
+                "-fx-font-weight: bold;"
+        );
 
-    TitledPane latencyPane = new TitledPane(
-            "HTTP latency samples",
-            latencyDetails
-    );
-    latencyPane.setExpanded(false);
-    latencyPane.setCollapsible(true);
+        HBox header = new HBox(12, arrow, title);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(13, 16, 13, 16));
+        header.setMaxWidth(Double.MAX_VALUE);
+        header.setMinHeight(52);
+        header.setStyle(
+                "-fx-background-color: #202020;" +
+                "-fx-background-radius: 7;" +
+                "-fx-border-color: " + BORDER + ";" +
+                "-fx-border-radius: 7;" +
+                "-fx-cursor: hand;"
+        );
 
-    VBox performancePanel = new VBox(
-            14,
-            headingLabel("Internet performance"),
-            performanceCards,
-            networkTestSummary,
-            latencyPane
-    );
-    performancePanel.setPadding(new Insets(20));
-    performancePanel.setStyle(panelStyle());
+        VBox bodyContainer = new VBox(body);
+        bodyContainer.setPadding(new Insets(14, 4, 4, 4));
+        bodyContainer.setVisible(false);
+        bodyContainer.setManaged(false);
 
-    // Adapter traffic counters
-    trafficList = new VBox(10);
+        Runnable toggle = () -> {
+            boolean expand = !bodyContainer.isVisible();
+            bodyContainer.setVisible(expand);
+            bodyContainer.setManaged(expand);
+            arrow.setText(expand ? "⌄" : "›");
+            header.setStyle(
+                    "-fx-background-color: " + (expand ? "#292929" : "#202020") + ";" +
+                    "-fx-background-radius: 7;" +
+                    "-fx-border-color: " + BORDER + ";" +
+                    "-fx-border-radius: 7;" +
+                    "-fx-cursor: hand;"
+            );
+        };
 
-    TitledPane trafficPane = new TitledPane(
-            "Adapter traffic counters",
-            trafficList
-    );
-    trafficPane.setExpanded(false);
-    trafficPane.setCollapsible(true);
+        header.setOnMouseClicked(event -> toggle.run());
+        header.setOnMouseEntered(event -> {
+            if (!bodyContainer.isVisible()) {
+                header.setStyle(
+                        "-fx-background-color: #292929;" +
+                        "-fx-background-radius: 7;" +
+                        "-fx-border-color: " + LIME + ";" +
+                        "-fx-border-radius: 7;" +
+                        "-fx-cursor: hand;"
+                );
+            }
+        });
+        header.setOnMouseExited(event -> {
+            header.setStyle(
+                    "-fx-background-color: " + (bodyContainer.isVisible() ? "#292929" : "#202020") + ";" +
+                    "-fx-background-radius: 7;" +
+                    "-fx-border-color: " + BORDER + ";" +
+                    "-fx-border-radius: 7;" +
+                    "-fx-cursor: hand;"
+            );
+        });
 
-    VBox trafficPanel = new VBox(
-            14,
-            headingLabel("Adapter traffic counters"),
-            muted("Cumulative bytes received and sent, as reported by the OS."),
-            trafficPane
-    );
-    trafficPanel.setPadding(new Insets(20));
-    trafficPanel.setStyle(panelStyle());
-
-    // Network adapter inventory
-    adapterList = new VBox(12);
-
-    TitledPane adaptersPane = new TitledPane(
-            "Detected network adapters",
-            adapterList
-    );
-    adaptersPane.setExpanded(false);
-    adaptersPane.setCollapsible(true);
-
-    VBox adapterPanel = new VBox(
-            14,
-            headingLabel("Network adapters"),
-            muted("Includes physical and virtual interfaces detected by the OS."),
-            adaptersPane
-    );
-    adapterPanel.setPadding(new Insets(20));
-    adapterPanel.setStyle(panelStyle());
-
-    // Improve readability of collapsible section headers
-    String titledPaneStyle =
-            "-fx-font-size: 15px;";
-
-    latencyPane.setStyle(titledPaneStyle);
-    trafficPane.setStyle(titledPaneStyle);
-    adaptersPane.setStyle(titledPaneStyle);
-
-    content.getChildren().addAll(
-            performancePanel,
-            trafficPanel,
-            adapterPanel
-    );
-
-    displayNetworkDetails();
-
-    return content;
-}
+        VBox section = new VBox(8, header, bodyContainer);
+        section.setFillWidth(true);
+        return section;
+    }
 
         private VBox networkMetricCard(
                 String title, Label value, String description) {
@@ -1191,7 +1212,7 @@ private VBox createNetworkPage() {
     private Label caption(String text) {
         Label label = new Label(text);
         label.setStyle(
-                "-fx-font-size: 9px;" +
+                "-fx-font-size: 12px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-text-fill: " + MUTED + ";"
         );
@@ -1202,7 +1223,7 @@ private VBox createNetworkPage() {
         Label label = new Label(text);
         label.setWrapText(true);
         label.setStyle(
-                "-fx-font-size: 11px;" +
+                "-fx-font-size: 13px;" +
                 "-fx-text-fill: " + MUTED + ";"
         );
         return label;
