@@ -19,14 +19,7 @@ public class MetricCard extends VBox {
         setMinWidth(150);
         setMaxWidth(Double.MAX_VALUE);
 
-        setStyle(
-                "-fx-background-color: "
-                + ThemeManager.getColour("panel") + ";"
-                + "-fx-background-radius: 8;"
-                + "-fx-border-color: "
-                + ThemeManager.getColour("border") + ";"
-                + "-fx-border-radius: 8;"
-        );
+        getStyleClass().add("app-tile");
 
         titleLabel.setText(safe(title));
         titleLabel.setWrapText(true);
