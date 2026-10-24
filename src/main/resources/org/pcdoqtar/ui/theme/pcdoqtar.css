@@ -523,3 +523,202 @@
     -fx-background-color: #E2E8F0 !important;
     -fx-border-color: #CBD5E1 !important;
 }
+
+
+/* Refined light theme: soft slate surfaces instead of stark white. These rules
+   cover all page content areas and JavaFX controls while retaining status colours. */
+.theme-light {
+    -fx-base: #E2E8F0;
+    -fx-background: #EEF2F7;
+    -fx-control-inner-background: #F1F5F9;
+    -fx-control-inner-background-alt: #E8EEF5;
+    -fx-text-base-color: #243247;
+    -fx-text-background-color: #243247;
+    -fx-accent: #527A00;
+    -fx-focus-color: #527A00;
+}
+.theme-light,
+.theme-light .scroll-pane,
+.theme-light .viewport,
+.theme-light .overview-page,
+.theme-light .diagnostics-page,
+.theme-light .network-page,
+.theme-light .processes-page,
+.theme-light .settings-page,
+.theme-light .dashboard-shell {
+    -fx-background-color: #EEF2F7 !important;
+}
+.theme-light .overview-page .vbox,
+.theme-light .overview-page .grid-pane,
+.theme-light .diagnostics-page .vbox,
+.theme-light .diagnostics-page .diagnostic-result,
+.theme-light .processes-page .vbox,
+.theme-light .processes-page .hbox,
+.theme-light .network-page .diagnostic-summary,
+.theme-light .network-page .interface-card,
+.theme-light .settings-page .vbox {
+    -fx-background-color: #E2E8F0 !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .diagnostic-summary,
+.theme-light .overview-page .diagnostic-summary,
+.theme-light .processes-page .table-panel {
+    -fx-background-color: #E2E8F0 !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .navigation-toolbar {
+    -fx-background-color: #EEF2F7 !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .app-sidebar {
+    -fx-background-color: #E2E8F0 !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .app-sidebar .sidebar-button {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .app-sidebar .sidebar-button:hover {
+    -fx-background-color: #D5DEE9 !important;
+}
+.theme-light .app-sidebar .sidebar-button.active {
+    -fx-background-color: #DDE8C7 !important;
+    -fx-border-color: #527A00 !important;
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .hamburger-button {
+    -fx-background-color: #E2E8F0 !important;
+    -fx-text-fill: #527A00 !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .custom-title-bar,
+.theme-light .custom-title-bar .window-button,
+.theme-light .custom-title-bar .window-close-button {
+    -fx-background-color: #E2E8F0 !important;
+    -fx-border-color: #CBD5E1 !important;
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .text-field,
+.theme-light .text-area,
+.theme-light .combo-box,
+.theme-light .combo-box-base,
+.theme-light .choice-box,
+.theme-light .list-view,
+.theme-light .date-picker,
+.theme-light .spinner {
+    -fx-background-color: #F1F5F9 !important;
+    -fx-control-inner-background: #F1F5F9 !important;
+    -fx-text-fill: #243247 !important;
+    -fx-prompt-text-fill: #58677B !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .table-view,
+.theme-light .table-view .virtual-flow,
+.theme-light .table-view .column-header-background,
+.theme-light .table-view .column-header,
+.theme-light .table-view .filler,
+.theme-light .table-view .nested-column-header {
+    -fx-background-color: #E2E8F0 !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .table-row-cell {
+    -fx-background-color: #F1F5F9 !important;
+    -fx-text-background-color: #243247 !important;
+    -fx-border-color: transparent transparent #D9E1EA transparent !important;
+}
+.theme-light .table-row-cell:odd {
+    -fx-background-color: #E8EEF5 !important;
+}
+.theme-light .table-row-cell:selected {
+    -fx-background-color: #DDE8C7 !important;
+    -fx-text-background-color: #243247 !important;
+}
+.theme-light .table-cell,
+.theme-light .table-row-cell .text {
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .table-view .column-header .label {
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .button {
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #243247;
+    -fx-border-color: #CBD5E1;
+}
+.theme-light .button:hover {
+    -fx-background-color: #D5DEE9;
+}
+.theme-light .button:disabled {
+    -fx-opacity: 0.55;
+}
+.theme-light .scroll-bar,
+.theme-light .scroll-bar .track,
+.theme-light .scroll-bar .increment-button,
+.theme-light .scroll-bar .decrement-button {
+    -fx-background-color: #E2E8F0 !important;
+}
+.theme-light .scroll-bar .thumb {
+    -fx-background-color: #A8B5C6 !important;
+    -fx-background-radius: 8;
+}
+.theme-light .titled-pane > .title {
+    -fx-background-color: #E2E8F0 !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .titled-pane > .content {
+    -fx-background-color: #E8EEF5 !important;
+    -fx-border-color: #CBD5E1 !important;
+}
+.theme-light .combo-box-popup .list-view,
+.theme-light .combo-box-popup .list-cell {
+    -fx-background-color: #F1F5F9 !important;
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .combo-box-popup .list-cell:filled:hover,
+.theme-light .combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #DDE8C7 !important;
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .pie-chart .chart-title,
+.theme-light .pie-chart-legend,
+.theme-light .chart-legend-item .label,
+.theme-light .axis,
+.theme-light .axis-label {
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .usage-chart .chart-pie.default-color0 {
+    -fx-pie-color: #648A21;
+}
+.theme-light .usage-chart .chart-pie.default-color1 {
+    -fx-pie-color: #CBD5E1;
+}
+.theme-light .page-eyebrow,
+.theme-light .app-sidebar .sidebar-brand {
+    -fx-text-fill: #527A00 !important;
+}
+.theme-light .page-heading,
+.theme-light .section-heading,
+.theme-light .summary-value,
+.theme-light .interface-title,
+.theme-light .navigation-section-title {
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .page-description,
+.theme-light .diagnostic-detail,
+.theme-light .summary-caption,
+.theme-light .app-sidebar .sidebar-subtitle {
+    -fx-text-fill: #58677B !important;
+}
+/* Inline styles on older pages used these legacy dark surfaces. Keep this
+   fallback scoped to light mode; status/health labels retain their own styles. */
+.theme-light .overview-page .vbox,
+.theme-light .diagnostics-page .vbox,
+.theme-light .processes-page .vbox,
+.theme-light .network-page .vbox,
+.theme-light .settings-page .vbox {
+    -fx-background-color: #E2E8F0 !important;
+}
+.theme-light .overview-page .pie-chart,
+.theme-light .overview-page .chart-plot-background {
+    -fx-background-color: transparent !important;
+}
