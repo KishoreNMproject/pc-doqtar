@@ -24,16 +24,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import org.pcdoqtar.ui.theme.ThemeManager;
 
 public class ProcessesPage extends VBox {
-
-    private static final String BG = "#090909";
-    private static final String PANEL = "#141414";
-    private static final String BORDER = "#292929";
-    private static final String TEXT = "#F5F5F5";
-    private static final String MUTED = "#929292";
-    private static final String LIME = "#B8FF3B";
-    private static final String BLUE = "#42B8FF";
 
     private final OperatingSystem operatingSystem =
             new SystemInfo().getOperatingSystem();
@@ -268,7 +261,7 @@ public class ProcessesPage extends VBox {
                     status.setText(
                             "Scan failed: " + exception.getMessage()
                     );
-                    status.setStyle("-fx-text-fill: #FF5555;");
+                    status.setStyle("-fx-text-fill: " + ThemeManager.getColour("critical") + ";");
                     scanButton.setDisable(false);
                     scanButton.setGraphic(null);
                 });
