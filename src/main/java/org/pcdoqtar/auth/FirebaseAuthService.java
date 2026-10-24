@@ -30,14 +30,19 @@ public final class FirebaseAuthService {
         this.session = session;
         this.apiKey = System.getenv("FIREBASE_WEB_API_KEY");
 
-        if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException(
-                    "FIREBASE_WEB_API_KEY environment variable is not set.");
-        }
     }
 
     public void signIn(String email, String password)
             throws IOException, InterruptedException {
+
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IOException(
+                    "Optional sign-in is unavailable because FIREBASE_WEB_API_KEY is not configured.");
+        }
+
+        if (email == null || email.isBlank() || password == null || password.isBlank()) {
+            throw new IOException("Enter both email and password.");
+        }
 
         Map<String, Object> body = new HashMap<>();
         body.put("email", email);
@@ -75,7 +80,7 @@ public final class FirebaseAuthService {
     public synchronized String getValidIdToken()
             throws IOException, InterruptedException {
 
-        if (!session.isLoggedIn()) {
+        if (apiKey == null || apiKey.isBlank() || !session.isLoggedIn()) {
             return null;
         }
 

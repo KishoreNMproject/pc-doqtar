@@ -289,3 +289,44 @@
 .theme-light .processes-page .table-view .table-cell { -fx-text-fill: #172033 !important; }
 .theme-dark .button:disabled { -fx-opacity: 0.55; }
 .theme-light .button:disabled { -fx-opacity: 0.55; }
+
+
+/* ComboBox closed state and popup must use the same active theme. JavaFX
+   popup cells are rendered in a separate popup window, so root selectors alone
+   do not reliably provide readable text in both modes. */
+.theme-dark .combo-box,
+.theme-dark .combo-box-base,
+.theme-dark .combo-box .list-cell {
+    -fx-background-color: #10141C !important;
+    -fx-control-inner-background: #10141C !important;
+    -fx-text-fill: #F2F5FA !important;
+}
+.theme-light .combo-box,
+.theme-light .combo-box-base,
+.theme-light .combo-box .list-cell {
+    -fx-background-color: #FFFFFF !important;
+    -fx-control-inner-background: #FFFFFF !important;
+    -fx-text-fill: #172033 !important;
+}
+.theme-dark .combo-box-popup .list-view,
+.theme-dark .combo-box-popup .list-cell {
+    -fx-background-color: #141821 !important;
+    -fx-text-fill: #F2F5FA !important;
+}
+.theme-dark .combo-box-popup .list-cell:filled:hover,
+.theme-dark .combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #29351B !important;
+    -fx-text-fill: #F2F5FA !important;
+}
+.theme-light .combo-box-popup .list-view,
+.theme-light .combo-box-popup .list-cell {
+    -fx-background-color: #FFFFFF !important;
+    -fx-text-fill: #172033 !important;
+}
+.theme-light .combo-box-popup .list-cell:filled:hover,
+.theme-light .combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #EAF3D7 !important;
+    -fx-text-fill: #172033 !important;
+}
+.theme-dark .combo-box .arrow { -fx-background-color: #F2F5FA !important; }
+.theme-light .combo-box .arrow { -fx-background-color: #172033 !important; }

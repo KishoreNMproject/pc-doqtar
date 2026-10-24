@@ -37,13 +37,7 @@ public final class ApplicationLifecycle {
         shutdownManager.initialise(stage, this::shutdown);
 
         try {
-            if (!StartupConfiguration.hasFirebaseApiKey()) {
-                ApplicationErrorHandler.showStartupError(
-                        stage,
-                        StartupConfiguration.getFirebaseConfigurationError());
-                shutdownManager.shutdown();
-                return;
-            }
+            // Keep local diagnostics available when optional cloud sign-in is not configured.
 
             services = new ApplicationServices();
 
