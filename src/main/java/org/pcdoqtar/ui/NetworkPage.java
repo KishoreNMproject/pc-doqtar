@@ -103,7 +103,7 @@ public class NetworkPage extends VBox {
 
         // Internet speed-test section
         VBox speedTestCard = new VBox(12);
-        speedTestCard.getStyleClass().add("speed-test-card");
+        speedTestCard.getStyleClass().addAll("app-tile", "speed-test-card");
         speedTestCard.setPadding(new Insets(18));
 
         Label speedTestHeading = new Label("Internet Speed Test");
@@ -402,7 +402,7 @@ public class NetworkPage extends VBox {
         details.getStyleClass().add("diagnostic-detail");
 
         VBox card = new VBox(8, title, state, details);
-        card.getStyleClass().add("interface-card");
+        card.getStyleClass().addAll("app-tile", "interface-card");
         card.setPadding(new Insets(16, 18, 16, 18));
         card.setMaxWidth(Double.MAX_VALUE);
 
