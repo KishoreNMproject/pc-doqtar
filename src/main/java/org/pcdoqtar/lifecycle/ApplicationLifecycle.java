@@ -6,7 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.scene.image.Image;
 
+import org.pcdoqtar.app.DashboardApp;
 import org.pcdoqtar.ui.CustomTitleBar;
 import org.pcdoqtar.ui.DashboardView;
 import org.pcdoqtar.ui.DashboardViewFactory;
@@ -61,6 +63,13 @@ public final class ApplicationLifecycle {
             ThemeManager.apply(scene);
 
             stage.setScene(scene);
+            var iconUrl = DashboardApp.class.getResource(
+                    "/org/pcdoqtar/app/pc-doqtar.png");
+
+            if (iconUrl != null) {
+                stage.getIcons().clear();
+                stage.getIcons().add(new Image(iconUrl.toExternalForm()));
+            }
             stage.show();
 
         } catch (RuntimeException exception) {
