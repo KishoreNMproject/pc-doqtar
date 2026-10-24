@@ -128,7 +128,6 @@ public class DiagnosticsPage extends VBox {
 
     private VBox createResultRow(DiagnosticResult result) {
         VBox card = new VBox(7);
-        card.getStyleClass().add("diagnostic-result-card");
         card.setPadding(new Insets(16));
         card.setStyle(
                 "-fx-background-color: " + ThemeManager.getColour("panel") + ";"
