@@ -148,7 +148,7 @@ public final class ThemeManager {
                 return target.get("muted");
             }
             if (value.equals("#101010")) {
-                return target.get("background");
+                return "Light".equalsIgnoreCase(targetTheme) ? "#FFFFFF" : "#090B10";
             }
             if (key != null) {
                 return target.get(key);
