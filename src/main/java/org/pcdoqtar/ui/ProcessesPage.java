@@ -4,6 +4,7 @@ package org.pcdoqtar.ui;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
@@ -29,6 +30,11 @@ import javafx.scene.layout.VBox;
 import org.pcdoqtar.ui.theme.ThemeManager;
 
 public class ProcessesPage extends VBox {
+
+    private static final Set<String> PROTECTED_PROCESS_NAMES = Set.of(
+            "system", "registry", "smss.exe", "csrss.exe", "wininit.exe",
+            "services.exe", "lsass.exe", "winlogon.exe", "svchost.exe",
+            "fontdrvhost.exe", "secure system", "memory compression");
 
     private final OperatingSystem operatingSystem =
             new SystemInfo().getOperatingSystem();
@@ -218,8 +224,10 @@ public class ProcessesPage extends VBox {
             return;
         }
         long pid = selected.getPid();
-        if (pid <= 4 || pid == ProcessHandle.current().pid()) {
-            status.setText("For safety, PC DOQTAR will not terminate this protected process.");
+        String normalizedName = selected.getName().toLowerCase(Locale.ROOT);
+        if (pid <= 4 || pid == ProcessHandle.current().pid()
+                || PROTECTED_PROCESS_NAMES.contains(normalizedName)) {
+            status.setText("For safety, PC DOQTAR will not terminate this protected Windows process.");
             return;
         }
 
