@@ -1,0 +1,2 @@
+Error: Could not find or load main class JAVA
+Caused by: java.lang.ClassNotFoundException: JAVA

@@ -1,0 +1,53 @@
+{
+  "application" : "PC DOQTAR",
+  "schemaVersion" : 1,
+  "timestamp" : "2026-10-24T21:05:14.319381900",
+  "overallStatus" : "NORMAL",
+  "warningCount" : 0,
+  "containsUnavailableResults" : false,
+  "cpu" : {
+    "metric" : "CPU utilisation",
+    "value" : 2.2774461763848826,
+    "unit" : "%",
+    "status" : "NORMAL",
+    "message" : "Utilisation is within the normal range."
+  },
+  "memory" : {
+    "metric" : "Memory utilisation",
+    "value" : 77.15659685650782,
+    "unit" : "%",
+    "status" : "NORMAL",
+    "message" : "Utilisation is within the normal range."
+  },
+  "storage" : [ {
+    "metric" : "Storage utilisation (C:\\)",
+    "value" : 62.25220814208673,
+    "unit" : "%",
+    "status" : "NORMAL",
+    "message" : "Utilisation is within the normal range."
+  }, {
+    "metric" : "Storage utilisation (D:\\)",
+    "value" : 65.41303495099037,
+    "unit" : "%",
+    "status" : "NORMAL",
+    "message" : "Utilisation is within the normal range."
+  }, {
+    "metric" : "Storage utilisation (E:\\)",
+    "value" : 79.75412111877009,
+    "unit" : "%",
+    "status" : "NORMAL",
+    "message" : "Utilisation is within the normal range."
+  }, {
+    "metric" : "Storage utilisation (F:\\)",
+    "value" : 0.1927246123157442,
+    "unit" : "%",
+    "status" : "NORMAL",
+    "message" : "Utilisation is within the normal range."
+  }, {
+    "metric" : "Storage utilisation (K:\\)",
+    "value" : 1.206717548690679,
+    "unit" : "%",
+    "status" : "NORMAL",
+    "message" : "Utilisation is within the normal range."
+  } ]
+}
