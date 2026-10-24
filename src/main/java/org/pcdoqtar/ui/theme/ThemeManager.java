@@ -5,25 +5,24 @@ import java.util.Map;
 
 import org.pcdoqtar.settings.AppSettings;
 
+import javafx.scene.Scene;
+
 public final class ThemeManager {
 
-    private static final String DARK = "Dark";
-    private static final String LIGHT = "Light";
-
-    private static final Map<String, String> DARK_COLOURS = Map.of(
-            "background", "#090909",
-            "panel", "#141414",
-            "border", "#292929",
-            "text", "#F5F5F5",
-            "muted", "#929292",
+    private static final Map<String, String> DARK = Map.of(
+            "background", "#090B10",
+            "panel", "#141821",
+            "border", "#2B3240",
+            "text", "#F2F5FA",
+            "muted", "#A0A9B8",
             "accent", "#B8FF3B",
             "warning", "#FFB020",
             "critical", "#FF5555",
-            "grey", "#454545"
+            "grey", "#454D5B"
     );
 
-    private static final Map<String, String> LIGHT_COLOURS = Map.of(
-            "background", "#F5F7FA",
+    private static final Map<String, String> LIGHT = Map.of(
+            "background", "#F4F6FA",
             "panel", "#FFFFFF",
             "border", "#D8DEE8",
             "text", "#172033",
@@ -35,7 +34,6 @@ public final class ThemeManager {
     );
 
     private ThemeManager() {
-        // Utility class; do not instantiate.
     }
 
     public static String getCurrentTheme() {
@@ -47,25 +45,42 @@ public final class ThemeManager {
     }
 
     public static String getColour(String key) {
-        if (key == null || key.isBlank()) {
+        Map<String, String> palette =
+                "Light".equalsIgnoreCase(getCurrentTheme())
+                        ? LIGHT : DARK;
+
+        String value = palette.get(key);
+        if (value == null) {
             throw new IllegalArgumentException(
-                    "Colour key must not be empty."
-            );
+                    "Unknown theme colour: " + key);
+        }
+        return value;
+    }
+
+    public static void apply(Scene scene) {
+        if (scene == null) {
+            return;
         }
 
-        Map<String, String> colours =
-                LIGHT.equalsIgnoreCase(getCurrentTheme())
-                        ? LIGHT_COLOURS
-                        : DARK_COLOURS;
+        scene.getRoot().getStyleClass().removeAll(
+                "theme-dark", "theme-light");
 
-        String colour = colours.get(key);
+        scene.getRoot().getStyleClass().add(
+                "Light".equalsIgnoreCase(getCurrentTheme())
+                        ? "theme-light" : "theme-dark");
 
-        if (colour == null) {
-            throw new IllegalArgumentException(
-                    "Unknown theme colour: " + key
-            );
+        scene.getRoot().setStyle(
+                "-fx-background-color: " + getColour("background") + ";");
+
+        String stylesheet = ThemeManager.class.getResource(
+                "/org/pcdoqtar/ui/theme/pcdoqtar.css") == null
+                ? null
+                : ThemeManager.class.getResource(
+                        "/org/pcdoqtar/ui/theme/pcdoqtar.css").toExternalForm();
+
+        if (stylesheet != null
+                && !scene.getStylesheets().contains(stylesheet)) {
+            scene.getStylesheets().add(stylesheet);
         }
-
-        return colour;
     }
 }

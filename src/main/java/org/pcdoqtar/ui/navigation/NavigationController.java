@@ -1,6 +1,9 @@
+
 package org.pcdoqtar.ui.navigation;
 
 import java.util.function.Consumer;
+
+import org.pcdoqtar.ui.theme.ThemeManager;
 
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
@@ -27,8 +30,7 @@ public final class NavigationController {
         this.pageRegistry = pageRegistry;
         this.root = root;
         this.pageChangeListener = pageChangeListener != null
-                ? pageChangeListener
-                : page -> { };
+                ? pageChangeListener : page -> { };
     }
 
     public void navigateTo(String pageName) {
@@ -38,15 +40,14 @@ public final class NavigationController {
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(false);
         scrollPane.setPannable(true);
-        scrollPane.setHbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setStyle(
-                "-fx-background: #090909;"
-                + "-fx-background-color: #090909;"
-                + "-fx-border-width: 0;"
-        );
+                "-fx-background-color: "
+                + ThemeManager.getColour("background")
+                + "; -fx-background: "
+                + ThemeManager.getColour("background")
+                + "; -fx-border-width: 0;");
 
         root.setCenter(scrollPane);
         currentPage = pageName;

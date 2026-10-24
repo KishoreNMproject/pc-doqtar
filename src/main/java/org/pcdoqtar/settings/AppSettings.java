@@ -9,20 +9,15 @@ public final class AppSettings {
             Preferences.userNodeForPackage(AppSettings.class);
 
     private static final String THEME_KEY = "theme";
-    private static final String WARNING_THRESHOLD_KEY =
-            "warningThreshold";
+    private static final String WARNING_THRESHOLD_KEY = "warningThreshold";
 
-    private static final String DEFAULT_THEME = "Dark";
     private static final double DEFAULT_WARNING_THRESHOLD = 80.0;
 
     private AppSettings() {
-        // Utility class; do not instantiate.
     }
 
     public static String getTheme() {
-        String theme = PREFS.get(THEME_KEY, DEFAULT_THEME);
-
-        return "Light".equalsIgnoreCase(theme) ? "Light" : "Dark";
+        return PREFS.get(THEME_KEY, "Dark");
     }
 
     public static void setTheme(String theme) {
@@ -30,8 +25,7 @@ public final class AppSettings {
                 || (!theme.equalsIgnoreCase("Dark")
                 && !theme.equalsIgnoreCase("Light"))) {
             throw new IllegalArgumentException(
-                    "Theme must be Dark or Light."
-            );
+                    "Theme must be Dark or Light.");
         }
 
         PREFS.put(THEME_KEY,
@@ -39,25 +33,25 @@ public final class AppSettings {
     }
 
     public static double getWarningThreshold() {
-        double threshold = PREFS.getDouble(
-                "warningThreshold",
+        double value = PREFS.getDouble(
+                WARNING_THRESHOLD_KEY,
                 DEFAULT_WARNING_THRESHOLD);
 
-        return Math.max(10.0, Math.min(89.0, threshold));
+        if (!Double.isFinite(value) || value < 0 || value > 100) {
+            return DEFAULT_WARNING_THRESHOLD;
+        }
+
+        return value;
     }
 
     public static void setWarningThreshold(double percentage) {
         if (!Double.isFinite(percentage)
-                || percentage < 10.0
-                || percentage > 89.0) {
+                || percentage < 0.0
+                || percentage > 100.0) {
             throw new IllegalArgumentException(
-                    "Warning threshold must be between 10 and 89."
-            );
+                    "Warning threshold must be between 0 and 100.");
         }
 
-        PREFS.putDouble(
-                WARNING_THRESHOLD_KEY,
-                percentage
-        );
+        PREFS.putDouble(WARNING_THRESHOLD_KEY, percentage);
     }
 }

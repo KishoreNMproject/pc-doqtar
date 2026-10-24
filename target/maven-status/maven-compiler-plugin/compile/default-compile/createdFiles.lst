@@ -31,6 +31,7 @@ org\pcdoqtar\lifecycle\StartupStatusDialog.class
 org\pcdoqtar\ui\DashboardViewFactory.class
 org\pcdoqtar\ui\SettingsPage.class
 org\pcdoqtar\ui\components\MetricCard.class
+org\pcdoqtar\ui\CustomTitleBar.class
 org\pcdoqtar\lifecycle\ApplicationServices.class
 org\pcdoqtar\diagnostics\SystemDiagnostics.class
 org\pcdoqtar\ui\components\WarningCard.class

@@ -12,13 +12,14 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class NetworkPage extends VBox {
 
     private final NetworkDiagnostics networkDiagnostics;
-    private final VBox adapterContainer = new VBox(12);
+    private final VBox adapterContainer = new VBox(8);
     private final Label statusLabel = new Label("Ready");
     private boolean refreshRunning;
 
@@ -29,70 +30,44 @@ public class NetworkPage extends VBox {
     public NetworkPage(NetworkDiagnostics networkDiagnostics) {
         if (networkDiagnostics == null) {
             throw new IllegalArgumentException(
-                    "Network diagnostics must not be null."
-            );
+                    "Network diagnostics must not be null.");
         }
 
         this.networkDiagnostics = networkDiagnostics;
 
-        setSpacing(20);
+        setSpacing(18);
         setPadding(new Insets(28));
-        setStyle(
-                "-fx-background-color: "
-                + ThemeManager.getColour("background") + ";"
-        );
+        setStyle("-fx-background-color: "
+                + ThemeManager.getColour("background") + ";");
 
         Label eyebrow = new Label("SYSTEM MONITORING / NETWORK");
-        eyebrow.setStyle(
-                "-fx-text-fill: "
-                + ThemeManager.getColour("accent") + ";"
-        );
+        eyebrow.setStyle("-fx-text-fill: "
+                + ThemeManager.getColour("accent") + ";");
 
         Label heading = new Label("Network");
-        heading.setStyle(
-                "-fx-text-fill: "
-                + ThemeManager.getColour("text") + ";"
-                + "-fx-font-size: 30px;"
-                + "-fx-font-weight: bold;"
-        );
+        heading.setStyle("-fx-text-fill: "
+                + ThemeManager.getColour("text")
+                + "; -fx-font-size: 30px; -fx-font-weight: bold;");
 
         Label description = new Label(
-                "Inspect local network interfaces and their current status."
-        );
+                "Inspect local network interfaces and their current status. "
+                + "Expand an adapter to view its details.");
         description.setWrapText(true);
-        description.setStyle(
-                "-fx-text-fill: "
-                + ThemeManager.getColour("muted") + ";"
-        );
+        description.setStyle("-fx-text-fill: "
+                + ThemeManager.getColour("muted") + ";");
 
         Button refreshButton = new Button("Refresh adapters");
-        refreshButton.setStyle(
-                "-fx-background-color: "
-                + ThemeManager.getColour("accent") + ";"
-                + "-fx-text-fill: "
-                + ThemeManager.getColour("background") + ";"
-                + "-fx-font-weight: bold;"
-                + "-fx-padding: 10 16 10 16;"
-        );
         refreshButton.setOnAction(event -> refreshAdapters());
 
         statusLabel.setWrapText(true);
-        statusLabel.setStyle(
-                "-fx-text-fill: "
-                + ThemeManager.getColour("muted") + ";"
-        );
+        statusLabel.setStyle("-fx-text-fill: "
+                + ThemeManager.getColour("muted") + ";");
 
         adapterContainer.setFillWidth(true);
 
         getChildren().addAll(
-                eyebrow,
-                heading,
-                description,
-                refreshButton,
-                statusLabel,
-                new Separator(),
-                adapterContainer
-        );
+                eyebrow, heading, description,
+                refreshButton, statusLabel, new Separator(), adapterContainer);
 
         VBox.setVgrow(adapterContainer, Priority.ALWAYS);
         refreshAdapters();
@@ -103,8 +78,7 @@ public class NetworkPage extends VBox {
 
         if (adapters == null || adapters.isEmpty()) {
             adapterContainer.getChildren().add(
-                    createMessageCard("No network interfaces were detected.")
-            );
+                    new Label("No network interfaces were detected."));
             statusLabel.setText("No adapter data available.");
             return;
         }
@@ -116,53 +90,29 @@ public class NetworkPage extends VBox {
 
         statusLabel.setText(
                 "Interfaces found: " + adapters.size()
-                + " · Active non-loopback interfaces: " + activeCount
-        );
+                + " · Active non-loopback interfaces: " + activeCount);
 
         for (AdapterInfo adapter : adapters) {
-            adapterContainer.getChildren().add(createAdapterCard(adapter));
+            adapterContainer.getChildren().add(createAdapterPane(adapter));
         }
     }
 
-    private VBox createAdapterCard(AdapterInfo adapter) {
-        VBox card = new VBox(8);
-        card.setPadding(new Insets(18));
-        card.setStyle(
-                "-fx-background-color: "
-                + ThemeManager.getColour("panel") + ";"
-                + "-fx-background-radius: 8;"
-                + "-fx-border-color: "
-                + ThemeManager.getColour("border") + ";"
-                + "-fx-border-radius: 8;"
-        );
-
-        Label name = new Label(
-                adapter.getDisplayName() == null
-                        || adapter.getDisplayName().isBlank()
-                        ? adapter.getName()
-                        : adapter.getDisplayName()
-        );
-        name.setWrapText(true);
-        name.setStyle(
-                "-fx-text-fill: "
-                + ThemeManager.getColour("text") + ";"
-                + "-fx-font-size: 16px;"
-                + "-fx-font-weight: bold;"
-        );
+    private TitledPane createAdapterPane(AdapterInfo adapter) {
+        String name = adapter.getDisplayName() == null
+                || adapter.getDisplayName().isBlank()
+                ? adapter.getName() : adapter.getDisplayName();
 
         String state = adapter.isUp() ? "UP" : "DOWN";
-        Label status = new Label(
-                "Status: " + state
-                + (adapter.isLoopback() ? " · Loopback" : "")
-                + (adapter.isVirtual() ? " · Virtual" : "")
-        );
-        status.setStyle(
-                "-fx-text-fill: "
+        String kind = adapter.isVirtual() ? "Virtual"
+                : adapter.isLoopback() ? "Loopback" : "Physical";
+
+        Label summary = new Label(
+                state + "  ·  " + kind + "  ·  " + adapter.getName());
+        summary.setWrapText(true);
+        summary.setStyle("-fx-text-fill: "
                 + (adapter.isUp()
-                        ? ThemeManager.getColour("accent")
-                        : ThemeManager.getColour("warning"))
-                + ";"
-        );
+                    ? ThemeManager.getColour("accent")
+                    : ThemeManager.getColour("warning")) + ";");
 
         Label details = new Label(
                 "Interface: " + adapter.getName()
@@ -171,39 +121,25 @@ public class NetworkPage extends VBox {
                 + "\nMAC address: " + adapter.getMacAddress()
                 + "\nLink speed: " + formatSpeed(adapter.getLinkSpeedMbps())
                 + "\nReceived: " + formatBytes(adapter.getReceivedBytes())
-                + "\nSent: " + formatBytes(adapter.getSentBytes())
-        );
+                + "\nSent: " + formatBytes(adapter.getSentBytes()));
+
         details.setWrapText(true);
-        details.setStyle(
-                "-fx-text-fill: "
-                + ThemeManager.getColour("muted") + ";"
-        );
+        details.setStyle("-fx-text-fill: "
+                + ThemeManager.getColour("muted") + ";");
 
-        card.getChildren().addAll(name, status, details);
-        return card;
-    }
+        VBox content = new VBox(10, summary, details);
+        content.setPadding(new Insets(12));
+        content.setStyle("-fx-background-color: "
+                + ThemeManager.getColour("panel") + ";");
 
-    private VBox createMessageCard(String text) {
-        VBox card = new VBox(8);
-        card.setPadding(new Insets(18));
-        card.setStyle(
-                "-fx-background-color: "
-                + ThemeManager.getColour("panel") + ";"
-                + "-fx-background-radius: 8;"
-                + "-fx-border-color: "
-                + ThemeManager.getColour("border") + ";"
-                + "-fx-border-radius: 8;"
-        );
+        TitledPane pane = new TitledPane(name, content);
+        pane.setExpanded(false);
+        pane.setAnimated(false);
+        pane.setMaxWidth(Double.MAX_VALUE);
+        pane.setStyle("-fx-text-fill: "
+                + ThemeManager.getColour("text") + ";");
 
-        Label message = new Label(text);
-        message.setWrapText(true);
-        message.setStyle(
-                "-fx-text-fill: "
-                + ThemeManager.getColour("muted") + ";"
-        );
-
-        card.getChildren().add(message);
-        return card;
+        return pane;
     }
 
     private String formatSpeed(long speedMbps) {
@@ -214,10 +150,7 @@ public class NetworkPage extends VBox {
         if (bytes < 0) {
             return "Unavailable";
         }
-
-        return String.format(
-                "%.2f MB", bytes / (1024.0 * 1024.0)
-        );
+        return String.format("%.2f MB", bytes / (1024.0 * 1024.0));
     }
 
     private void refreshAdapters() {
@@ -233,17 +166,13 @@ public class NetworkPage extends VBox {
             try {
                 List<AdapterInfo> adapters =
                         networkDiagnostics.collectAdapters();
-
                 Platform.runLater(() -> displayAdapters(adapters));
             } catch (Exception exception) {
                 Platform.runLater(() -> {
                     adapterContainer.getChildren().clear();
                     adapterContainer.getChildren().add(
-                            createMessageCard(
-                                    "Unable to inspect network interfaces: "
-                                    + exception.getMessage()
-                            )
-                    );
+                            new Label("Unable to inspect interfaces: "
+                                    + exception.getMessage()));
                     statusLabel.setText("Network inspection failed.");
                 });
             } finally {

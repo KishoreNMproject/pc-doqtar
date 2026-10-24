@@ -1,8 +1,16 @@
+
 package org.pcdoqtar.lifecycle;
 
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
+import org.pcdoqtar.ui.CustomTitleBar;
 import org.pcdoqtar.ui.DashboardView;
 import org.pcdoqtar.ui.DashboardViewFactory;
+import org.pcdoqtar.ui.theme.ThemeManager;
 
 public final class ApplicationLifecycle {
 
@@ -41,10 +49,18 @@ public final class ApplicationLifecycle {
                     services.getSystemDiagnostics(),
                     services.getNetworkDiagnostics());
 
+            stage.initStyle(StageStyle.UNDECORATED);
             stage.setTitle("PC DOQTAR | System Health");
             stage.setMinWidth(1000);
             stage.setMinHeight(700);
-            stage.setScene(dashboard.getScene());
+
+            BorderPane root = dashboard.getRoot();
+            root.setTop(new CustomTitleBar(stage));
+
+            Scene scene = dashboard.getScene();
+            ThemeManager.apply(scene);
+
+            stage.setScene(scene);
             stage.show();
 
         } catch (RuntimeException exception) {

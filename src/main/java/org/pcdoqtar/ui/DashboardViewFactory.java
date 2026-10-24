@@ -1,3 +1,4 @@
+
 package org.pcdoqtar.ui;
 
 import java.util.Objects;
@@ -7,6 +8,7 @@ import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
 import org.pcdoqtar.ui.navigation.NavigationController;
 import org.pcdoqtar.ui.navigation.PageRegistry;
 import org.pcdoqtar.ui.navigation.SidebarFactory;
+import org.pcdoqtar.ui.theme.ThemeManager;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -18,39 +20,29 @@ public final class DashboardViewFactory {
     private static final double DEFAULT_HEIGHT = 760;
 
     private DashboardViewFactory() {
-        // Utility class.
     }
 
     public static DashboardView create(
             SystemDiagnostics systemDiagnostics,
             NetworkDiagnostics networkDiagnostics) {
 
-        Objects.requireNonNull(
-                systemDiagnostics, "System diagnostics is required.");
-        Objects.requireNonNull(
-                networkDiagnostics, "Network diagnostics is required.");
+        Objects.requireNonNull(systemDiagnostics,
+                "System diagnostics is required.");
+        Objects.requireNonNull(networkDiagnostics,
+                "Network diagnostics is required.");
 
         BorderPane root = new BorderPane();
         PageRegistry registry = new PageRegistry();
 
-        registry.register(
-                "Overview",
+        registry.register("Overview",
                 new OverviewPage(systemDiagnostics));
-
-        registry.register(
-                "Diagnostics",
+        registry.register("Diagnostics",
                 new DiagnosticsPage(systemDiagnostics));
-
-        registry.register(
-                "Network",
+        registry.register("Network",
                 new NetworkPage(networkDiagnostics));
-
-        registry.register(
-                "Processes",
+        registry.register("Processes",
                 new ProcessesPage());
-
-        registry.register(
-                "Settings",
+        registry.register("Settings",
                 new SettingsPage());
 
         NavigationController navigation =
@@ -59,18 +51,12 @@ public final class DashboardViewFactory {
         VBox sidebar = SidebarFactory.create(navigation::navigateTo);
         root.setLeft(sidebar);
 
-        Scene scene = new Scene(
-                root,
-                DEFAULT_WIDTH,
-                DEFAULT_HEIGHT);
+        Scene scene = new Scene(root, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        ThemeManager.apply(scene);
 
         navigation.navigateTo("Overview");
 
         return new DashboardView(
-                root,
-                scene,
-                registry,
-                navigation,
-                sidebar);
+                root, scene, registry, navigation, sidebar);
     }
 }
