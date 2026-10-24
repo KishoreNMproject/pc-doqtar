@@ -11,9 +11,29 @@ public final class AppSettings {
     private static final String WARNING_THRESHOLD_KEY = "warningThreshold";
     private static final String NAV_COLLAPSED_KEY = "navigationCollapsedByDefault";
     private static final double DEFAULT_WARNING_THRESHOLD = 80.0;
-
+    private static final String TILE_THEME_KEY = "tileTheme";
+    
     private AppSettings() { }
+    public static String getTileTheme() {
+        String value = PREFS.get(TILE_THEME_KEY, "Match app theme");
 
+        if (value.equals("Dark tiles") || value.equals("Light tiles")) {
+            return value;
+        }
+
+        return "Match app theme";
+    }
+
+    public static void setTileTheme(String theme) {
+        if (theme == null
+                || !(theme.equals("Match app theme")
+                || theme.equals("Dark tiles")
+                || theme.equals("Light tiles"))) {
+            throw new IllegalArgumentException("Invalid tile appearance.");
+        }
+
+        PREFS.put(TILE_THEME_KEY, theme);
+    }
     public static String getTheme() {
         return PREFS.get(THEME_KEY, "Dark");
     }

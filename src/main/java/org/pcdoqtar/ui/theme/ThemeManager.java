@@ -69,6 +69,17 @@ public final class ThemeManager {
         if (cssUrl != null && !scene.getStylesheets().contains(cssUrl.toExternalForm())) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
         }
+        
+        scene.getRoot().getStyleClass().removeAll(
+                "tile-theme-dark", "tile-theme-light");
+
+        String tileTheme = AppSettings.getTileTheme();
+
+        if ("Dark tiles".equals(tileTheme)) {
+            scene.getRoot().getStyleClass().add("tile-theme-dark");
+        } else if ("Light tiles".equals(tileTheme)) {
+            scene.getRoot().getStyleClass().add("tile-theme-light");
+        }
 
         scene.getProperties().put(APPLIED_THEME_KEY, targetTheme);
         scene.getRoot().applyCss();

@@ -13,7 +13,6 @@ public class MetricCard extends VBox {
     private final Label titleLabel = new Label();
     private final Label valueLabel = new Label();
     private final Label detailLabel = new Label();
-
     public MetricCard(String title, String value, String detail) {
         setSpacing(10);
         setPadding(new Insets(18));
@@ -62,7 +61,7 @@ public class MetricCard extends VBox {
     public MetricCard(String title, String value) {
         this(title, value, "");
     }
-
+    
     public void setTitle(String title) {
         titleLabel.setText(safe(title));
     }

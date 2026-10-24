@@ -1,3 +1,4 @@
+
 package org.pcdoqtar.ui;
 
 import java.net.InetSocketAddress;
@@ -7,7 +8,7 @@ import java.util.Locale;
 
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics.AdapterInfo;
-import org.pcdoqtar.ui.theme.ThemeManager;
+import org.pcdoqtar.diagnostics.network.NetworkPerformanceTest;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -17,165 +18,314 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-@SuppressWarnings("unused")
 public class NetworkPage extends VBox {
 
     private final NetworkDiagnostics networkDiagnostics;
-    private final VBox interfaceContainer = new VBox(10);
-    private final Label connectionStatus = new Label("Checking connectivity...");
-    private final Label interfaceSummary = new Label("Waiting for interface scan...");
-    private final Label transferSummary = new Label("Traffic totals will appear after scanning.");
-    private final Button refreshButton = new Button("Run network diagnostics");
-    private boolean refreshRunning;
+    private final NetworkPerformanceTest performanceTest =
+            new NetworkPerformanceTest();
 
-    public NetworkPage() { this(new NetworkDiagnostics()); }
+    private final VBox interfaceContainer = new VBox(10);
+
+    private final Label connectionStatus =
+            new Label("Checking connectivity...");
+    private final Label interfaceSummary =
+            new Label("Waiting for interface scan...");
+    private final Label transferSummary =
+            new Label("Traffic totals will appear after scanning.");
+
+    private final Label downloadResult = new Label("-- Mbps");
+    private final Label uploadResult = new Label("-- Mbps");
+    private final Label latencyResult = new Label("-- ms");
+    private final Label speedTestStatus = new Label("Ready");
+
+    private final Button refreshButton =
+            new Button("Run network diagnostics");
+    private final Button speedTestButton =
+            new Button("Run Internet Speed Test");
+
+    private boolean refreshRunning;
+    private boolean speedTestRunning;
+
+    public NetworkPage() {
+        this(new NetworkDiagnostics());
+    }
 
     public NetworkPage(NetworkDiagnostics networkDiagnostics) {
         if (networkDiagnostics == null) {
-            throw new IllegalArgumentException("Network diagnostics must not be null.");
+            throw new IllegalArgumentException(
+                    "Network diagnostics must not be null.");
         }
+
         this.networkDiagnostics = networkDiagnostics;
+
         getStyleClass().add("network-page");
         setSpacing(18);
         setPadding(new Insets(28));
 
         Label eyebrow = new Label("SYSTEM MONITORING / NETWORK");
         eyebrow.getStyleClass().add("page-eyebrow");
+
         Label heading = new Label("Network diagnostics");
         heading.getStyleClass().add("page-heading");
+
         Label description = new Label(
-                "Review connectivity, active non-virtual interfaces, IP addressing, link speed and traffic counters. "
-                + "Windows filter, loopback and virtual adapters are omitted from the main list.");
+                "Review internet connectivity, active non-virtual interfaces, "
+                + "IP addressing, link speed and traffic counters.");
         description.setWrapText(true);
         description.getStyleClass().add("page-description");
 
+        // Network summary
         GridPane summary = new GridPane();
         summary.getStyleClass().add("diagnostic-summary");
         summary.setHgap(24);
         summary.setVgap(10);
+
         Label connectionTitle = new Label("INTERNET REACHABILITY");
         Label interfaceTitle = new Label("ACTIVE INTERFACES");
         Label trafficTitle = new Label("TOTAL TRAFFIC");
+
         connectionTitle.getStyleClass().add("summary-caption");
         interfaceTitle.getStyleClass().add("summary-caption");
         trafficTitle.getStyleClass().add("summary-caption");
+
         connectionStatus.getStyleClass().add("summary-value");
         interfaceSummary.getStyleClass().add("summary-value");
         transferSummary.getStyleClass().add("summary-value");
+
         summary.addColumn(0, connectionTitle, connectionStatus);
         summary.addColumn(1, interfaceTitle, interfaceSummary);
         summary.addColumn(2, trafficTitle, transferSummary);
+
         GridPane.setHgrow(connectionStatus, Priority.ALWAYS);
 
         refreshButton.getStyleClass().add("primary-action");
         refreshButton.setOnAction(event -> refresh());
+
+        // Internet speed-test section
+        VBox speedTestCard = new VBox(12);
+        speedTestCard.getStyleClass().add("speed-test-card");
+        speedTestCard.setPadding(new Insets(18));
+
+        Label speedTestHeading = new Label("Internet Speed Test");
+        speedTestHeading.getStyleClass().add("section-heading");
+
+        Label speedTestDescription = new Label(
+                "Measure download speed, upload speed and HTTP response "
+                + "latency using the Cloudflare speed-test endpoint.");
+        speedTestDescription.setWrapText(true);
+        speedTestDescription.getStyleClass().add("page-description");
+
+        GridPane speedResults = new GridPane();
+        speedResults.setHgap(28);
+        speedResults.setVgap(12);
+
+        Label downloadTitle = new Label("DOWNLOAD");
+        Label uploadTitle = new Label("UPLOAD");
+        Label latencyTitle = new Label("HTTP LATENCY");
+
+        downloadTitle.getStyleClass().add("summary-caption");
+        uploadTitle.getStyleClass().add("summary-caption");
+        latencyTitle.getStyleClass().add("summary-caption");
+
+        downloadResult.getStyleClass().add("summary-value");
+        uploadResult.getStyleClass().add("summary-value");
+        latencyResult.getStyleClass().add("summary-value");
+
+        speedResults.addColumn(0, downloadTitle, downloadResult);
+        speedResults.addColumn(1, uploadTitle, uploadResult);
+        speedResults.addColumn(2, latencyTitle, latencyResult);
+
+        speedTestStatus.getStyleClass().add("diagnostic-detail");
+        speedTestStatus.setWrapText(true);
+
+        speedTestButton.getStyleClass().add("primary-action");
+        speedTestButton.setOnAction(event -> runSpeedTest());
+
+        speedTestCard.getChildren().addAll(
+                speedTestHeading,
+                speedTestDescription,
+                speedResults,
+                speedTestStatus,
+                speedTestButton
+        );
+
         Label section = new Label("Available network interfaces");
         section.getStyleClass().add("section-heading");
-        getChildren().addAll(eyebrow, heading, description, summary,
-                refreshButton, section, interfaceContainer);
+
+        getChildren().addAll(
+                eyebrow,
+                heading,
+                description,
+                summary,
+                refreshButton,
+                speedTestCard,
+                section,
+                interfaceContainer
+        );
+
         VBox.setVgrow(interfaceContainer, Priority.ALWAYS);
+
         refresh();
     }
 
     private void refresh() {
-        if (refreshRunning) return;
+        if (refreshRunning) {
+            return;
+        }
+
         refreshRunning = true;
         refreshButton.setDisable(true);
+
         connectionStatus.setText("Testing...");
         interfaceSummary.setText("Scanning...");
         transferSummary.setText("Calculating...");
         interfaceContainer.getChildren().clear();
 
         Thread worker = new Thread(() -> {
-            List<AdapterInfo> adapters;
+            final List<AdapterInfo> adapters;
+
             try {
                 adapters = networkDiagnostics.collectAdapters();
             } catch (Exception ex) {
                 Platform.runLater(() -> {
                     interfaceContainer.getChildren().setAll(
-                            new Label("Interface scan failed: " + ex.getMessage()));
+                            new Label("Interface scan failed: "
+                                    + safeMessage(ex)));
+
                     connectionStatus.setText("Unavailable");
                     interfaceSummary.setText("Unavailable");
                     transferSummary.setText("Unavailable");
+
                     finishRefresh();
                 });
                 return;
             }
+
             boolean internet = testInternetReachability();
+
             Platform.runLater(() -> {
                 List<AdapterInfo> visible = adapters.stream()
                         .filter(this::isUsefulInterface)
                         .filter(AdapterInfo::isUp)
                         .toList();
+
                 if (visible.isEmpty()) {
                     visible = adapters.stream()
                             .filter(AdapterInfo::isUp)
                             .filter(a -> !a.isLoopback() && !a.isVirtual())
                             .toList();
                 }
-                connectionStatus.setText(internet ? "Reachable" : "No response");
+
+                connectionStatus.setText(
+                        internet ? "Reachable" : "No response");
+
                 interfaceSummary.setText(visible.size() + " active");
-                long rx = visible.stream().mapToLong(AdapterInfo::getReceivedBytes)
-                        .filter(v -> v >= 0).sum();
-                long tx = visible.stream().mapToLong(AdapterInfo::getSentBytes)
-                        .filter(v -> v >= 0).sum();
-                transferSummary.setText("↓ " + formatBytes(rx) + "  ↑ " + formatBytes(tx));
+
+                long rx = visible.stream()
+                        .mapToLong(AdapterInfo::getReceivedBytes)
+                        .filter(value -> value >= 0)
+                        .sum();
+
+                long tx = visible.stream()
+                        .mapToLong(AdapterInfo::getSentBytes)
+                        .filter(value -> value >= 0)
+                        .sum();
+
+                transferSummary.setText(
+                        "↓ " + formatBytes(rx) + "  ↑ " + formatBytes(tx));
+
                 interfaceContainer.getChildren().clear();
+
                 if (visible.isEmpty()) {
-                    Label empty = new Label("No active physical interfaces were found. Check that Wi-Fi or Ethernet is enabled.");
+                    Label empty = new Label(
+                            "No active physical interfaces were found. "
+                            + "Check that Wi-Fi or Ethernet is enabled.");
                     empty.getStyleClass().add("diagnostic-detail");
+                    empty.setWrapText(true);
                     interfaceContainer.getChildren().add(empty);
                 } else {
                     for (AdapterInfo adapter : visible) {
-                        interfaceContainer.getChildren().add(interfaceCard(adapter));
+                        interfaceContainer.getChildren().add(
+                                interfaceCard(adapter));
                     }
                 }
+
                 finishRefresh();
             });
         }, "PC-DOQTAR-Network-Diagnostics");
+
         worker.setDaemon(true);
         worker.start();
     }
 
-    private boolean isUsefulInterface(AdapterInfo adapter) {
-        if (!adapter.isUp() || adapter.isLoopback() || adapter.isVirtual()) return false;
-        String name = ((adapter.getDisplayName() == null ? "" : adapter.getDisplayName())
-                + " " + adapter.getName()).toLowerCase(Locale.ROOT);
-        return !(name.contains("filter") || name.contains("wfp")
-                || name.contains("qos packet") || name.contains("ndis")
-                || name.contains("loopback") || name.contains("virtualbox")
-                || name.contains("hyper-v") || name.contains("hyperv")
-                || name.contains("vethernet") || name.contains("pseudo"));
-    }
-
-    private boolean testInternetReachability() {
-        try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress("1.1.1.1", 443), 1200);
-            return true;
-        } catch (Exception ignored) {
-            return false;
+    private void runSpeedTest() {
+        if (speedTestRunning) {
+            return;
         }
-    }
 
-    private VBox interfaceCard(AdapterInfo adapter) {
-        String name = adapter.getDisplayName() == null || adapter.getDisplayName().isBlank()
-                ? adapter.getName() : adapter.getDisplayName();
-        Label title = new Label(name);
-        title.getStyleClass().add("interface-title");
-        Label state = new Label("● Connected  ·  " + formatSpeed(adapter.getLinkSpeedMbps()));
-        state.getStyleClass().add("interface-state");
-        Label details = new Label("IPv4: " + adapter.getIpv4()
-                + "\nIPv6: " + adapter.getIpv6()
-                + "\nMAC: " + adapter.getMacAddress()
-                + "\nReceived: " + formatBytes(adapter.getReceivedBytes())
-                + "\nSent: " + formatBytes(adapter.getSentBytes()));
-        details.setWrapText(true);
-        details.getStyleClass().add("diagnostic-detail");
-        VBox card = new VBox(8, title, state, details);
-        card.getStyleClass().add("interface-card");
-        card.setPadding(new Insets(16, 18, 16, 18));
-        card.setMaxWidth(Double.MAX_VALUE);
-        return card;
+        speedTestRunning = true;
+        speedTestButton.setDisable(true);
+
+        speedTestStatus.setText(
+                "Testing latency, download and upload. Please wait...");
+
+        downloadResult.setText("Testing...");
+        uploadResult.setText("Waiting...");
+        latencyResult.setText("Testing...");
+
+        Thread worker = new Thread(() -> {
+            try {
+                NetworkPerformanceTest.LatencyResult latency =
+                        performanceTest.measureLatencySamples();
+
+                double[] speeds = performanceTest.measureSpeeds();
+
+                Platform.runLater(() -> {
+                    downloadResult.setText(
+                            String.format(
+                                    Locale.ROOT,
+                                    "%.2f Mbps",
+                                    speeds[0]));
+
+                    uploadResult.setText(
+                            String.format(
+                                    Locale.ROOT,
+                                    "%.2f Mbps",
+                                    speeds[1]));
+
+                    if (latency.getAverageMs() >= 0) {
+                        latencyResult.setText(
+                                String.format(
+                                        Locale.ROOT,
+                                        "%.0f ms",
+                                        latency.getAverageMs()));
+                    } else {
+                        latencyResult.setText("Unavailable");
+                    }
+
+                    speedTestStatus.setText(
+                            "Completed. Results use Cloudflare's test endpoint.");
+
+                    finishSpeedTest();
+                });
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+
+                Platform.runLater(() -> {
+                    speedTestStatus.setText("Speed test interrupted.");
+                    finishSpeedTest();
+                });
+            } catch (Exception ex) {
+                Platform.runLater(() -> {
+                    speedTestStatus.setText(
+                            "Speed test failed: " + safeMessage(ex));
+                    finishSpeedTest();
+                });
+            }
+        }, "PC-DOQTAR-Internet-Speed-Test");
+
+        worker.setDaemon(true);
+        worker.start();
     }
 
     private void finishRefresh() {
@@ -183,12 +333,101 @@ public class NetworkPage extends VBox {
         refreshButton.setDisable(false);
     }
 
+    private void finishSpeedTest() {
+        speedTestRunning = false;
+        speedTestButton.setDisable(false);
+    }
+
+    private boolean isUsefulInterface(AdapterInfo adapter) {
+        if (!adapter.isUp()
+                || adapter.isLoopback()
+                || adapter.isVirtual()) {
+            return false;
+        }
+
+        String name = (
+                (adapter.getDisplayName() == null
+                        ? "" : adapter.getDisplayName())
+                + " " + adapter.getName()
+        ).toLowerCase(Locale.ROOT);
+
+        return !(name.contains("filter")
+                || name.contains("wfp")
+                || name.contains("qos packet")
+                || name.contains("ndis")
+                || name.contains("loopback")
+                || name.contains("virtualbox")
+                || name.contains("hyper-v")
+                || name.contains("hyperv")
+                || name.contains("vethernet")
+                || name.contains("pseudo"));
+    }
+
+    private boolean testInternetReachability() {
+        try (Socket socket = new Socket()) {
+            socket.connect(
+                    new InetSocketAddress("1.1.1.1", 443),
+                    1200);
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private VBox interfaceCard(AdapterInfo adapter) {
+        String name =
+                adapter.getDisplayName() == null
+                        || adapter.getDisplayName().isBlank()
+                ? adapter.getName()
+                : adapter.getDisplayName();
+
+        Label title = new Label(name);
+        title.getStyleClass().add("interface-title");
+        title.setWrapText(true);
+
+        Label state = new Label(
+                "● Connected  ·  "
+                + formatSpeed(adapter.getLinkSpeedMbps()));
+        state.getStyleClass().add("interface-state");
+        state.setWrapText(true);
+
+        Label details = new Label(
+                "IPv4: " + adapter.getIpv4()
+                + "\nIPv6: " + adapter.getIpv6()
+                + "\nMAC: " + adapter.getMacAddress()
+                + "\nReceived: " + formatBytes(adapter.getReceivedBytes())
+                + "\nSent: " + formatBytes(adapter.getSentBytes()));
+
+        details.setWrapText(true);
+        details.getStyleClass().add("diagnostic-detail");
+
+        VBox card = new VBox(8, title, state, details);
+        card.getStyleClass().add("interface-card");
+        card.setPadding(new Insets(16, 18, 16, 18));
+        card.setMaxWidth(Double.MAX_VALUE);
+
+        return card;
+    }
+
     private String formatSpeed(long speed) {
         return speed < 0 ? "Unavailable" : speed + " Mbps";
     }
 
     private String formatBytes(long bytes) {
-        if (bytes < 0) return "Unavailable";
-        return String.format("%.2f MB", bytes / (1024.0 * 1024.0));
+        if (bytes < 0) {
+            return "Unavailable";
+        }
+
+        return String.format(
+                Locale.ROOT,
+                "%.2f MB",
+                bytes / (1024.0 * 1024.0));
+    }
+
+    private String safeMessage(Exception exception) {
+        String message = exception.getMessage();
+        return message == null || message.isBlank()
+                ? exception.getClass().getSimpleName()
+                : message;
     }
 }

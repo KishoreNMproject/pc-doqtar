@@ -724,3 +724,16 @@
 .theme-light .diagnostics-page .label {
     -fx-text-fill: #243247;
 }
+.theme-dark .network-page .speed-test-card {
+    -fx-background-color: #141821;
+    -fx-border-color: #2B3240;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.theme-light .network-page .speed-test-card {
+    -fx-background-color: #E2E8F0;
+    -fx-border-color: #CBD5E1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
