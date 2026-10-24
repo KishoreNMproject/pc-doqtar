@@ -179,3 +179,113 @@
 .theme-dark .usage-chart .chart-pie.default-color1 { -fx-pie-color: #454D5B; }
 .theme-light .usage-chart .chart-pie.default-color0 { -fx-pie-color: #527A00; }
 .theme-light .usage-chart .chart-pie.default-color1 { -fx-pie-color: #D8DEE8; }
+
+
+/* Accessible, consistent theme tokens for every page and control. */
+.theme-dark .overview-page *, .theme-dark .network-page *,
+.theme-dark .processes-page *, .theme-dark .settings-page *,
+.theme-dark .diagnostics-page * {
+    -fx-text-fill: #F2F5FA;
+}
+.theme-light .overview-page *, .theme-light .network-page *,
+.theme-light .processes-page *, .theme-light .settings-page *,
+.theme-light .diagnostics-page * {
+    -fx-text-fill: #172033;
+}
+.theme-dark .overview-page, .theme-dark .network-page,
+.theme-dark .processes-page, .theme-dark .settings-page,
+.theme-dark .diagnostics-page {
+    -fx-background-color: #090B10 !important;
+}
+.theme-light .overview-page, .theme-light .network-page,
+.theme-light .processes-page, .theme-light .settings-page,
+.theme-light .diagnostics-page {
+    -fx-background-color: #F4F6FA !important;
+}
+/* Keep content surfaces simple and flat; avoid a grid of rounded boxes. */
+.theme-dark .overview-page .vbox, .theme-dark .processes-page .vbox,
+.theme-dark .settings-page .vbox, .theme-dark .network-page .interface-card,
+.theme-dark .diagnostic-summary {
+    -fx-background-color: #141821 !important;
+    -fx-border-color: transparent !important;
+    -fx-background-radius: 3 !important;
+    -fx-border-radius: 3 !important;
+}
+.theme-light .overview-page .vbox, .theme-light .processes-page .vbox,
+.theme-light .settings-page .vbox, .theme-light .network-page .interface-card,
+.theme-light .diagnostic-summary {
+    -fx-background-color: #FFFFFF !important;
+    -fx-border-color: transparent !important;
+    -fx-background-radius: 3 !important;
+    -fx-border-radius: 3 !important;
+}
+.theme-dark .app-sidebar {
+    -fx-background-color: #10141C !important;
+    -fx-border-color: #2B3240 !important;
+}
+.theme-light .app-sidebar {
+    -fx-background-color: #FFFFFF !important;
+    -fx-border-color: #D8DEE8 !important;
+}
+.app-sidebar .sidebar-brand { -fx-font-size: 18px; -fx-font-weight: bold; }
+.theme-dark .app-sidebar .sidebar-brand { -fx-text-fill: #B8FF3B !important; }
+.theme-light .app-sidebar .sidebar-brand { -fx-text-fill: #527A00 !important; }
+.theme-dark .app-sidebar .sidebar-subtitle { -fx-text-fill: #A0A9B8 !important; -fx-font-size: 10px; }
+.theme-light .app-sidebar .sidebar-subtitle { -fx-text-fill: #667085 !important; -fx-font-size: 10px; }
+.theme-dark .app-sidebar .sidebar-button,
+.theme-light .app-sidebar .sidebar-button {
+    -fx-background-color: transparent !important;
+    -fx-border-color: transparent !important;
+    -fx-background-radius: 3 !important;
+    -fx-border-radius: 3 !important;
+    -fx-padding: 12 14 12 14;
+    -fx-alignment: center-left;
+}
+.theme-dark .app-sidebar .sidebar-button { -fx-text-fill: #F2F5FA !important; }
+.theme-light .app-sidebar .sidebar-button { -fx-text-fill: #172033 !important; }
+.theme-dark .app-sidebar .sidebar-button:hover { -fx-background-color: #202633 !important; }
+.theme-light .app-sidebar .sidebar-button:hover { -fx-background-color: #F0F3F8 !important; }
+.theme-dark .app-sidebar .sidebar-button.active {
+    -fx-background-color: #29351B !important;
+    -fx-border-color: #B8FF3B !important;
+    -fx-border-width: 0 0 0 3;
+    -fx-font-weight: bold;
+}
+.theme-light .app-sidebar .sidebar-button.active {
+    -fx-background-color: #EAF3D7 !important;
+    -fx-border-color: #527A00 !important;
+    -fx-border-width: 0 0 0 3;
+    -fx-font-weight: bold;
+}
+.theme-dark .navigation-toolbar { -fx-background-color: #090B10 !important; -fx-border-color: #2B3240; -fx-border-width: 0 0 1 0; }
+.theme-light .navigation-toolbar { -fx-background-color: #F4F6FA !important; -fx-border-color: #D8DEE8; -fx-border-width: 0 0 1 0; }
+.theme-dark .navigation-section-title { -fx-text-fill: #F2F5FA !important; -fx-font-weight: bold; }
+.theme-light .navigation-section-title { -fx-text-fill: #172033 !important; -fx-font-weight: bold; }
+.theme-dark .hamburger-button { -fx-background-color: #202633 !important; -fx-text-fill: #B8FF3B !important; -fx-border-color: #343D4D !important; -fx-font-size: 18px; }
+.theme-light .hamburger-button { -fx-background-color: #FFFFFF !important; -fx-text-fill: #527A00 !important; -fx-border-color: #D8DEE8 !important; -fx-font-size: 18px; }
+.theme-dark .page-eyebrow { -fx-text-fill: #B8FF3B !important; }
+.theme-light .page-eyebrow { -fx-text-fill: #527A00 !important; }
+.theme-dark .page-heading, .theme-dark .section-heading { -fx-text-fill: #F2F5FA !important; -fx-font-weight: bold; }
+.theme-light .page-heading, .theme-light .section-heading { -fx-text-fill: #172033 !important; -fx-font-weight: bold; }
+.theme-dark .page-description, .theme-dark .diagnostic-detail { -fx-text-fill: #A0A9B8 !important; }
+.theme-light .page-description, .theme-light .diagnostic-detail { -fx-text-fill: #475467 !important; }
+.theme-dark .summary-caption { -fx-text-fill: #A0A9B8 !important; -fx-font-size: 10px; -fx-font-weight: bold; }
+.theme-light .summary-caption { -fx-text-fill: #667085 !important; -fx-font-size: 10px; -fx-font-weight: bold; }
+.theme-dark .summary-value, .theme-dark .interface-title { -fx-text-fill: #F2F5FA !important; -fx-font-weight: bold; }
+.theme-light .summary-value, .theme-light .interface-title { -fx-text-fill: #172033 !important; -fx-font-weight: bold; }
+.theme-dark .interface-state { -fx-text-fill: #B8FF3B !important; }
+.theme-light .interface-state { -fx-text-fill: #527A00 !important; }
+.theme-dark .network-page .interface-card { -fx-border-color: #2B3240 !important; -fx-border-width: 0 0 0 3; }
+.theme-light .network-page .interface-card { -fx-border-color: #D8DEE8 !important; -fx-border-width: 0 0 0 3; }
+.theme-dark .processes-page .table-view .column-header,
+.theme-dark .processes-page .table-view .column-header-background,
+.theme-dark .processes-page .table-view .filler { -fx-background-color: #202633 !important; }
+.theme-light .processes-page .table-view .column-header,
+.theme-light .processes-page .table-view .column-header-background,
+.theme-light .processes-page .table-view .filler { -fx-background-color: #E8EDF5 !important; }
+.theme-dark .processes-page .table-view .column-header .label { -fx-text-fill: #F2F5FA !important; }
+.theme-light .processes-page .table-view .column-header .label { -fx-text-fill: #172033 !important; }
+.theme-dark .processes-page .table-view .table-cell { -fx-text-fill: #F2F5FA !important; }
+.theme-light .processes-page .table-view .table-cell { -fx-text-fill: #172033 !important; }
+.theme-dark .button:disabled { -fx-opacity: 0.55; }
+.theme-light .button:disabled { -fx-opacity: 0.55; }
