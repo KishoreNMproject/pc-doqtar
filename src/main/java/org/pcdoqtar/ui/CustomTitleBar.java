@@ -15,9 +15,7 @@ public final class CustomTitleBar extends HBox {
     private double dragOffsetY;
 
     public CustomTitleBar(Stage stage) {
-        if (stage == null) {
-            throw new IllegalArgumentException("Stage is required.");
-        }
+        if (stage == null) throw new IllegalArgumentException("Stage is required.");
 
         getStyleClass().add("custom-title-bar");
         setAlignment(Pos.CENTER_LEFT);
@@ -33,12 +31,10 @@ public final class CustomTitleBar extends HBox {
         HBox spacer = new HBox();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button minimise = windowButton("—", "window-button", 42);
+        Button minimise = windowButton("—", "window-button", 34);
         minimise.setOnAction(event -> stage.setIconified(true));
-
         Button maximise = windowButton("□", "window-button", 42);
         maximise.setOnAction(event -> stage.setMaximized(!stage.isMaximized()));
-
         Button close = windowButton("×", "window-close-button", 46);
         close.setOnAction(event -> stage.close());
 
@@ -51,15 +47,12 @@ public final class CustomTitleBar extends HBox {
                 dragOffsetY = event.getScreenY() - stage.getY();
             }
         });
-
         addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
-            if (!stage.isMaximized()
-                    && !(event.getTarget() instanceof Button)) {
+            if (!stage.isMaximized() && !(event.getTarget() instanceof Button)) {
                 stage.setX(event.getScreenX() - dragOffsetX);
                 stage.setY(event.getScreenY() - dragOffsetY);
             }
         });
-
         setOnMouseClicked(event -> {
             if (event.getClickCount() == 2
                     && (event.getTarget() == this || event.getTarget() == title)) {
