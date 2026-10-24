@@ -722,3 +722,33 @@
 .theme-light .overview-page .chart-plot-background {
     -fx-background-color: transparent !important;
 }
+
+
+/* Diagnostic result rows: use an explicit class rather than generic VBox
+   selectors, which can accidentally style nested layout containers. */
+.theme-light .diagnostics-page .diagnostic-result-card {
+    -fx-background-color: #E2E8F0 !important;
+    -fx-border-color: #CBD5E1 !important;
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+.theme-light .diagnostics-page .diagnostic-result-card .label {
+    -fx-text-fill: #243247 !important;
+}
+.theme-light .diagnostics-page .diagnostic-result-card .diagnostic-detail {
+    -fx-text-fill: #58677B !important;
+}
+.theme-dark .diagnostics-page .diagnostic-result-card {
+    -fx-background-color: #141821 !important;
+    -fx-border-color: #2B3240 !important;
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+.theme-dark .diagnostics-page .diagnostic-result-card .label {
+    -fx-text-fill: #F2F5FA !important;
+}
+.theme-dark .diagnostics-page .diagnostic-result-card .diagnostic-detail {
+    -fx-text-fill: #A0A9B8 !important;
+}
