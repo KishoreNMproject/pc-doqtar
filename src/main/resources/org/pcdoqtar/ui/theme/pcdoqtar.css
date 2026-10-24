@@ -150,3 +150,16 @@
 .theme-dark .pie-chart .chart-title { -fx-text-fill: #F2F5FA; }
 .theme-light .pie-chart .chart-title { -fx-text-fill: #172033; }
 .theme-dark .pie-chart-legend, .theme-light .pie-chart-legend { -fx-background-color: transparent; }
+
+.theme-dark .app-sidebar { -fx-background-color: #141821 !important; -fx-border-color: #2B3240 !important; }
+.theme-dark .app-sidebar .sidebar-button { -fx-background-color: transparent !important; -fx-text-fill: #F2F5FA !important; }
+.theme-dark .app-sidebar .sidebar-button:hover { -fx-background-color: #202633 !important; }
+.theme-light .app-sidebar { -fx-background-color: #FFFFFF !important; -fx-border-color: #D8DEE8 !important; }
+.theme-light .app-sidebar .sidebar-button { -fx-background-color: transparent !important; -fx-text-fill: #172033 !important; }
+.theme-light .app-sidebar .sidebar-button:hover { -fx-background-color: #E8EDF5 !important; }
+.theme-dark .overview-page .button, .theme-dark .network-page .button, .theme-dark .processes-page .button, .theme-dark .settings-page .button {
+    -fx-background-color: #202633 !important; -fx-text-fill: #F2F5FA !important; -fx-border-color: #343D4D !important;
+}
+.theme-light .overview-page .button, .theme-light .network-page .button, .theme-light .processes-page .button, .theme-light .settings-page .button {
+    -fx-background-color: #E8EDF5 !important; -fx-text-fill: #172033 !important; -fx-border-color: #D8DEE8 !important;
+}
