@@ -132,3 +132,21 @@
 .theme-light .scroll-bar .thumb { -fx-background-color: #AAB4C4; -fx-background-radius: 8; }
 .theme-dark .pie-chart { -fx-background-color: transparent; }
 .theme-light .pie-chart { -fx-background-color: transparent; }
+
+.theme-dark .custom-title-bar { -fx-background-color: #141821 !important; -fx-border-color: #2B3240 !important; }
+.theme-dark .custom-title-bar .title-bar-title { -fx-text-fill: #F2F5FA !important; }
+.theme-dark .custom-title-bar .window-button, .theme-dark .custom-title-bar .window-close-button { -fx-background-color: #141821 !important; -fx-text-fill: #F2F5FA !important; -fx-border-color: transparent !important; }
+.theme-dark .custom-title-bar .window-button:hover { -fx-background-color: #303746 !important; }
+.theme-dark .custom-title-bar .window-close-button:hover { -fx-background-color: #C62828 !important; -fx-text-fill: white !important; }
+.theme-light .custom-title-bar { -fx-background-color: #FFFFFF !important; -fx-border-color: #D8DEE8 !important; }
+.theme-light .custom-title-bar .title-bar-title { -fx-text-fill: #172033 !important; }
+.theme-light .custom-title-bar .window-button, .theme-light .custom-title-bar .window-close-button { -fx-background-color: #FFFFFF !important; -fx-text-fill: #172033 !important; -fx-border-color: transparent !important; }
+.theme-light .custom-title-bar .window-button:hover { -fx-background-color: #E8EDF5 !important; }
+.theme-light .custom-title-bar .window-close-button:hover { -fx-background-color: #C62828 !important; -fx-text-fill: white !important; }
+.theme-dark .overview-page .vbox, .theme-dark .network-page .vbox, .theme-dark .processes-page .vbox, .theme-dark .settings-page .vbox { -fx-background-color: #141821 !important; -fx-border-color: #2B3240 !important; }
+.theme-light .overview-page .vbox, .theme-light .network-page .vbox, .theme-light .processes-page .vbox, .theme-light .settings-page .vbox { -fx-background-color: #FFFFFF !important; -fx-border-color: #D8DEE8 !important; }
+.theme-light .processes-page .table-view { -fx-background-color: #FFFFFF !important; -fx-control-inner-background: #FFFFFF !important; -fx-control-inner-background-alt: #F4F6FA !important; -fx-text-background-color: #172033 !important; }
+.theme-dark .processes-page .table-view { -fx-background-color: #141821 !important; -fx-control-inner-background: #10141C !important; -fx-control-inner-background-alt: #171C26 !important; -fx-text-background-color: #F2F5FA !important; }
+.theme-dark .pie-chart .chart-title { -fx-text-fill: #F2F5FA; }
+.theme-light .pie-chart .chart-title { -fx-text-fill: #172033; }
+.theme-dark .pie-chart-legend, .theme-light .pie-chart-legend { -fx-background-color: transparent; }
