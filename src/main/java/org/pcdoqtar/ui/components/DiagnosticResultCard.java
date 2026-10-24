@@ -93,13 +93,8 @@ public class DiagnosticResultCard extends VBox {
                 + "-fx-font-weight: bold;"
         );
 
-        setStyle(
-                "-fx-background-color: "
-                + ThemeManager.getColour("panel") + ";"
-                + "-fx-background-radius: 8;"
-                + "-fx-border-color: " + colour + ";"
-                + "-fx-border-radius: 8;"
-        );
+        getStyleClass().add("app-tile");
+        setStyle("-fx-border-color: " + colour + ";");
     }
 
     private String safe(String value) {
