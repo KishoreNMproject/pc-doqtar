@@ -36,6 +36,7 @@ public class DiagnosticsPage extends VBox {
         }
 
         this.diagnostics = diagnostics;
+        getStyleClass().add("diagnostics-page");
 
         setSpacing(20);
         setPadding(new Insets(28));
