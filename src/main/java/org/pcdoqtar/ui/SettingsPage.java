@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.VBox;
@@ -109,12 +110,22 @@ public class SettingsPage extends VBox {
                 thresholdHeading, thresholdDescription,
                 thresholdValue, warningSlider, saveButton);
 
+        VBox navigationCard = createCard();
+        Label navigationHeading = heading("Navigation menu", 18);
+        Label navigationDescription = new Label("Choose whether the hamburger navigation drawer starts collapsed when PC DOQTAR launches. The drawer starts expanded by default.");
+        navigationDescription.setWrapText(true);
+        navigationDescription.setStyle(mutedStyle());
+        CheckBox collapsedByDefault = new CheckBox("Start with navigation collapsed");
+        collapsedByDefault.setSelected(AppSettings.isNavigationCollapsedByDefault());
+        collapsedByDefault.setOnAction(event -> AppSettings.setNavigationCollapsedByDefault(collapsedByDefault.isSelected()));
+        navigationCard.getChildren().addAll(navigationHeading, navigationDescription, collapsedByDefault);
+
         statusLabel.setWrapText(true);
         statusLabel.setStyle(mutedStyle());
 
         getChildren().addAll(
                 eyebrow, heading, description,
-                themeCard, thresholdCard, statusLabel);
+                themeCard, navigationCard, thresholdCard, statusLabel);
     }
 
     private VBox createCard() {
