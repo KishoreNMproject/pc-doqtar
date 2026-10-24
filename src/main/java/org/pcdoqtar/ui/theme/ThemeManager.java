@@ -1,6 +1,7 @@
 package org.pcdoqtar.ui.theme;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,31 +14,39 @@ import javafx.scene.Scene;
 
 public final class ThemeManager {
 
-    private static final String APPLIED_THEME_KEY = ThemeManager.class.getName() + ".appliedTheme";
     private static final Pattern HEX_COLOUR = Pattern.compile("#[0-9a-fA-F]{6}");
 
     private static final Map<String, String> DARK = Map.of(
-            "background", "#090B10", "panel", "#141821", "border", "#2B3240",
-            "text", "#F2F5FA", "muted", "#A0A9B8", "accent", "#B8FF3B",
-            "warning", "#FFB020", "critical", "#FF5555", "grey", "#454D5B");
+            "background", "#090B10",
+            "panel", "#141821",
+            "border", "#2B3240",
+            "text", "#F2F5FA",
+            "muted", "#A0A9B8",
+            "accent", "#B8FF3B",
+            "warning", "#FFB020",
+            "critical", "#FF5555",
+            "grey", "#454D5B");
 
     private static final Map<String, String> LIGHT = Map.of(
-            "background", "#EEF2F7", 
-            "panel", "#E2E8F0", 
+            "background", "#EEF2F7",
+            "panel", "#FFFFFF",
             "border", "#CBD5E1",
-            "text", "#243247", 
-            "muted", "#58677B", 
+            "text", "#243247",
+            "muted", "#58677B",
             "accent", "#647D35",
-            "warning", "#925400", 
-            "critical", "#B42318", 
-            "grey", "#94A3B8"
-            );
+            "warning", "#925400",
+            "critical", "#B42318",
+            "grey", "#94A3B8");
 
     private ThemeManager() { }
 
-    public static String getCurrentTheme() { return AppSettings.getTheme(); }
+    public static String getCurrentTheme() {
+        return AppSettings.getTheme();
+    }
 
-    public static void setTheme(String theme) { AppSettings.setTheme(theme); }
+    public static void setTheme(String theme) {
+        AppSettings.setTheme(theme);
+    }
 
     public static String getColour(String key) {
         String value = palette().get(key);
@@ -47,71 +56,111 @@ public final class ThemeManager {
         return value;
     }
 
+    /**
+     * Applies exactly one theme stylesheet and updates the scene's theme class.
+     * Legacy inline styles are retinted as a compatibility layer while pages
+     * are progressively moved to shared CSS classes.
+     */
     public static void apply(Scene scene) {
-        if (scene == null) return;
+        if (scene == null || scene.getRoot() == null) {
+            return;
+        }
 
-        String targetTheme = getCurrentTheme();
-        Object previous = scene.getProperties().get(APPLIED_THEME_KEY);
-        // On first launch, legacy pages may still contain hard-coded dark inline
-        // colours. Treat those styles as dark and retint them for the saved theme.
-        String oldTheme = previous instanceof String ? (String) previous : "Dark";
+        boolean light = "Light".equalsIgnoreCase(getCurrentTheme());
+        String activeClass = light ? "theme-light" : "theme-dark";
+        String activePath = light
+                ? "/org/pcdoqtar/ui/theme/theme-light.css"
+                : "/org/pcdoqtar/ui/theme/theme-dark.css";
+        String inactivePath = light
+                ? "/org/pcdoqtar/ui/theme/theme-dark.css"
+                : "/org/pcdoqtar/ui/theme/theme-light.css";
 
-        if (!oldTheme.equalsIgnoreCase(targetTheme)) {
-            retintInlineStyles(scene.getRoot(), colourReplacements(oldTheme, targetTheme));
+        String activeUrl = stylesheetUrl(activePath);
+        String inactiveUrl = stylesheetUrl(inactivePath);
+
+        if (inactiveUrl != null) {
+            scene.getStylesheets().remove(inactiveUrl);
+        }
+        if (activeUrl != null && !scene.getStylesheets().contains(activeUrl)) {
+            scene.getStylesheets().add(activeUrl);
         }
 
         scene.getRoot().getStyleClass().removeAll("theme-dark", "theme-light");
-        scene.getRoot().getStyleClass().add(
-                "Light".equalsIgnoreCase(targetTheme) ? "theme-light" : "theme-dark");
+        scene.getRoot().getStyleClass().add(activeClass);
         scene.getRoot().setStyle("-fx-background-color: " + getColour("background") + ";");
 
-        var cssUrl = ThemeManager.class.getResource("/org/pcdoqtar/ui/theme/pcdoqtar.css");
-        if (cssUrl != null && !scene.getStylesheets().contains(cssUrl.toExternalForm())) {
-            scene.getStylesheets().add(cssUrl.toExternalForm());
-        }
-        
-        scene.getRoot().getStyleClass().removeAll(
-                "tile-theme-dark", "tile-theme-light");
-
-        String tileTheme = AppSettings.getTileTheme();
-
-        if ("Dark tiles".equals(tileTheme)) {
-            scene.getRoot().getStyleClass().add("tile-theme-dark");
-        } else if ("Light tiles".equals(tileTheme)) {
-            scene.getRoot().getStyleClass().add("tile-theme-light");
-        }
-
-        scene.getProperties().put(APPLIED_THEME_KEY, targetTheme);
+        applyToNode(scene.getRoot());
         scene.getRoot().applyCss();
         scene.getRoot().requestLayout();
+    }
+
+    /**
+     * Retints a page when it is attached to the scene. Pages are created up
+     * front and may be hidden when Settings changes the theme, so styling only
+     * the currently visible scene tree is not sufficient.
+     */
+    public static void applyToNode(Node node) {
+        if (node == null) {
+            return;
+        }
+        retintInlineStyles(node, colourReplacements(getCurrentTheme()));
+        if (node instanceof Parent parent) {
+            parent.applyCss();
+            parent.requestLayout();
+        }
+    }
+
+    private static String stylesheetUrl(String path) {
+        var resource = ThemeManager.class.getResource(path);
+        return resource == null ? null : resource.toExternalForm();
     }
 
     private static Map<String, String> palette() {
         return "Light".equalsIgnoreCase(getCurrentTheme()) ? LIGHT : DARK;
     }
 
-    private static Map<String, String> colourReplacements(String fromTheme, String toTheme) {
-        Map<String, String> from = "Light".equalsIgnoreCase(fromTheme) ? LIGHT : DARK;
-        Map<String, String> to = "Light".equalsIgnoreCase(toTheme) ? LIGHT : DARK;
-        Map<String, String> result = new HashMap<>();
-        for (String key : from.keySet()) result.put(from.get(key).toUpperCase(), to.get(key));
+    /**
+     * Maps colours from either palette and the previous hard-coded dark styles
+     * to the currently selected palette. Applying it repeatedly is safe.
+     */
+    private static Map<String, String> colourReplacements(String targetTheme) {
+        Map<String, String> target = "Light".equalsIgnoreCase(targetTheme) ? LIGHT : DARK;
+        Map<String, String> replacements = new HashMap<>();
 
-        boolean light = "Light".equalsIgnoreCase(toTheme);
-        result.put("#090909", to.get("background"));
-        result.put("#141414", to.get("panel"));
-        result.put("#292929", to.get("border"));
-        result.put("#F5F5F5", to.get("text"));
-        result.put("#929292", to.get("muted"));
-        result.put("#101010", light ? "#F1F5F9" : "#10141C");
-        result.put("#666666", to.get("muted"));
-        result.put("#42B8FF", to.get("accent"));
-        result.put("#8993A3", to.get("muted"));
-        result.put("#202633", light ? "#E2E8F0" : "#202633");
-        result.put("#343D4D", to.get("border"));
-        result.put("#151515", light ? "#EEF2F7" : "#151515");
-        result.put("#171C26", light ? "#E8EEF5" : "#171C26");
-        result.put("#34451F", light ? "#DDE8C7" : "#34451F");
-        return result;
+        for (String key : DARK.keySet()) {
+            replacements.put(DARK.get(key).toUpperCase(Locale.ROOT), target.get(key));
+            replacements.put(LIGHT.get(key).toUpperCase(Locale.ROOT), target.get(key));
+        }
+
+        boolean light = "Light".equalsIgnoreCase(targetTheme);
+        replacements.put("#090909", target.get("background"));
+        replacements.put("#0D0D0D", target.get("background"));
+        replacements.put("#111111", target.get("panel"));
+        replacements.put("#101010", light ? "#FFFFFF" : "#10141C");
+        replacements.put("#141414", target.get("panel"));
+        replacements.put("#151515", light ? "#EEF2F7" : "#151515");
+        replacements.put("#171717", light ? "#F4F6FA" : "#171717");
+        replacements.put("#202020", light ? "#E2E8F0" : "#202633");
+        replacements.put("#292929", target.get("border"));
+        replacements.put("#383838", target.get("border"));
+        replacements.put("#444444", target.get("border"));
+        replacements.put("#454545", target.get("grey"));
+        replacements.put("#666666", target.get("muted"));
+        replacements.put("#929292", target.get("muted"));
+        replacements.put("#8993A3", target.get("muted"));
+        replacements.put("#B0B0B0", target.get("muted"));
+        replacements.put("#F5F5F5", target.get("text"));
+        replacements.put("#FFFFFF", target.get("text"));
+        replacements.put("#172033", target.get("text"));
+        replacements.put("#42B8FF", target.get("accent"));
+        replacements.put("#10141C", light ? "#FFFFFF" : "#10141C");
+        replacements.put("#171C26", light ? "#F4F6FA" : "#171C26");
+        replacements.put("#343D4D", target.get("border"));
+        replacements.put("#34451F", light ? "#DFEBC8" : "#34451F");
+        replacements.put("#29351B", light ? "#EAF3D7" : "#29351B");
+        replacements.put("#26331A", light ? "#DFEBC8" : "#26331A");
+        replacements.put("#FFFFFF", light ? "#FFFFFF" : target.get("text"));
+        return replacements;
     }
 
     private static void retintInlineStyles(Node node, Map<String, String> replacements) {
@@ -120,13 +169,14 @@ public final class ThemeManager {
             Matcher matcher = HEX_COLOUR.matcher(style);
             StringBuffer updated = new StringBuffer();
             while (matcher.find()) {
-                String replacement = replacements.get(matcher.group().toUpperCase());
+                String replacement = replacements.get(matcher.group().toUpperCase(Locale.ROOT));
                 matcher.appendReplacement(updated, Matcher.quoteReplacement(
                         replacement == null ? matcher.group() : replacement));
             }
             matcher.appendTail(updated);
             node.setStyle(updated.toString());
         }
+
         if (node instanceof Parent parent) {
             for (Node child : parent.getChildrenUnmodifiable()) {
                 retintInlineStyles(child, replacements);
