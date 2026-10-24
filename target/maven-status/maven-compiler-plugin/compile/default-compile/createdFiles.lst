@@ -24,7 +24,6 @@ org\pcdoqtar\diagnostics\process\ProcessDiagnostics.class
 org\pcdoqtar\settings\AppSettings.class
 org\pcdoqtar\app\DashboardApp.class
 org\pcdoqtar\ui\NetworkPage.class
-org\pcdoqtar\app\DashboardApp$1.class
 org\pcdoqtar\ui\navigation\SidebarFactory.class
 org\pcdoqtar\diagnostics\DiagnosticTaskManager$DiagnosticTaskException.class
 org\pcdoqtar\diagnostics\DiagnosticTaskManager.class

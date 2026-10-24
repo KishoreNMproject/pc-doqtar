@@ -1,3 +1,4 @@
+
 package org.pcdoqtar.lifecycle;
 
 import java.util.Objects;
@@ -13,10 +14,7 @@ public final class ApplicationErrorHandler {
         // Utility class.
     }
 
-    public static void showStartupError(
-            Window owner,
-            String message) {
-
+    public static void showStartupError(Window owner, String message) {
         show(
                 owner,
                 Alert.AlertType.ERROR,
@@ -62,6 +60,7 @@ public final class ApplicationErrorHandler {
 
         Runnable display = () -> {
             Alert alert = new Alert(type, "", ButtonType.OK);
+
             alert.setTitle(title);
             alert.setHeaderText(header);
             alert.setContentText(
@@ -69,7 +68,9 @@ public final class ApplicationErrorHandler {
                             ? "No additional details are available."
                             : message);
 
-            if (owner != null) {
+            // A startup Stage may not have a Scene yet.
+            // Do not initialise the dialog owner in that state.
+            if (owner != null && owner.getScene() != null) {
                 alert.initOwner(owner);
             }
 
