@@ -123,12 +123,7 @@ public class ProcessesPage extends VBox {
                 toolbar, table, status
         );
         tablePanel.setPadding(new Insets(18));
-        tablePanel.setStyle(
-                "-fx-background-color: " + ThemeManager.getColour("panel") + ";" +
-                "-fx-background-radius: 8;" +
-                "-fx-border-color: " + ThemeManager.getColour("border") + ";" +
-                "-fx-border-radius: 8;"
-        );
+        tablePanel.getStyleClass().add("app-tile");
 
         VBox.setVgrow(table, Priority.ALWAYS);
         VBox.setVgrow(tablePanel, Priority.ALWAYS);
@@ -160,12 +155,7 @@ public class ProcessesPage extends VBox {
         VBox card = new VBox(12, caption, value);
         card.setPadding(new Insets(17));
         card.setMinHeight(90);
-        card.setStyle(
-                "-fx-background-color: " + ThemeManager.getColour("panel") + ";" +
-                "-fx-background-radius: 8;" +
-                "-fx-border-color: " + ThemeManager.getColour("border") + ";" +
-                "-fx-border-radius: 8;"
-        );
+        card.getStyleClass().add("app-tile");
 
         return card;
     }
