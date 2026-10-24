@@ -390,7 +390,7 @@
 .theme-light .overview-page .chart-legend {
     -fx-background-color: #F4F6FA !important;
 }
-.theme-light .label,
+
 .theme-light .titled-pane .title .text,
 .theme-light .table-view .table-cell,
 .theme-light .table-view .column-header .label,
@@ -712,7 +712,6 @@
 /* Inline styles on older pages used these legacy dark surfaces. Keep this
    fallback scoped to light mode; status/health labels retain their own styles. */
 .theme-light .overview-page .vbox,
-.theme-light .diagnostics-page .vbox,
 .theme-light .processes-page .vbox,
 .theme-light .network-page .vbox,
 .theme-light .settings-page .vbox {
@@ -721,4 +720,7 @@
 .theme-light .overview-page .pie-chart,
 .theme-light .overview-page .chart-plot-background {
     -fx-background-color: transparent !important;
+}
+.theme-light .diagnostics-page .label {
+    -fx-text-fill: #243247;
 }
