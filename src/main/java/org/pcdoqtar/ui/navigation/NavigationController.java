@@ -1,9 +1,9 @@
-
 package org.pcdoqtar.ui.navigation;
 
 import java.util.function.Consumer;
 
 import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 
 public final class NavigationController {
@@ -21,8 +21,7 @@ public final class NavigationController {
 
         if (pageRegistry == null || root == null) {
             throw new IllegalArgumentException(
-                    "Page registry and root must not be null."
-            );
+                    "Page registry and root must not be null.");
         }
 
         this.pageRegistry = pageRegistry;
@@ -35,7 +34,21 @@ public final class NavigationController {
     public void navigateTo(String pageName) {
         Node page = pageRegistry.get(pageName);
 
-        root.setCenter(page);
+        ScrollPane scrollPane = new ScrollPane(page);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(false);
+        scrollPane.setPannable(true);
+        scrollPane.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle(
+                "-fx-background: #090909;"
+                + "-fx-background-color: #090909;"
+                + "-fx-border-width: 0;"
+        );
+
+        root.setCenter(scrollPane);
         currentPage = pageName;
         pageChangeListener.accept(pageName);
     }

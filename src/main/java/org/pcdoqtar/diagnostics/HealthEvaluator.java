@@ -3,18 +3,17 @@ package org.pcdoqtar.diagnostics;
 
 import org.pcdoqtar.model.DiagnosticResult;
 import org.pcdoqtar.model.HealthStatus;
+import org.pcdoqtar.settings.AppSettings;
 
 public class HealthEvaluator {
 
-    private static final double WARNING_THRESHOLD = 75.0;
     private static final double CRITICAL_THRESHOLD = 90.0;
 
     public DiagnosticResult evaluateUtilisation(
             String metric,
             double percentage) {
 
-        if (Double.isNaN(percentage)
-                || Double.isInfinite(percentage)
+        if (!Double.isFinite(percentage)
                 || percentage < 0.0
                 || percentage > 100.0) {
 
@@ -26,6 +25,10 @@ public class HealthEvaluator {
                     "Utilisation value is invalid or unavailable.");
         }
 
+        // Read the user's saved warning threshold dynamically.
+        double warningThreshold =
+                AppSettings.getWarningThreshold();
+
         if (percentage > CRITICAL_THRESHOLD) {
             return new DiagnosticResult(
                     metric,
@@ -35,13 +38,15 @@ public class HealthEvaluator {
                     "Critical utilisation: exceeds 90%.");
         }
 
-        if (percentage > WARNING_THRESHOLD) {
+        if (percentage > warningThreshold) {
             return new DiagnosticResult(
                     metric,
                     percentage,
                     "%",
                     HealthStatus.WARNING,
-                    "High utilisation: exceeds 75%.");
+                    String.format(
+                            "High utilisation: exceeds %.0f%%.",
+                            warningThreshold));
         }
 
         return new DiagnosticResult(

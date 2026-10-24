@@ -13,7 +13,7 @@ public final class AppSettings {
             "warningThreshold";
 
     private static final String DEFAULT_THEME = "Dark";
-    private static final double DEFAULT_WARNING_THRESHOLD = 75.0;
+    private static final double DEFAULT_WARNING_THRESHOLD = 80.0;
 
     private AppSettings() {
         // Utility class; do not instantiate.
@@ -39,12 +39,11 @@ public final class AppSettings {
     }
 
     public static double getWarningThreshold() {
-        double value = PREFS.getDouble(
-                WARNING_THRESHOLD_KEY,
-                DEFAULT_WARNING_THRESHOLD
-        );
+        double threshold = PREFS.getDouble(
+                "warningThreshold",
+                DEFAULT_WARNING_THRESHOLD);
 
-        return Math.max(10.0, Math.min(89.0, value));
+        return Math.max(10.0, Math.min(89.0, threshold));
     }
 
     public static void setWarningThreshold(double percentage) {
