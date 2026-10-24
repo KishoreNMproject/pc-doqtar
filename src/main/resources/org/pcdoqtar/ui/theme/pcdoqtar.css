@@ -47,3 +47,8 @@
 .theme-light .usage-chart .chart-legend-item .label { -fx-text-fill: #172033; }
 .theme-dark .usage-chart .chart-pie-label { -fx-fill: #F2F5FA; }
 .theme-light .usage-chart .chart-pie-label { -fx-fill: #172033; }
+
+.theme-dark .usage-chart .chart-pie.default-color0 { -fx-pie-color: #B8FF3B; }
+.theme-dark .usage-chart .chart-pie.default-color1 { -fx-pie-color: #454D5B; }
+.theme-light .usage-chart .chart-pie.default-color0 { -fx-pie-color: #527A00; }
+.theme-light .usage-chart .chart-pie.default-color1 { -fx-pie-color: #D8DEE8; }
