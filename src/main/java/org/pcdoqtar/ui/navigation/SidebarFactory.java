@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
+@SuppressWarnings("unused")
 public final class SidebarFactory {
 
     private static final List<String> PAGE_NAMES =
