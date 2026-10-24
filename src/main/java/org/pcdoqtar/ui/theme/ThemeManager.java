@@ -1,6 +1,5 @@
 package org.pcdoqtar.ui.theme;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -135,6 +134,8 @@ public final class ThemeManager {
         String normalizedProperty = property.toLowerCase(Locale.ROOT);
 
         if (normalizedProperty.contains("text-fill")
+                || normalizedProperty.contains("text-background")
+                || normalizedProperty.contains("text-base")
                 || normalizedProperty.equals("-fx-fill")
                 || normalizedProperty.contains("tick-label-fill")) {
             if (value.equals("#FFFFFF") || value.equals("#F5F5F5")
