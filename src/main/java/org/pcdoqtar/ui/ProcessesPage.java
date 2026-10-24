@@ -4,6 +4,7 @@ package org.pcdoqtar.ui;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
@@ -15,6 +16,8 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
@@ -28,6 +31,11 @@ import org.pcdoqtar.ui.theme.ThemeManager;
 
 public class ProcessesPage extends VBox {
 
+    private static final Set<String> PROTECTED_PROCESS_NAMES = Set.of(
+            "system", "registry", "smss.exe", "csrss.exe", "wininit.exe",
+            "services.exe", "lsass.exe", "winlogon.exe", "svchost.exe",
+            "fontdrvhost.exe", "secure system", "memory compression");
+
     private final OperatingSystem operatingSystem =
             new SystemInfo().getOperatingSystem();
 
@@ -40,6 +48,7 @@ public class ProcessesPage extends VBox {
     private final Label status = new Label("Ready");
     private final TextField searchField = new TextField();
     private final Button scanButton = new Button("Scan processes");
+    private final Button endTaskButton = new Button("End task");
 
     public ProcessesPage() {
         getStyleClass().add("processes-page");
@@ -101,7 +110,11 @@ public class ProcessesPage extends VBox {
         );
         scanButton.setOnAction(event -> scanProcesses());
 
-        HBox toolbar = new HBox(12, searchField, scanButton);
+        endTaskButton.setOnAction(event -> endSelectedTask());
+        endTaskButton.setDisable(true);
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldRow, newRow) ->
+                endTaskButton.setDisable(newRow == null));
+        HBox toolbar = new HBox(12, searchField, scanButton, endTaskButton);
         toolbar.setAlignment(Pos.CENTER_LEFT);
 
         configureTable();
@@ -202,6 +215,59 @@ public class ProcessesPage extends VBox {
         );
 
         table.setFixedCellSize(39);
+    }
+
+    private void endSelectedTask() {
+        ProcessRow selected = table.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            status.setText("Select a process before choosing End task.");
+            return;
+        }
+        long pid = selected.getPid();
+        String normalizedName = selected.getName().toLowerCase(Locale.ROOT);
+        if (pid <= 4 || pid == ProcessHandle.current().pid()
+                || PROTECTED_PROCESS_NAMES.contains(normalizedName)) {
+            status.setText("For safety, PC DOQTAR will not terminate this protected Windows process.");
+            return;
+        }
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Confirm end task");
+        confirmation.setHeaderText("End " + selected.getName() + "?");
+        confirmation.setContentText("This requests process termination for PID " + pid
+                + ". Unsaved work in that application may be lost.");
+        confirmation.getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
+        confirmation.showAndWait().filter(button -> button == ButtonType.OK)
+                .ifPresent(button -> {
+                    endTaskButton.setDisable(true);
+                    status.setText("Requesting termination of " + selected.getName() + "...");
+                    Thread worker = new Thread(() -> {
+                        String result;
+                        try {
+                            ProcessHandle process = ProcessHandle.of(pid).orElse(null);
+                            if (process == null || !process.isAlive()) {
+                                result = "Process is no longer running.";
+                            } else if (process.destroy()) {
+                                result = "Termination requested for PID " + pid
+                                        + ". Rescan to confirm it has exited.";
+                            } else {
+                                result = "Windows denied termination. Try running PC DOQTAR with appropriate permissions.";
+                            }
+                        } catch (SecurityException exception) {
+                            result = "Termination denied by the operating system: "
+                                    + exception.getMessage();
+                        } catch (Exception exception) {
+                            result = "Unable to end task: " + exception.getMessage();
+                        }
+                        String finalResult = result;
+                        Platform.runLater(() -> {
+                            status.setText(finalResult);
+                            endTaskButton.setDisable(table.getSelectionModel().getSelectedItem() == null);
+                        });
+                    }, "PC-DOQTAR-End-Task");
+                    worker.setDaemon(true);
+                    worker.start();
+                });
     }
 
     private void scanProcesses() {
