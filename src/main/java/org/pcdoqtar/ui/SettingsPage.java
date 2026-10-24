@@ -22,6 +22,7 @@ public class SettingsPage extends VBox {
     private final Label statusLabel = new Label();
 
     public SettingsPage() {
+        getStyleClass().add("settings-page");
         setSpacing(20);
         setPadding(new Insets(28));
         setStyle("-fx-background-color: "
