@@ -129,12 +129,7 @@ public class DiagnosticsPage extends VBox {
     private VBox createResultRow(DiagnosticResult result) {
         VBox card = new VBox(7);
         card.setPadding(new Insets(16));
-        card.setStyle(
-                "-fx-background-color: " + ThemeManager.getColour("panel") + ";"
-                + "-fx-background-radius: 8;"
-                + "-fx-border-color: " + ThemeManager.getColour("border") + ";"
-                + "-fx-border-radius: 8;"
-        );
+        card.getStyleClass().add("app-tile");
 
         Label metric = new Label(result.getMetric());
         metric.setWrapText(true);
