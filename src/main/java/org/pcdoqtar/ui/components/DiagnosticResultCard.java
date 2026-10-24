@@ -20,6 +20,7 @@ public class DiagnosticResultCard extends VBox {
         setSpacing(8);
         setPadding(new Insets(16));
         setMaxWidth(Double.MAX_VALUE);
+        getStyleClass().add("app-tile");
 
         for (Label label : new Label[] {
                 metricLabel, valueLabel, statusLabel, messageLabel
@@ -93,7 +94,6 @@ public class DiagnosticResultCard extends VBox {
                 + "-fx-font-weight: bold;"
         );
 
-        getStyleClass().add("app-tile");
         setStyle("-fx-border-color: " + colour + ";");
     }
 
