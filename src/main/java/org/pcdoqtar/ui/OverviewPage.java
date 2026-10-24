@@ -89,9 +89,11 @@ public class OverviewPage extends VBox {
     private PieChart createPieChart(String title) {
         PieChart chart = new PieChart();
         chart.setTitle(title);
+        chart.getStyleClass().add("usage-chart");
         chart.setLegendVisible(true);
         chart.setLabelsVisible(false);
         chart.setAnimated(false);
+        chart.setMinWidth(180);
         chart.setMinHeight(220);
         chart.setPrefHeight(240);
         chart.setMaxHeight(260);

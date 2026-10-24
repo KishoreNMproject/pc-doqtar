@@ -163,3 +163,19 @@
 .theme-light .overview-page .button, .theme-light .network-page .button, .theme-light .processes-page .button, .theme-light .settings-page .button {
     -fx-background-color: #E8EDF5 !important; -fx-text-fill: #172033 !important; -fx-border-color: #D8DEE8 !important;
 }
+
+
+/* Theme the network adapter header rather than JavaFX's default light gradient. */
+.theme-dark .network-page .titled-pane > .title { -fx-background-color: #141821 !important; -fx-border-color: #2B3240 !important; }
+.theme-dark .network-page .titled-pane > .title .text { -fx-fill: #F2F5FA !important; -fx-text-fill: #F2F5FA !important; }
+.theme-dark .network-page .titled-pane > .content { -fx-background-color: #141821 !important; -fx-border-color: #2B3240 !important; }
+.theme-light .network-page .titled-pane > .title { -fx-background-color: #E8EDF5 !important; -fx-border-color: #D8DEE8 !important; }
+.theme-light .network-page .titled-pane > .title .text { -fx-fill: #172033 !important; -fx-text-fill: #172033 !important; }
+.theme-light .network-page .titled-pane > .content { -fx-background-color: #FFFFFF !important; -fx-border-color: #D8DEE8 !important; }
+
+.theme-dark .usage-chart .chart-legend-item .label { -fx-text-fill: #F2F5FA !important; }
+.theme-light .usage-chart .chart-legend-item .label { -fx-text-fill: #172033 !important; }
+.theme-dark .usage-chart .chart-pie.default-color0 { -fx-pie-color: #B8FF3B; }
+.theme-dark .usage-chart .chart-pie.default-color1 { -fx-pie-color: #454D5B; }
+.theme-light .usage-chart .chart-pie.default-color0 { -fx-pie-color: #527A00; }
+.theme-light .usage-chart .chart-pie.default-color1 { -fx-pie-color: #D8DEE8; }

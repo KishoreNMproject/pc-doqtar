@@ -24,16 +24,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import org.pcdoqtar.ui.theme.ThemeManager;
 
 public class ProcessesPage extends VBox {
-
-    private static final String BG = "#090909";
-    private static final String PANEL = "#141414";
-    private static final String BORDER = "#292929";
-    private static final String TEXT = "#F5F5F5";
-    private static final String MUTED = "#929292";
-    private static final String LIME = "#B8FF3B";
-    private static final String BLUE = "#42B8FF";
 
     private final OperatingSystem operatingSystem =
             new SystemInfo().getOperatingSystem();
@@ -52,17 +45,17 @@ public class ProcessesPage extends VBox {
         getStyleClass().add("processes-page");
         setSpacing(20);
         setPadding(new Insets(28));
-        setStyle("-fx-background-color: " + BG + ";");
+        setStyle("-fx-background-color: " + ThemeManager.getColour("background") + ";");
 
         Label eyebrow = new Label("SYSTEM MONITORING / PROCESSES");
         eyebrow.setStyle(
-                "-fx-text-fill: " + LIME + ";" +
+                "-fx-text-fill: " + ThemeManager.getColour("accent") + ";" +
                 "-fx-font-size: 10px;"
         );
 
         Label heading = new Label("Process Manager");
         heading.setStyle(
-                "-fx-text-fill: " + TEXT + ";" +
+                "-fx-text-fill: " + ThemeManager.getColour("text") + ";" +
                 "-fx-font-size: 30px;" +
                 "-fx-font-weight: bold;"
         );
@@ -71,7 +64,7 @@ public class ProcessesPage extends VBox {
                 "Inspect running processes and identify resource-heavy applications."
         );
         description.setWrapText(true);
-        description.setStyle("-fx-text-fill: " + MUTED + ";");
+        description.setStyle("-fx-text-fill: " + ThemeManager.getColour("muted") + ";");
 
         VBox titleBlock = new VBox(7, eyebrow, heading, description);
 
@@ -86,9 +79,9 @@ public class ProcessesPage extends VBox {
         searchField.setPromptText("Search by process name or PID...");
         searchField.setStyle(
                 "-fx-background-color: #101010;" +
-                "-fx-text-fill: " + TEXT + ";" +
+                "-fx-text-fill: " + ThemeManager.getColour("text") + ";" +
                 "-fx-prompt-text-fill: #666666;" +
-                "-fx-border-color: " + BORDER + ";" +
+                "-fx-border-color: " + ThemeManager.getColour("border") + ";" +
                 "-fx-border-radius: 5;" +
                 "-fx-background-radius: 5;" +
                 "-fx-padding: 10;"
@@ -99,7 +92,7 @@ public class ProcessesPage extends VBox {
         );
 
         scanButton.setStyle(
-                "-fx-background-color: " + LIME + ";" +
+                "-fx-background-color: " + ThemeManager.getColour("accent") + ";" +
                 "-fx-text-fill: #101010;" +
                 "-fx-font-weight: bold;" +
                 "-fx-background-radius: 5;" +
@@ -118,9 +111,9 @@ public class ProcessesPage extends VBox {
         );
         tablePanel.setPadding(new Insets(18));
         tablePanel.setStyle(
-                "-fx-background-color: " + PANEL + ";" +
+                "-fx-background-color: " + ThemeManager.getColour("panel") + ";" +
                 "-fx-background-radius: 8;" +
-                "-fx-border-color: " + BORDER + ";" +
+                "-fx-border-color: " + ThemeManager.getColour("border") + ";" +
                 "-fx-border-radius: 8;"
         );
 
@@ -139,13 +132,13 @@ public class ProcessesPage extends VBox {
     private VBox summaryCard(String title, Label value) {
         Label caption = new Label(title);
         caption.setStyle(
-                "-fx-text-fill: " + MUTED + ";" +
+                "-fx-text-fill: " + ThemeManager.getColour("muted") + ";" +
                 "-fx-font-size: 9px;" +
                 "-fx-font-weight: bold;"
         );
 
         value.setStyle(
-                "-fx-text-fill: " + TEXT + ";" +
+                "-fx-text-fill: " + ThemeManager.getColour("text") + ";" +
                 "-fx-font-size: 20px;" +
                 "-fx-font-weight: bold;"
         );
@@ -155,9 +148,9 @@ public class ProcessesPage extends VBox {
         card.setPadding(new Insets(17));
         card.setMinHeight(90);
         card.setStyle(
-                "-fx-background-color: " + PANEL + ";" +
+                "-fx-background-color: " + ThemeManager.getColour("panel") + ";" +
                 "-fx-background-radius: 8;" +
-                "-fx-border-color: " + BORDER + ";" +
+                "-fx-border-color: " + ThemeManager.getColour("border") + ";" +
                 "-fx-border-radius: 8;"
         );
 
@@ -201,10 +194,10 @@ public class ProcessesPage extends VBox {
         table.setItems(allProcesses);
         table.setPlaceholder(new Label("No matching processes."));
         table.setStyle(
-                "-fx-background-color: " + PANEL + ";" +
+                "-fx-background-color: " + ThemeManager.getColour("panel") + ";" +
                 "-fx-control-inner-background: #101010;" +
                 "-fx-control-inner-background-alt: #151515;" +
-                "-fx-text-background-color: " + TEXT + ";" +
+                "-fx-text-background-color: " + ThemeManager.getColour("text") + ";" +
                 "-fx-background-radius: 5;"
         );
 
@@ -214,7 +207,7 @@ public class ProcessesPage extends VBox {
     private void scanProcesses() {
         scanButton.setDisable(true);
         status.setText("Scanning local processes...");
-        status.setStyle("-fx-text-fill: " + BLUE + ";");
+        status.setStyle("-fx-text-fill: " + ThemeManager.getColour("accent") + ";");
 
         ProgressIndicator progress = new ProgressIndicator();
         progress.setMaxSize(18, 18);
@@ -257,7 +250,7 @@ public class ProcessesPage extends VBox {
                             "Scan complete · " + rows.size()
                                     + " processes retrieved · sorted by RAM"
                     );
-                    status.setStyle("-fx-text-fill: " + MUTED + ";");
+                    status.setStyle("-fx-text-fill: " + ThemeManager.getColour("muted") + ";");
 
                     scanButton.setDisable(false);
                     scanButton.setGraphic(null);
@@ -268,7 +261,7 @@ public class ProcessesPage extends VBox {
                     status.setText(
                             "Scan failed: " + exception.getMessage()
                     );
-                    status.setStyle("-fx-text-fill: #FF5555;");
+                    status.setStyle("-fx-text-fill: " + ThemeManager.getColour("critical") + ";");
                     scanButton.setDisable(false);
                     scanButton.setGraphic(null);
                 });

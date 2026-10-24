@@ -134,6 +134,7 @@ public class NetworkPage extends VBox {
                 + ThemeManager.getColour("panel") + ";");
 
         TitledPane pane = new TitledPane(name, content);
+        pane.getStyleClass().add("network-adapter");
         pane.setExpanded(false);
         pane.setAnimated(false);
         pane.setMaxWidth(Double.MAX_VALUE);
