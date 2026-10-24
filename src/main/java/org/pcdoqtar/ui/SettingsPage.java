@@ -131,11 +131,7 @@ public class SettingsPage extends VBox {
     private VBox createCard() {
         VBox card = new VBox(12);
         card.setPadding(new Insets(20));
-        card.setStyle(
-                "-fx-background-color: " + ThemeManager.getColour("panel")
-                + "; -fx-background-radius: 8;"
-                + " -fx-border-color: " + ThemeManager.getColour("border")
-                + "; -fx-border-radius: 8;");
+        card.getStyleClass().add("app-tile");
         return card;
     }
 
