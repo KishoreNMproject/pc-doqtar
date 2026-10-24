@@ -45,7 +45,9 @@ public final class ThemeManager {
 
         String targetTheme = getCurrentTheme();
         Object previous = scene.getProperties().get(APPLIED_THEME_KEY);
-        String oldTheme = previous instanceof String ? (String) previous : targetTheme;
+        // On first launch, legacy pages may still contain hard-coded dark inline
+        // colours. Treat those styles as dark and retint them for the saved theme.
+        String oldTheme = previous instanceof String ? (String) previous : "Dark";
 
         if (!oldTheme.equalsIgnoreCase(targetTheme)) {
             retintInlineStyles(scene.getRoot(), colourReplacements(oldTheme, targetTheme));
