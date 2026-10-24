@@ -49,6 +49,7 @@ public class ProcessesPage extends VBox {
     private final Button scanButton = new Button("Scan processes");
 
     public ProcessesPage() {
+        getStyleClass().add("processes-page");
         setSpacing(20);
         setPadding(new Insets(28));
         setStyle("-fx-background-color: " + BG + ";");

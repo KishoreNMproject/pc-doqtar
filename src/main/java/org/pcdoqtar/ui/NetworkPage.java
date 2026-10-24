@@ -34,6 +34,7 @@ public class NetworkPage extends VBox {
         }
 
         this.networkDiagnostics = networkDiagnostics;
+        getStyleClass().add("network-page");
 
         setSpacing(18);
         setPadding(new Insets(28));

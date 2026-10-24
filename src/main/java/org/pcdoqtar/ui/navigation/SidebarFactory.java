@@ -27,6 +27,7 @@ public final class SidebarFactory {
         }
 
         VBox sidebar = new VBox(10);
+        sidebar.getStyleClass().add("app-sidebar");
         sidebar.setPadding(new Insets(20, 12, 20, 12));
         sidebar.setPrefWidth(190);
         sidebar.setAlignment(Pos.TOP_LEFT);
@@ -53,6 +54,7 @@ public final class SidebarFactory {
 
         for (String pageName : PAGE_NAMES) {
             Button button = new Button(pageName);
+            button.getStyleClass().add("sidebar-button");
             button.setMaxWidth(Double.MAX_VALUE);
             button.setAlignment(Pos.CENTER_LEFT);
             button.setPadding(new Insets(11, 12, 11, 12));
