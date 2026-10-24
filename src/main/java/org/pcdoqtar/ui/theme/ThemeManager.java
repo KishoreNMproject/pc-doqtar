@@ -23,7 +23,7 @@ public final class ThemeManager {
 
     private static final Map<String, String> LIGHT = Map.of(
             "background", "#EEF2F7", "panel", "#E2E8F0", "border", "#CBD5E1",
-            "text", "#243247", "muted", "#58677B", "accent", "#527A00",
+            "text", "#243247", "muted", "#58677B", "accent", "#647D35",
             "warning", "#925400", "critical", "#B42318", "grey", "#94A3B8");
 
     private ThemeManager() { }
