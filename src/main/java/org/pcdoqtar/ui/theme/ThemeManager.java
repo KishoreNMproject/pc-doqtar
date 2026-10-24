@@ -103,7 +103,7 @@ public final class ThemeManager {
         if (node == null) {
             return;
         }
-        retintInlineStyles(node, colourReplacements(getCurrentTheme()));
+        retintInlineStyles(node, getCurrentTheme());
         if (node instanceof Parent parent) {
             parent.applyCss();
             parent.requestLayout();
@@ -119,57 +119,109 @@ public final class ThemeManager {
         return "Light".equalsIgnoreCase(getCurrentTheme()) ? LIGHT : DARK;
     }
 
-    /**
-     * Maps colours from either palette and the previous hard-coded dark styles
-     * to the currently selected palette. Applying it repeatedly is safe.
-     */
-    private static Map<String, String> colourReplacements(String targetTheme) {
+    private static String replacementFor(
+            String property, String colour, String targetTheme) {
         Map<String, String> target = "Light".equalsIgnoreCase(targetTheme) ? LIGHT : DARK;
-        Map<String, String> replacements = new HashMap<>();
+        String value = colour.toUpperCase(Locale.ROOT);
+        String key = null;
 
-        for (String key : DARK.keySet()) {
-            replacements.put(DARK.get(key).toUpperCase(Locale.ROOT), target.get(key));
-            replacements.put(LIGHT.get(key).toUpperCase(Locale.ROOT), target.get(key));
+        for (String candidate : DARK.keySet()) {
+            if (value.equals(DARK.get(candidate)) || value.equals(LIGHT.get(candidate))) {
+                key = candidate;
+                break;
+            }
         }
 
-        boolean light = "Light".equalsIgnoreCase(targetTheme);
-        replacements.put("#090909", target.get("background"));
-        replacements.put("#0D0D0D", target.get("background"));
-        replacements.put("#111111", target.get("panel"));
-        replacements.put("#101010", light ? "#FFFFFF" : "#10141C");
-        replacements.put("#141414", target.get("panel"));
-        replacements.put("#151515", light ? "#EEF2F7" : "#151515");
-        replacements.put("#171717", light ? "#F4F6FA" : "#171717");
-        replacements.put("#202020", light ? "#E2E8F0" : "#202633");
-        replacements.put("#292929", target.get("border"));
-        replacements.put("#383838", target.get("border"));
-        replacements.put("#444444", target.get("border"));
-        replacements.put("#454545", target.get("grey"));
-        replacements.put("#666666", target.get("muted"));
-        replacements.put("#929292", target.get("muted"));
-        replacements.put("#8993A3", target.get("muted"));
-        replacements.put("#B0B0B0", target.get("muted"));
-        replacements.put("#F5F5F5", target.get("text"));
-        replacements.put("#FFFFFF", target.get("text"));
-        replacements.put("#172033", target.get("text"));
-        replacements.put("#42B8FF", target.get("accent"));
-        replacements.put("#10141C", light ? "#FFFFFF" : "#10141C");
-        replacements.put("#171C26", light ? "#F4F6FA" : "#171C26");
-        replacements.put("#343D4D", target.get("border"));
-        replacements.put("#34451F", light ? "#DFEBC8" : "#34451F");
-        replacements.put("#29351B", light ? "#EAF3D7" : "#29351B");
-        replacements.put("#26331A", light ? "#DFEBC8" : "#26331A");
-        replacements.put("#FFFFFF", light ? "#FFFFFF" : target.get("text"));
-        return replacements;
+        String normalizedProperty = property.toLowerCase(Locale.ROOT);
+
+        if (normalizedProperty.contains("text-fill")
+                || normalizedProperty.equals("-fx-fill")
+                || normalizedProperty.contains("tick-label-fill")) {
+            if (value.equals("#FFFFFF") || value.equals("#F5F5F5")
+                    || value.equals("#F2F5FA") || value.equals("#172033")
+                    || value.equals("#243247")) {
+                return target.get("text");
+            }
+            if (value.equals("#A0A9B8") || value.equals("#58677B")
+                    || value.equals("#929292") || value.equals("#8993A3")
+                    || value.equals("#666666") || value.equals("#B0B0B0")) {
+                return target.get("muted");
+            }
+            if (value.equals("#101010")) {
+                return target.get("background");
+            }
+            if (key != null) {
+                return target.get(key);
+            }
+            return null;
+        }
+
+        if (normalizedProperty.contains("background")
+                || normalizedProperty.contains("control-inner")) {
+            if (key != null) {
+                return target.get(key);
+            }
+            return switch (value) {
+                case "#090909", "#0D0D0D" -> target.get("background");
+                case "#101010" -> "Light".equalsIgnoreCase(targetTheme) ? "#FFFFFF" : "#10141C";
+                case "#111111", "#141414" -> target.get("panel");
+                case "#151515", "#171717" -> "Light".equalsIgnoreCase(targetTheme) ? "#F4F6FA" : "#171C26";
+                case "#202020" -> "Light".equalsIgnoreCase(targetTheme) ? "#E2E8F0" : "#202633";
+                case "#34451F", "#26331A" -> "Light".equalsIgnoreCase(targetTheme) ? "#DFEBC8" : "#34451F";
+                case "#29351B" -> "Light".equalsIgnoreCase(targetTheme) ? "#EAF3D7" : "#29351B";
+                default -> null;
+            };
+        }
+
+        if (normalizedProperty.contains("border")) {
+            if (value.equals("#FFB020") || value.equals("#925400")) {
+                return target.get("warning");
+            }
+            if (value.equals("#FF5555") || value.equals("#B42318")
+                    || value.equals("#C62828")) {
+                return target.get("critical");
+            }
+            if (value.equals("#B8FF3B") || value.equals("#647D35")
+                    || value.equals("#527A00")) {
+                return target.get("accent");
+            }
+            if (key != null) {
+                return target.get(key);
+            }
+            if (value.equals("#383838") || value.equals("#444444")
+                    || value.equals("#343D4D") || value.equals("#292929")) {
+                return target.get("border");
+            }
+            return null;
+        }
+
+        if (normalizedProperty.contains("pie-color")) {
+            if (key != null) {
+                return target.get(key);
+            }
+            if (value.equals("#454545")) {
+                return target.get("grey");
+            }
+            return null;
+        }
+
+        if (key != null) {
+            return target.get(key);
+        }
+        return null;
     }
 
-    private static void retintInlineStyles(Node node, Map<String, String> replacements) {
+    private static void retintInlineStyles(Node node, String targetTheme) {
         String style = node.getStyle();
         if (style != null && !style.isBlank()) {
             Matcher matcher = HEX_COLOUR.matcher(style);
             StringBuffer updated = new StringBuffer();
             while (matcher.find()) {
-                String replacement = replacements.get(matcher.group().toUpperCase(Locale.ROOT));
+                int declarationStart = style.lastIndexOf(';', matcher.start()) + 1;
+                int colon = style.indexOf(':', declarationStart);
+                String property = colon >= 0 && colon < matcher.start()
+                        ? style.substring(declarationStart, colon).trim() : "";
+                String replacement = replacementFor(property, matcher.group(), targetTheme);
                 matcher.appendReplacement(updated, Matcher.quoteReplacement(
                         replacement == null ? matcher.group() : replacement));
             }
@@ -179,7 +231,7 @@ public final class ThemeManager {
 
         if (node instanceof Parent parent) {
             for (Node child : parent.getChildrenUnmodifiable()) {
-                retintInlineStyles(child, replacements);
+                retintInlineStyles(child, targetTheme);
             }
         }
     }
