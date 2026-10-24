@@ -1,0 +1,73 @@
+/* PC DOQTAR light theme: shared palette + reusable component classes. */
+.theme-light {
+ -app-background:#EEF2F7; -app-surface:#FFFFFF; -app-surface-raised:#E2E8F0;
+ -app-input:#FFFFFF; -app-text:#243247; -app-muted:#58677B; -app-border:#CBD5E1;
+ -app-accent:#647D35; -app-accent-text:#FFFFFF; -app-warning:#925400;
+ -app-critical:#B42318; -app-neutral:#94A3B8;
+ -fx-base:-app-surface; -fx-background:-app-background; -fx-control-inner-background:-app-input;
+ -fx-control-inner-background-alt:#F4F6FA; -fx-text-base-color:-app-text;
+ -fx-text-background-color:-app-text; -fx-accent:-app-accent; -fx-focus-color:-app-accent;
+ -fx-faint-focus-color:transparent;
+}
+.root { -fx-font-family:"Segoe UI"; -fx-font-size:14px; -fx-background-color:-app-background; }
+.dashboard-shell,.overview-page,.diagnostics-page,.network-page,.processes-page,.settings-page,.scroll-pane,.scroll-pane>.viewport { -fx-background-color:-app-background; }
+.label,.text,.titled-pane .title .text { -fx-text-fill:-app-text; }
+.page-eyebrow { -fx-text-fill:-app-accent; -fx-font-size:10px; }
+.page-heading { -fx-text-fill:-app-text; -fx-font-size:30px; -fx-font-weight:bold; }
+.section-heading { -fx-text-fill:-app-text; -fx-font-size:18px; -fx-font-weight:bold; }
+.page-description,.diagnostic-detail { -fx-text-fill:-app-muted; }
+.summary-caption { -fx-text-fill:-app-muted; -fx-font-size:10px; -fx-font-weight:bold; }
+.summary-value,.interface-title { -fx-text-fill:-app-text; -fx-font-weight:bold; }
+.interface-state { -fx-text-fill:-app-accent; }
+.app-tile { -fx-background-color:-app-surface; -fx-border-color:-app-border; -fx-border-width:1; -fx-background-radius:8; -fx-border-radius:8; }
+.app-tile .tile-title { -fx-text-fill:-app-text; }
+.app-tile .tile-description { -fx-text-fill:-app-muted; }
+.diagnostic-summary { -fx-background-color:-app-surface; -fx-border-color:-app-border; -fx-background-radius:8; -fx-border-radius:8; -fx-padding:16; }
+.interface-card,.speed-test-card { -fx-background-color:-app-surface; -fx-border-color:-app-border; -fx-background-radius:8; -fx-border-radius:8; }
+.interface-card { -fx-border-width:0 0 0 3; }
+.button { -fx-font-family:"Segoe UI"; -fx-cursor:hand; -fx-background-color:-app-surface-raised; -fx-text-fill:-app-text; -fx-border-color:-app-border; -fx-background-radius:5; -fx-border-radius:5; }
+.button:hover { -fx-background-color:derive(-app-surface-raised,-5%); }
+.button:disabled { -fx-opacity:.55; }
+.primary-action { -fx-background-color:-app-accent; -fx-text-fill:-app-accent-text; -fx-font-weight:bold; -fx-padding:10 16 10 16; }
+.text-field,.text-area,.combo-box,.choice-box,.list-view { -fx-background-color:-app-input; -fx-control-inner-background:-app-input; -fx-text-fill:-app-text; -fx-prompt-text-fill:-app-muted; -fx-border-color:-app-border; -fx-background-radius:5; -fx-border-radius:5; }
+.combo-box .list-cell,.combo-box-popup .list-view,.combo-box-popup .list-cell { -fx-background-color:-app-surface; -fx-text-fill:-app-text; }
+.combo-box-popup .list-cell:filled:hover,.combo-box-popup .list-cell:filled:selected { -fx-background-color:-app-surface-raised; }
+.table-view { -fx-background-color:-app-surface; -fx-control-inner-background:-app-input; -fx-control-inner-background-alt:-app-surface; -fx-table-cell-border-color:-app-border; -fx-table-header-border-color:-app-border; -fx-text-background-color:-app-text; }
+.table-view .column-header-background,.table-view .column-header,.table-view .filler,.table-view .nested-column-header { -fx-background-color:-app-surface-raised; -fx-border-color:-app-border; }
+.table-view .column-header .label { -fx-text-fill:-app-text; -fx-font-weight:bold; }
+.table-row-cell { -fx-background-color:-app-input; -fx-text-background-color:-app-text; }
+.table-row-cell:odd { -fx-background-color:-app-surface; }
+.table-row-cell:selected { -fx-background-color:#DFEBC8; }
+.table-cell { -fx-text-fill:-app-text; -fx-border-color:transparent -app-border transparent transparent; }
+.titled-pane>.title { -fx-background-color:-app-surface; -fx-border-color:-app-border; -fx-background-radius:6; -fx-border-radius:6; }
+.titled-pane>.title:hover { -fx-background-color:-app-surface-raised; }
+.titled-pane>.title .arrow { -fx-background-color:-app-accent; }
+.titled-pane>.content { -fx-background-color:-app-surface; -fx-border-color:-app-border; }
+.scroll-bar,.scroll-bar .track,.scroll-bar .increment-button,.scroll-bar .decrement-button { -fx-background-color:-app-surface; }
+.scroll-bar .thumb { -fx-background-color:-app-neutral; -fx-background-radius:8; }
+.navigation-toolbar { -fx-background-color:-app-background; -fx-border-color:-app-border; -fx-border-width:0 0 1 0; }
+.navigation-section-title { -fx-text-fill:-app-text; -fx-font-weight:bold; }
+.hamburger-button { -fx-background-color:-app-surface-raised; -fx-text-fill:-app-accent; -fx-font-size:18px; }
+.app-sidebar { -fx-background-color:-app-surface; -fx-border-color:-app-border; }
+.app-sidebar .sidebar-brand { -fx-text-fill:-app-accent; -fx-font-size:18px; -fx-font-weight:bold; }
+.app-sidebar .sidebar-subtitle { -fx-text-fill:-app-muted; -fx-font-size:10px; }
+.app-sidebar .sidebar-button { -fx-background-color:transparent; -fx-text-fill:-app-text; -fx-border-color:transparent; -fx-padding:12 14 12 14; -fx-alignment:center-left; }
+.app-sidebar .sidebar-button:hover { -fx-background-color:-app-surface-raised; }
+.app-sidebar .sidebar-button.active { -fx-background-color:#EAF3D7; -fx-border-color:-app-accent; -fx-border-width:0 0 0 3; -fx-font-weight:bold; }
+.custom-title-bar { -fx-background-color:-app-surface; -fx-border-color:-app-border; }
+.custom-title-bar .title-bar-title { -fx-text-fill:-app-text; }
+.custom-title-bar .window-button,.custom-title-bar .window-close-button { -fx-background-color:-app-surface; -fx-text-fill:-app-text; -fx-border-color:transparent; }
+.custom-title-bar .window-button:hover { -fx-background-color:-app-surface-raised; }
+.custom-title-bar .window-close-button:hover { -fx-background-color:#C62828; -fx-text-fill:white; }
+.usage-chart,.pie-chart { -fx-background-color:transparent; }
+.usage-chart .chart-legend-item .label,.pie-chart .chart-title,.chart-legend-item .label { -fx-text-fill:-app-text; }
+.usage-chart .chart-pie.default-color0 { -fx-pie-color:-app-accent; }
+.usage-chart .chart-pie.default-color1 { -fx-pie-color:-app-neutral; }
+.axis { -fx-tick-label-fill:-app-muted; }
+.axis-label { -fx-text-fill:-app-muted; }
+.chart-plot-background { -fx-background-color:-app-input; }
+.chart-horizontal-grid-lines,.chart-vertical-grid-lines { -fx-stroke:-app-border; }
+.warning,.status-warning { -fx-text-fill:-app-warning; }
+.critical,.status-critical { -fx-text-fill:-app-critical; }
+.status-normal { -fx-text-fill:-app-accent; }
+.status-unavailable { -fx-text-fill:-app-muted; }
