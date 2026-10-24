@@ -197,10 +197,8 @@ public class OverviewPage extends VBox {
 
     private VBox createCard() {
         VBox card = new VBox(10);
+        card.getStyleClass().add("app-tile");
         card.setPadding(new Insets(18));
-        card.setStyle("-fx-background-color: " + ThemeManager.getColour("panel")
-                + ";-fx-background-radius: 8;-fx-border-color: "
-                + ThemeManager.getColour("border") + ";-fx-border-radius: 8;");
         return card;
     }
 
