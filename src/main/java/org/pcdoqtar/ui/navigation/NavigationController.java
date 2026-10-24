@@ -35,7 +35,6 @@ public final class NavigationController {
 
     public void navigateTo(String pageName) {
         Node page = pageRegistry.get(pageName);
-        ThemeManager.applyToNode(page);
 
         ScrollPane scrollPane = new ScrollPane(page);
         scrollPane.setFitToWidth(true);
@@ -51,6 +50,7 @@ public final class NavigationController {
                 + "; -fx-border-width: 0;");
 
         root.setCenter(scrollPane);
+        ThemeManager.applyToNode(page);
         currentPage = pageName;
         pageChangeListener.accept(pageName);
     }
