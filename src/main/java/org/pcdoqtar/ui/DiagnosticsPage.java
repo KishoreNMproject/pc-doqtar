@@ -130,11 +130,9 @@ public class DiagnosticsPage extends VBox {
         VBox card = new VBox(7);
         card.setPadding(new Insets(16));
         card.setStyle(
-                "-fx-background-color: "
-                + ThemeManager.getColour("panel") + ";"
+                "-fx-background-color: " + ThemeManager.getColour("panel") + ";"
                 + "-fx-background-radius: 8;"
-                + "-fx-border-color: "
-                + ThemeManager.getColour("border") + ";"
+                + "-fx-border-color: " + ThemeManager.getColour("border") + ";"
                 + "-fx-border-radius: 8;"
         );
 
