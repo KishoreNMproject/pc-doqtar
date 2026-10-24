@@ -1,7 +1,8 @@
-
 package org.pcdoqtar.ui.navigation;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.pcdoqtar.ui.theme.ThemeManager;
@@ -14,42 +15,30 @@ import javafx.scene.layout.VBox;
 
 public final class SidebarFactory {
 
-    private static final List<String> PAGE_NAMES = List.of(
-            "Overview", "Diagnostics", "Network", "Processes", "Settings");
+    private static final List<String> PAGE_NAMES =
+            List.of("Overview", "Diagnostics", "Network", "Processes", "Settings");
+    private static final Map<String, Button> BUTTONS = new LinkedHashMap<>();
 
-    private SidebarFactory() {
-    }
+    private SidebarFactory() { }
 
     public static VBox create(Consumer<String> onNavigate) {
         if (onNavigate == null) {
-            throw new IllegalArgumentException(
-                    "Navigation callback must not be null.");
+            throw new IllegalArgumentException("Navigation callback must not be null.");
         }
 
-        VBox sidebar = new VBox(10);
+        BUTTONS.clear();
+        VBox sidebar = new VBox(8);
         sidebar.getStyleClass().add("app-sidebar");
-        sidebar.setPadding(new Insets(20, 12, 20, 12));
+        sidebar.setPadding(new Insets(18, 10, 18, 10));
         sidebar.setPrefWidth(190);
-        sidebar.setAlignment(Pos.TOP_LEFT);
-        sidebar.setStyle(
-                "-fx-background-color: "
-                + ThemeManager.getColour("panel")
-                + "; -fx-border-color: "
-                + ThemeManager.getColour("border")
-                + "; -fx-border-width: 0 1 0 0;");
+        sidebar.setMinWidth(190);
 
         Label title = new Label("PC DOQTAR");
-        title.setStyle(
-                "-fx-text-fill: " + ThemeManager.getColour("accent")
-                + "; -fx-font-size: 18px; -fx-font-weight: bold;");
-
+        title.getStyleClass().add("sidebar-brand");
         Label subtitle = new Label("SYSTEM HEALTH");
-        subtitle.setStyle(
-                "-fx-text-fill: " + ThemeManager.getColour("muted")
-                + "; -fx-font-size: 10px;");
-
+        subtitle.getStyleClass().add("sidebar-subtitle");
         VBox branding = new VBox(4, title, subtitle);
-        branding.setPadding(new Insets(0, 0, 20, 4));
+        branding.setPadding(new Insets(0, 8, 20, 8));
         sidebar.getChildren().add(branding);
 
         for (String pageName : PAGE_NAMES) {
@@ -57,19 +46,22 @@ public final class SidebarFactory {
             button.getStyleClass().add("sidebar-button");
             button.setMaxWidth(Double.MAX_VALUE);
             button.setAlignment(Pos.CENTER_LEFT);
-            button.setPadding(new Insets(11, 12, 11, 12));
-            button.setStyle(
-                    "-fx-background-color: transparent;"
-                    + " -fx-text-fill: "
-                    + ThemeManager.getColour("text")
-                    + "; -fx-font-size: 13px;"
-                    + " -fx-background-radius: 6px;"
-                    + " -fx-cursor: hand;");
-
+            button.setPadding(new Insets(12, 14, 12, 14));
+            button.setFocusTraversable(true);
             button.setOnAction(event -> onNavigate.accept(pageName));
+            BUTTONS.put(pageName, button);
             sidebar.getChildren().add(button);
         }
-
+        setActive("Overview");
         return sidebar;
+    }
+
+    public static void setActive(String pageName) {
+        BUTTONS.forEach((name, button) -> {
+            button.getStyleClass().remove("active");
+            if (name.equals(pageName)) {
+                button.getStyleClass().add("active");
+            }
+        });
     }
 }
