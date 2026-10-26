@@ -143,12 +143,19 @@ public final class ServerConnection {
 
         int status = response.statusCode();
 
+        // Developer console only (never shown in the UI).
+        String body = response.body() == null ? "" : response.body();
+        System.err.println("[PC DOQTAR] " + operation + " -> HTTP " + status
+                + (body.isBlank() ? "" : " " + body.substring(0, Math.min(body.length(), 300))));
+
         String reason = switch (status) {
             case 400 -> "The server rejected the diagnostic data.";
             case 401 -> "Authentication was rejected or has expired.";
             case 403 -> "The account is not authorised for this operation.";
             case 404 -> "The requested server endpoint was not found.";
             case 429 -> "The server rate limit was reached.";
+            case 500, 502, 503 -> "The server hit an error (HTTP " + status
+                    + "). Check the server logs and database settings.";
             default -> "The server returned HTTP " + status + ".";
         };
 
