@@ -1,3 +1,13 @@
-org\pcdoqtar\lifecycle\ShutdownManager.class
+org\pcdoqtar\diagnostics\network\NetworkDiagnostics$AdapterInfo.class
 org\pcdoqtar\app\DashboardApp.class
+org\pcdoqtar\auth\AuthenticationCoordinator.class
+org\pcdoqtar\diagnostics\network\NetworkDiagnostics.class
+org\pcdoqtar\auth\AuthenticationCoordinator$AuthenticationResult.class
+org\pcdoqtar\auth\AuthSession.class
+org\pcdoqtar\diagnostics\DiagnosticTaskManager$DiagnosticTaskException.class
+org\pcdoqtar\diagnostics\DiagnosticTaskManager.class
 org\pcdoqtar\lifecycle\ApplicationLifecycle.class
+org\pcdoqtar\auth\FirebaseAuthService.class
+org\pcdoqtar\lifecycle\ShutdownManager.class
+org\pcdoqtar\lifecycle\ApplicationServices.class
+org\pcdoqtar\diagnostics\SystemDiagnostics.class

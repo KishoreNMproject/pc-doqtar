@@ -17,13 +17,14 @@ public final class LoginDialog {
     private LoginDialog() {
     }
 
-    public record Credentials(String email, String password) {
+    /** register == true means "create a new account" instead of "sign in". */
+    public record Credentials(String email, String password, boolean register) {
     }
 
     public static Optional<Credentials> show(Window owner) {
         Dialog<Credentials> dialog = new Dialog<>();
         dialog.setTitle("PC DOQTAR — Sign in");
-        dialog.setHeaderText("Sign in with your Firebase account");
+        dialog.setHeaderText("Sign in, or create an account to sync your diagnostics");
 
         if (owner != null) {
             dialog.initOwner(owner);
@@ -31,15 +32,18 @@ public final class LoginDialog {
 
         ButtonType loginButton = new ButtonType(
                 "Sign in", ButtonBar.ButtonData.OK_DONE);
+        ButtonType registerButton = new ButtonType(
+                "Create account", ButtonBar.ButtonData.LEFT);
 
         dialog.getDialogPane().getButtonTypes().addAll(
-                loginButton, ButtonType.CANCEL);
+                registerButton, loginButton, ButtonType.CANCEL);
 
         TextField emailField = new TextField();
         emailField.setPromptText("Email address");
+        emailField.setPrefColumnCount(22);
 
         PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Password");
+        passwordField.setPromptText("Password (min 6 characters)");
 
         GridPane form = new GridPane();
         form.setHgap(12);
@@ -52,17 +56,21 @@ public final class LoginDialog {
         form.add(passwordField, 1, 1);
 
         dialog.getDialogPane().setContent(form);
+        emailField.requestFocus();
 
         dialog.setResultConverter(button -> {
-            if (button == loginButton) {
+            boolean register = button == registerButton;
+
+            if (button == loginButton || register) {
                 String email = emailField.getText().trim();
                 String password = passwordField.getText();
 
                 if (email.isBlank() || password.isBlank()) {
-                    return null;
+                    // The coordinator reports "Enter both your email..."
+                    return new Credentials("", "", register);
                 }
 
-                return new Credentials(email, password);
+                return new Credentials(email, password, register);
             }
 
             return null;
