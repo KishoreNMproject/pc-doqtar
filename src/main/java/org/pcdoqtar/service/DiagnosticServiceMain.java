@@ -1,11 +1,4 @@
-
 package org.pcdoqtar.service;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import org.pcdoqtar.diagnostics.SystemDiagnostics;
-import org.pcdoqtar.model.DiagnosticResult;
-import org.pcdoqtar.model.SystemHealthSnapshot;
 
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -18,6 +11,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.pcdoqtar.diagnostics.SystemDiagnostics;
+import org.pcdoqtar.model.DiagnosticResult;
+import org.pcdoqtar.model.SystemHealthSnapshot;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public final class DiagnosticServiceMain {
 

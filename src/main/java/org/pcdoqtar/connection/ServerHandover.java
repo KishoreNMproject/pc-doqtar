@@ -1,66 +1,101 @@
-
 package org.pcdoqtar.connection;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
-import java.util.Objects;
+import org.pcdoqtar.model.SystemHealthSnapshot;
 
-import org.pcdoqtar.auth.FirebaseAuthService;
+public class ServerHandover {
 
-public final class ServerHandover {
+    private final ServerConnection serverConnection;
 
-    private final FirebaseAuthService authService;
-
-    public ServerHandover(FirebaseAuthService authService) {
-        this.authService = Objects.requireNonNull(
-                authService, "Authentication service is required.");
+    public ServerHandover() {
+        this(new ServerConnection());
     }
 
-    public HandoverResult performHandover()
-            throws IOException, InterruptedException {
+    public ServerHandover(ServerConnection serverConnection) {
+        this.serverConnection = serverConnection;
+    }
 
-        String idToken = authService.getValidIdToken();
-
-        if (idToken == null || idToken.isBlank()) {
-            throw new IOException(
-                    "Authentication is required before server handover.");
+    /**
+     * Executes the initial server connection check and obtains a session ID.
+     */
+    public HandoverResult performHandover(String idToken) {
+        try {
+            boolean connected = serverConnection.checkConnection(idToken);
+            if (!connected) {
+                return new HandoverResult(false, null, "Server database connection check returned false.");
+            }
+            String sessionId = serverConnection.getSessionId(idToken);
+            return new HandoverResult(true, sessionId, "Connected to PC DOQTAR server.");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return new HandoverResult(false, null, "Server handover interrupted: " + e.getMessage());
+        } catch (IOException e) {
+            return new HandoverResult(false, null, "Server handover failed: " + e.getMessage());
         }
+    }
 
-        boolean sessionAvailable =
-                ServerConnection.checkConnection(idToken);
+    /**
+     * Performs handover (if sessionId is not yet provided) and uploads the collected
+     * SystemHealthSnapshot to POST /api/diagnostics/upload.
+     */
+    public UploadOutcome uploadSnapshot(
+            String idToken,
+            String sessionId,
+            SystemHealthSnapshot snapshot) {
 
-        if (!sessionAvailable) {
-            return new HandoverResult(false, null);
+        try {
+            String activeSessionId = sessionId;
+            if (activeSessionId == null || activeSessionId.isBlank()) {
+                HandoverResult handover = performHandover(idToken);
+                if (!handover.connected()) {
+                    return new UploadOutcome(false, null, null, null, handover.message());
+                }
+                activeSessionId = handover.sessionId();
+            }
+
+            JsonNode responseNode =
+                    serverConnection.uploadDiagnostics(idToken, activeSessionId, snapshot);
+
+            Long recordId = responseNode.hasNonNull("recordId")
+                    ? responseNode.get("recordId").asLong()
+                    : null;
+            String trendAssessment = null;
+            if (responseNode.hasNonNull("historicalComparison")) {
+                JsonNode comp = responseNode.get("historicalComparison");
+                if (comp.hasNonNull("trendAssessment")) {
+                    trendAssessment = comp.get("trendAssessment").asText();
+                }
+            }
+
+            return new UploadOutcome(
+                    true,
+                    recordId,
+                    activeSessionId,
+                    trendAssessment,
+                    "Diagnostic snapshot uploaded and persisted successfully."
+            );
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return new UploadOutcome(false, null, sessionId, null, "Upload interrupted: " + e.getMessage());
+        } catch (IOException e) {
+            return new UploadOutcome(false, null, sessionId, null, "Upload failed: " + e.getMessage());
         }
-
-        // Obtain a fresh token again in case the first request took
-        // long enough for the token to approach expiry.
-        idToken = authService.getValidIdToken();
-
-        if (idToken == null || idToken.isBlank()) {
-            throw new IOException(
-                    "Authentication expired during server handover.");
-        }
-
-        String sessionId = ServerConnection.getSessionId(idToken);
-
-        return new HandoverResult(true, sessionId);
     }
 
     public record HandoverResult(
-            boolean sessionAvailable,
-            String sessionId) {
+            boolean connected,
+            String sessionId,
+            String message
+    ) {
+    }
 
-        public HandoverResult {
-            if (sessionAvailable
-                    && (sessionId == null || sessionId.isBlank())) {
-                throw new IllegalArgumentException(
-                        "An available session must have a session ID.");
-            }
-
-            if (!sessionAvailable && sessionId != null) {
-                throw new IllegalArgumentException(
-                        "A missing session cannot have a session ID.");
-            }
-        }
+    public record UploadOutcome(
+            boolean success,
+            Long recordId,
+            String sessionId,
+            String trendAssessment,
+            String message
+    ) {
     }
 }

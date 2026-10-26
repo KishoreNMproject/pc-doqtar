@@ -1,111 +1,339 @@
-
 package org.pcdoqtar.connection;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Iterator;
+import java.util.Map;
+import org.pcdoqtar.model.SystemHealthSnapshot;
 
-public final class ServerConnection {
+public class ServerConnection {
 
-    private static final String SERVER_URL =
-            "https://pc-doqtar-connection-service.vercel.app";
+    private static final String DEFAULT_BASE_URL = "https://pc-doqtar-connection-service.vercel.app";
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(20);
 
-    private static final HttpClient CLIENT = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
+    private final String baseUrl;
+    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper;
 
-    private ServerConnection() {
-        // Utility class.
+    public ServerConnection() {
+        this(resolveConfiguredBaseUrl());
     }
 
-    public static boolean checkConnection(String idToken)
-            throws IOException, InterruptedException {
+    public ServerConnection(String baseUrl) {
+        this.baseUrl = normalizeBaseUrl(baseUrl);
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(15))
+                .build();
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.findAndRegisterModules();
+    }
 
-        HttpRequest request = authenticatedRequest(
-                "/sessions", idToken)
-                .timeout(Duration.ofSeconds(15))
+    private static String resolveConfiguredBaseUrl() {
+        String envUrl = System.getenv("PC_DOQTAR_SERVER_URL");
+        if (envUrl != null && !envUrl.isBlank()) {
+            return envUrl.trim();
+        }
+        String propUrl = System.getProperty("pcdoqtar.server.url");
+        if (propUrl != null && !propUrl.isBlank()) {
+            return propUrl.trim();
+        }
+        return DEFAULT_BASE_URL;
+    }
+
+    private static String normalizeBaseUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return DEFAULT_BASE_URL;
+        }
+        String trimmed = url.trim();
+        return trimmed.endsWith("/") ? trimmed.substring(0, trimmed.length() - 1) : trimmed;
+    }
+
+    /**
+     * Checks server & database liveness via GET /sessions.
+     */
+    public boolean checkConnection(String idToken) throws IOException, InterruptedException {
+        HttpRequest request = baseRequestBuilder("/sessions", idToken)
                 .GET()
                 .build();
 
-        HttpResponse<String> response = CLIENT.send(
-                request,
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
-        if (response.statusCode() == 200) {
-            return Boolean.parseBoolean(response.body().trim());
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            String body = response.body() != null ? response.body().trim() : "";
+            return "true".equalsIgnoreCase(body) || !body.isEmpty();
+        }
+        return false;
+    }
+
+    /**
+     * Requests a new diagnostic session ID from GET /getsession.
+     */
+    public String getSessionId(String idToken) throws IOException, InterruptedException {
+        HttpRequest request = baseRequestBuilder("/getsession", idToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300 && response.body() != null) {
+            return response.body().replace("", "").trim();
+        }
+        throw new IOException("Failed to obtain session ID from server. HTTP status: " + response.statusCode());
+    }
+
+    /**
+     * Serializes a SystemHealthSnapshot and uploads it to POST /api/diagnostics/upload.
+     *
+     * @param idToken   Firebase ID token (Bearer token)
+     * @param sessionId Active session ID obtained during server handover
+     * @param snapshot  Collected SystemHealthSnapshot from SystemDiagnostics
+     * @return Parsed JsonNode containing saved recordId and historicalComparison
+     */
+    public JsonNode uploadDiagnostics(
+            String idToken,
+            String sessionId,
+            SystemHealthSnapshot snapshot) throws IOException, InterruptedException {
+
+        String payloadJson = buildUploadPayloadJson(sessionId, snapshot);
+
+        HttpRequest request = baseRequestBuilder("/api/diagnostics/upload", idToken)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(payloadJson, StandardCharsets.UTF_8))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        if (response.statusCode() == 200 || response.statusCode() == 201) {
+            return objectMapper.readTree(response.body());
         }
 
-        throw createHttpException(
-                "Checking server sessions", response);
+        throw new IOException("Diagnostic upload failed with HTTP " + response.statusCode()
+                + ": " + response.body());
     }
 
-    public static String getSessionId(String idToken)
-            throws IOException, InterruptedException {
-
-        HttpRequest request = authenticatedRequest(
-                "/getsession", idToken)
-                .timeout(Duration.ofSeconds(15))
+    /**
+     * Fetches the user's latest stored diagnostic record and comparison from GET /api/diagnostics/latest.
+     */
+    public JsonNode fetchLatestDiagnostics(String idToken) throws IOException, InterruptedException {
+        HttpRequest request = baseRequestBuilder("/api/diagnostics/latest", idToken)
                 .GET()
                 .build();
 
-        HttpResponse<String> response = CLIENT.send(
-                request,
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
-        if (response.statusCode() == 200) {
-            String sessionId = response.body().trim();
+        if (response.statusCode() == 204 || response.body() == null || response.body().isBlank()) {
+            return null;
+        }
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            return objectMapper.readTree(response.body());
+        }
+        throw new IOException("Failed to fetch latest diagnostics. HTTP status: " + response.statusCode());
+    }
 
-            if (sessionId.isBlank()) {
-                throw new IOException(
-                        "The server returned an empty session ID.");
+    /**
+     * Fetches the user's diagnostic history from GET /api/diagnostics/history?limit=N.
+     */
+    public JsonNode fetchDiagnosticHistory(String idToken, int limit) throws IOException, InterruptedException {
+        HttpRequest request = baseRequestBuilder("/api/diagnostics/history?limit=" + limit, idToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            return objectMapper.readTree(response.body());
+        }
+        throw new IOException("Failed to fetch diagnostic history. HTTP status: " + response.statusCode());
+    }
+
+    /**
+     * Converts any SystemHealthSnapshot into the JSON structure expected by
+     * POST /api/diagnostics/upload while preserving the full raw snapshot JSON.
+     */
+    private String buildUploadPayloadJson(String sessionId, SystemHealthSnapshot snapshot)
+            throws IOException {
+
+        ObjectNode root = objectMapper.createObjectNode();
+        root.put("sessionId", sessionId);
+        root.put("hostname", resolveHostname());
+        root.put("osInfo", System.getProperty("os.name") + " " + System.getProperty("os.version"));
+        root.put("capturedAt", Instant.now().toString());
+
+        if (snapshot != null) {
+            String rawJson = objectMapper.writeValueAsString(snapshot);
+            root.put("rawSnapshotJson", rawJson);
+
+            JsonNode snapshotTree = objectMapper.readTree(rawJson);
+
+            Double cpuUsage = findNumericMetric(snapshotTree,
+                    "cpuUsagePercent", "cpuLoad", "systemCpuLoad", "cpuUsage", "loadPercent");
+            if (cpuUsage != null) {
+                root.put("cpuUsagePercent", clampPercent(cpuUsage));
             }
 
-            return sessionId;
+            Double memUsage = findNumericMetric(snapshotTree,
+                    "memoryUsagePercent", "ramUsagePercent", "memoryLoad", "usedPercent");
+            if (memUsage != null) {
+                root.put("memoryUsagePercent", clampPercent(memUsage));
+            }
+
+            Long memUsed = findLongMetric(snapshotTree, "memoryUsedBytes", "usedMemory", "usedBytes");
+            if (memUsed != null) {
+                root.put("memoryUsedBytes", memUsed);
+            }
+
+            Long memTotal = findLongMetric(snapshotTree, "memoryTotalBytes", "totalMemory", "totalBytes");
+            if (memTotal != null) {
+                root.put("memoryTotalBytes", memTotal);
+            }
+
+            Double storageUsage = findNumericMetric(snapshotTree,
+                    "storageUsagePercent", "diskUsagePercent", "storageLoad");
+            if (storageUsage != null) {
+                root.put("storageUsagePercent", clampPercent(storageUsage));
+            }
+
+            Boolean netConnected = findBooleanMetric(snapshotTree,
+                    "networkConnected", "connected", "internetAvailable", "online");
+            if (netConnected != null) {
+                root.put("networkConnected", netConnected);
+            }
+
+            Integer processCount = findIntMetric(snapshotTree,
+                    "runningProcessCount", "processCount", "totalProcesses");
+            if (processCount != null) {
+                root.put("runningProcessCount", processCount);
+            }
+
+            String overallStatus = findStringMetric(snapshotTree,
+                    "overallHealthStatus", "overallStatus", "healthStatus", "status");
+            if (overallStatus != null && !overallStatus.isBlank()) {
+                root.put("overallHealthStatus", overallStatus);
+            }
         }
 
-        throw createHttpException(
-                "Retrieving the session ID", response);
+        return objectMapper.writeValueAsString(root);
     }
 
-    private static HttpRequest.Builder authenticatedRequest(
-            String path,
-            String idToken) {
+    private HttpRequest.Builder baseRequestBuilder(String path, String idToken) {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + path))
+                .timeout(REQUEST_TIMEOUT);
 
-        if (idToken == null || idToken.isBlank()) {
-            throw new IllegalArgumentException(
-                    "A Firebase ID token is required.");
+        if (idToken != null && !idToken.isBlank()) {
+            builder.header("Authorization", "Bearer " + idToken.trim());
         }
-
-        if (!path.startsWith("/") || path.contains("..")) {
-            throw new IllegalArgumentException(
-                    "Invalid server endpoint path.");
-        }
-
-        return HttpRequest.newBuilder()
-                .uri(URI.create(SERVER_URL + path))
-                .header("Authorization", "Bearer " + idToken)
-                .header("Accept", "application/json");
+        return builder;
     }
 
-    private static IOException createHttpException(
-            String operation,
-            HttpResponse<String> response) {
+    private String resolveHostname() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (Exception e) {
+            String envName = System.getenv("COMPUTERNAME");
+            return (envName != null && !envName.isBlank()) ? envName : "unknown-pc";
+        }
+    }
 
-        int status = response.statusCode();
+    private double clampPercent(double val) {
+        return Math.max(0.0, Math.min(100.0, val));
+    }
 
-        String reason = switch (status) {
-            case 401 -> "Authentication was rejected or has expired.";
-            case 403 -> "The account is not authorised for this operation.";
-            case 404 -> "The requested server endpoint was not found.";
-            case 429 -> "The server rate limit was reached.";
-            default -> "The server returned HTTP " + status + ".";
-        };
+    private Double findNumericMetric(JsonNode node, String... fieldNames) {
+        if (node == null || node.isNull()) return null;
+        for (String name : fieldNames) {
+            JsonNode match = findFieldRecursive(node, name);
+            if (match != null && match.isNumber()) {
+                return match.doubleValue();
+            }
+        }
+        return null;
+    }
 
-        // Do not include raw response bodies, which may contain
-        // implementation details or sensitive server information.
-        return new IOException(operation + " failed. " + reason);
+    private Long findLongMetric(JsonNode node, String... fieldNames) {
+        if (node == null || node.isNull()) return null;
+        for (String name : fieldNames) {
+            JsonNode match = findFieldRecursive(node, name);
+            if (match != null && match.canConvertToLong()) {
+                return match.longValue();
+            }
+        }
+        return null;
+    }
+
+    private Integer findIntMetric(JsonNode node, String... fieldNames) {
+        if (node == null || node.isNull()) return null;
+        for (String name : fieldNames) {
+            JsonNode match = findFieldRecursive(node, name);
+            if (match != null && match.canConvertToInt()) {
+                return match.intValue();
+            }
+        }
+        return null;
+    }
+
+    private Boolean findBooleanMetric(JsonNode node, String... fieldNames) {
+        if (node == null || node.isNull()) return null;
+        for (String name : fieldNames) {
+            JsonNode match = findFieldRecursive(node, name);
+            if (match != null && match.isBoolean()) {
+                return match.booleanValue();
+            }
+        }
+        return null;
+    }
+
+    private String findStringMetric(JsonNode node, String... fieldNames) {
+        if (node == null || node.isNull()) return null;
+        for (String name : fieldNames) {
+            JsonNode match = findFieldRecursive(node, name);
+            if (match != null && match.isTextual()) {
+                return match.asText();
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("deprecation")
+	private JsonNode findFieldRecursive(JsonNode current, String targetField) {
+        if (current == null || current.isNull()) {
+            return null;
+        }
+        if (current.isObject()) {
+            Iterator<Map.Entry<String, JsonNode>> fields = current.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                if (entry.getKey().equalsIgnoreCase(targetField)) {
+                    return entry.getValue();
+                }
+            }
+            fields = current.fields();
+            while (fields.hasNext()) {
+                JsonNode nested = findFieldRecursive(fields.next().getValue(), targetField);
+                if (nested != null) {
+                    return nested;
+                }
+            }
+        }
+        return null;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
     }
 }
