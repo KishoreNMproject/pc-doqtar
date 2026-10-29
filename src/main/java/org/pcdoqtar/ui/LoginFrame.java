@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
+@SuppressWarnings("serial")
 public class LoginFrame extends JFrame {
     private final JTextField email = new JTextField(20);
     private final JPasswordField pass = new JPasswordField(20);

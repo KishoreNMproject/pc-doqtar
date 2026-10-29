@@ -14,7 +14,7 @@ import org.pcdoqtar.ui.DashboardView;
 import org.pcdoqtar.ui.DashboardViewFactory;
 import org.pcdoqtar.ui.theme.ThemeManager;
 
-@SuppressWarnings("unused")
+
 public final class ApplicationLifecycle {
 
     private final ShutdownManager shutdownManager = new ShutdownManager();

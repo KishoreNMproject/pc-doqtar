@@ -29,6 +29,7 @@ org\pcdoqtar\settings\AppSettings.class
 org\pcdoqtar\app\DashboardApp.class
 org\pcdoqtar\ui\NetworkPage.class
 org\pcdoqtar\ui\navigation\SidebarFactory.class
+org\pcdoqtar\ui\AccountControl.class
 org\pcdoqtar\diagnostics\DiagnosticTaskManager$DiagnosticTaskException.class
 org\pcdoqtar\diagnostics\DiagnosticTaskManager.class
 org\pcdoqtar\lifecycle\StartupStatusDialog.class

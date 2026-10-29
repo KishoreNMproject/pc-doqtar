@@ -129,7 +129,9 @@ public final class DiagnosticTaskManager implements AutoCloseable {
     public static final class DiagnosticTaskException
             extends RuntimeException {
 
-        public DiagnosticTaskException(String message, Throwable cause) {
+		    private static final long serialVersionUID = 1L;
+
+		public DiagnosticTaskException(String message, Throwable cause) {
             super(message, cause);
         }
     }
