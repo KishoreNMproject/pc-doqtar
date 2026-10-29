@@ -1,7 +1,6 @@
 
 package org.pcdoqtar.lifecycle;
 
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -9,12 +8,13 @@ import javafx.stage.StageStyle;
 import javafx.scene.image.Image;
 
 import org.pcdoqtar.app.DashboardApp;
+import org.pcdoqtar.ui.AccountControl;
 import org.pcdoqtar.ui.CustomTitleBar;
 import org.pcdoqtar.ui.DashboardView;
 import org.pcdoqtar.ui.DashboardViewFactory;
 import org.pcdoqtar.ui.theme.ThemeManager;
 
-@SuppressWarnings("unused")
+
 public final class ApplicationLifecycle {
 
     private final ShutdownManager shutdownManager = new ShutdownManager();
@@ -38,8 +38,8 @@ public final class ApplicationLifecycle {
         shutdownManager.initialise(stage, this::shutdown);
 
         try {
-            // Keep local diagnostics available when optional cloud sign-in is not configured.
-
+            // Local diagnostics never need an account. Sign-in is optional
+            // and is offered from the title bar (see AccountControl).
             services = new ApplicationServices();
 
             DashboardView dashboard = DashboardViewFactory.create(
@@ -51,8 +51,19 @@ public final class ApplicationLifecycle {
             stage.setMinWidth(1000);
             stage.setMinHeight(700);
 
+            CustomTitleBar titleBar = new CustomTitleBar(stage);
+
+            // Children are: title, spacer, minimise, maximise, close.
+            // Put the account area between the spacer and the window buttons.
+            titleBar.getChildren().add(2, new AccountControl(
+                    stage,
+                    services.getAuthService(),
+                    services.getAuthSession(),
+                    services.getDiagnosticTaskManager(),
+                    services.getServerHandover()));
+
             BorderPane root = dashboard.getRoot();
-            root.setTop(new CustomTitleBar(stage));
+            root.setTop(titleBar);
 
             Scene scene = dashboard.getScene();
             ThemeManager.apply(scene);

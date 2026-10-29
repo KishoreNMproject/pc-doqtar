@@ -66,9 +66,15 @@ public final class AuthenticationCoordinator implements AutoCloseable {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                authService.signIn(
-                        entered.email().trim(),
-                        entered.password());
+                if (entered.register()) {
+                    authService.signUp(
+                            entered.email().trim(),
+                            entered.password());
+                } else {
+                    authService.signIn(
+                            entered.email().trim(),
+                            entered.password());
+                }
 
                 return AuthenticationResult.success(
                         authServiceSessionEmail());

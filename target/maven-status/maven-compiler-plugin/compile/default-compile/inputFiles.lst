@@ -3,8 +3,10 @@ E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\Au
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\AuthSession.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\FirebaseAuthService.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\auth\LoginDialog.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\connection\FirebaseAuthClient.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\connection\ServerConnection.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\connection\ServerHandover.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\connection\SnapshotMapper.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\cpu\CpuDiagnostics.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\DiagnosticTaskManager.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\diagnostics\HealthEvaluator.java
@@ -26,6 +28,7 @@ E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\model\H
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\model\SystemHealthSnapshot.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\service\DiagnosticServiceMain.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\settings\AppSettings.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\AccountControl.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\components\DiagnosticPageRefresh.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\components\DiagnosticPageSupport.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\components\DiagnosticResultCard.java
@@ -35,6 +38,7 @@ E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\Cust
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\DashboardView.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\DashboardViewFactory.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\DiagnosticsPage.java
+E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\LoginFrame.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\navigation\NavigationController.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\navigation\PageRegistry.java
 E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\java\org\pcdoqtar\ui\navigation\SidebarFactory.java

@@ -18,6 +18,10 @@ public final class FirebaseAuthService {
             "https://identitytoolkit.googleapis.com/v1/"
             + "accounts:signInWithPassword?key=";
 
+    private static final String SIGN_UP_URL =
+            "https://identitytoolkit.googleapis.com/v1/"
+            + "accounts:signUp?key=";
+
     private static final String REFRESH_URL =
             "https://securetoken.googleapis.com/v1/token?key=";
 
@@ -33,6 +37,17 @@ public final class FirebaseAuthService {
     }
 
     public void signIn(String email, String password)
+            throws IOException, InterruptedException {
+        requestTokens(SIGN_IN_URL, email, password);
+    }
+
+    /** Creates a new Firebase account and signs in with it. */
+    public void signUp(String email, String password)
+            throws IOException, InterruptedException {
+        requestTokens(SIGN_UP_URL, email, password);
+    }
+
+    private void requestTokens(String endpoint, String email, String password)
             throws IOException, InterruptedException {
 
         if (apiKey == null || apiKey.isBlank()) {
@@ -50,7 +65,7 @@ public final class FirebaseAuthService {
         body.put("returnSecureToken", true);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(SIGN_IN_URL + apiKey))
+                .uri(URI.create(endpoint + apiKey))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
                         mapper.writeValueAsString(body),
@@ -135,11 +150,16 @@ public final class FirebaseAuthService {
     }
 
     private String toUserMessage(String firebaseError) {
+        if (firebaseError.startsWith("WEAK_PASSWORD")) {
+            return "Password must be at least 6 characters.";
+        }
         return switch (firebaseError) {
             case "EMAIL_NOT_FOUND",
                  "INVALID_LOGIN_CREDENTIALS",
                  "INVALID_PASSWORD" ->
                     "Email or password is incorrect.";
+            case "EMAIL_EXISTS" ->
+                    "An account with this email already exists. Sign in instead.";
             case "USER_DISABLED" ->
                     "This account has been disabled.";
             case "INVALID_EMAIL" ->

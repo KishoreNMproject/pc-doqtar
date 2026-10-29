@@ -1,0 +1,14 @@
+/* Sign-in dialog. Colours come from the .theme-dark / .theme-light variables. */
+.dialog-pane { -fx-background-color:-app-surface; -fx-border-color:-app-border; -fx-border-width:1; -fx-padding:0; }
+.dialog-pane > .content { -fx-background-color:-app-surface; }
+.dialog-pane > .button-bar { -fx-background-color:-app-surface; }
+.dialog-pane > .button-bar > .container { -fx-background-color:-app-surface; -fx-padding:10 22 18 22; }
+.dialog-pane .login-title { -fx-font-size:20px; -fx-font-weight:bold; -fx-text-fill:-app-text; }
+.dialog-pane .login-field-label { -fx-text-fill:-app-muted; -fx-font-size:11px; -fx-font-weight:bold; }
+.dialog-pane .login-error { -fx-text-fill:-app-critical; }
+.dialog-pane .login-info { -fx-text-fill:-app-accent; }
+.dialog-pane .text-field, .dialog-pane .password-field { -fx-padding:8 10 8 10; }
+.dialog-pane .text-field:focused, .dialog-pane .password-field:focused { -fx-border-color:-app-accent; }
+.dialog-pane .button { -fx-padding:8 16 8 16; }
+.dialog-pane .button:default { -fx-background-color:-app-accent; -fx-text-fill:-app-accent-text; -fx-font-weight:bold; }
+.dialog-pane .button:default:hover { -fx-background-color:derive(-app-accent,12%); }

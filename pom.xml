@@ -2,70 +2,138 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.pcdoqtar</groupId>
   <artifactId>pc-doqtar</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <name>PC DOQTAR</name>
   <description>A Light Weight PC Health Monitoring System</description>
-  <build>
-  <plugins>
-  
-<plugin>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-maven-plugin</artifactId>
-    <version>0.0.8</version>
-    <configuration>
-        <mainClass>org.pcdoqtar.app.DashboardApp</mainClass>
-    </configuration>
-</plugin>
-
-  </plugins>
-  </build>
   
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-</properties>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
+        <configuration>
+            <mainClass>org.pcdoqtar.app.DashboardApp</mainClass>
+        </configuration>
+      </plugin>
+      
+      <!-- 1. Automatically copy the primary application JAR to target/jpackage-input -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+            <execution>
+                <id>copy-jar-for-jpackage</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/jpackage-input</outputDirectory>
+                    <resources>
+                        <resource>
+                            <directory>${project.build.directory}</directory>
+                            <includes>
+                                <include>${project.build.finalName}.jar</include>
+                            </includes>
+                        </resource>
+                    </resources>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+
+      <!-- 2. NEW: Automatically copy all runtime dependencies (Hibernate, OSHI, MySQL, Jackson) to target/jpackage-input -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.6.1</version>
+        <executions>
+            <execution>
+                <id>copy-dependencies-for-jpackage</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/jpackage-input</outputDirectory>
+                    <includeScope>runtime</includeScope>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+
+          <!-- Automatically execute jpackage -->
+    <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+            <execution>
+                <id>run-jpackage</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>exec</goal>
+                </goals>
+                <configuration>
+                    <executable>jpackage</executable>
+                    <!-- Flattened Single-Line Argument with the CORRECT Icon Path -->
+                    <commandlineArgs>--type app-image --name "PCDOQTAR" --dest "E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\dist\gui" --input "${project.build.directory}/jpackage-input" --main-jar "${project.build.finalName}.jar" --main-class org.pcdoqtar.app.DashboardApp --app-version 1.1.0 --vendor "PC DOQTAR" --module-path "E:\javafx-jmods-21" --add-modules javafx.controls,javafx.fxml --icon "E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\resources\org\pcdoqtar\app\pc-doqtar.ico"</commandlineArgs>
+                </configuration>
+            </execution>
+        </executions>
+    </plugin>
+
+    </plugins>
+  </build>
   
   <dependencies>
-  
-  <!-- Source: https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
-<dependency>
-    <groupId>com.mysql</groupId>
-    <artifactId>mysql-connector-j</artifactId>
-    <version>26.7.0</version>
-    <scope>compile</scope>
-</dependency>
+    <!-- Source: https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
+    <dependency>
+        <groupId>com.mysql</groupId>
+        <artifactId>mysql-connector-j</artifactId>
+        <version>26.7.0</version>
+        <scope>compile</scope>
+    </dependency>
 
-<!-- Source: https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
-<dependency>
-    <groupId>org.hibernate.orm</groupId>
-    <artifactId>hibernate-core</artifactId>
-    <version>7.4.10.Final</version>
-    <scope>compile</scope>
-</dependency>
-<!-- Source: https://mvnrepository.com/artifact/com.github.oshi/oshi-core -->
-<dependency>
-    <groupId>com.github.oshi</groupId>
-    <artifactId>oshi-core</artifactId>
-    <version>7.7.1</version>
-    <scope>compile</scope>
-</dependency>
+    <!-- Source: https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
+    <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>7.4.10.Final</version>
+        <scope>compile</scope>
+    </dependency>
 
-<dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-controls</artifactId>
-    <version>21.0.8</version>
-</dependency>
+    <!-- Source: https://mvnrepository.com/artifact/com.github.oshi/oshi-core -->
+    <dependency>
+        <groupId>com.github.oshi</groupId>
+        <artifactId>oshi-core</artifactId>
+        <version>7.7.1</version>
+        <scope>compile</scope>
+    </dependency>
 
-<dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-graphics</artifactId>
-    <version>21.0.8</version>
-</dependency>
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.19.2</version>
-</dependency>
-  
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>21.0.8</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-graphics</artifactId>
+        <version>21.0.8</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.19.2</version>
+    </dependency>
   </dependencies>
 </project>
