@@ -7,7 +7,7 @@ import java.util.regex.*;
 
 public final class FirebaseAuthClient {
     // Firebase Console > Project settings > Web API key
-    private static final String API_KEY = System.getenv("FIREBASE_API_KEY");
+    private static final String API_KEY = System.getenv("FIREBASE_WEB_API_KEY");
     private static final HttpClient HTTP = HttpClient.newHttpClient();
 
     public record AuthSession(String email, String idToken, String refreshToken, long expiresAtMillis) {

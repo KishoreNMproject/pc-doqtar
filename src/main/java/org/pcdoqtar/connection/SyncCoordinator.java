@@ -46,7 +46,7 @@ public final class SyncCoordinator implements AutoCloseable {
     public enum SyncStatus {
         UNAUTHENTICATED("Sign in to sync"),
         SYNCING("Syncing…"),
-        SYNCED("Synced \u2713"),
+        SYNCED("Sync Success"),
         SYNC_FAILED("Sync failed"),
         OFFLINE("Offline");
 
