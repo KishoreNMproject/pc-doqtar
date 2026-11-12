@@ -24,10 +24,11 @@ ArchitecturesInstallIn64BitMode=x64compatible
 WizardStyle=modern
 
 ; --- ICON CONFIGURATION ---
-SetupIconFile={#BaseDir}\dist\gui\PCDOQTAR\pc-doqtar.ico
-UninstallDisplayIcon={app}\GUI\pc-doqtar.ico
+SetupIconFile={#BaseDir}\src\main\resources\org\pcdoqtar\app\pc-doqtar.ico
+UninstallDisplayIcon={app}\GUI\PCDOQTAR.exe
 
 [Files]
+Source: "{#BaseDir}\src\main\resources\org\pcdoqtar\app\pc-doqtar.ico"; DestDir: "{app}\GUI"; Flags: ignoreversion
 Source: "{#BaseDir}\dist\gui\PCDOQTAR\*"; DestDir: "{app}\GUI"; Flags: recursesubdirs createallsubdirs
 Source: "{#BaseDir}\dist\PCDOQTAR-Service\*"; DestDir: "{app}\Service"; Flags: recursesubdirs createallsubdirs
 
