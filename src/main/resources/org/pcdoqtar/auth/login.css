@@ -12,3 +12,7 @@
 .dialog-pane .button { -fx-padding:8 16 8 16; }
 .dialog-pane .button:default { -fx-background-color:-app-accent; -fx-text-fill:-app-accent-text; -fx-font-weight:bold; }
 .dialog-pane .button:default:hover { -fx-background-color:derive(-app-accent,12%); }
+.dialog-pane .forgot-password-link { -fx-text-fill:-app-accent; -fx-font-size:11px; -fx-underline:false; -fx-padding:0; -fx-border-color:transparent; -fx-background-color:transparent; -fx-cursor:hand; }
+.dialog-pane .forgot-password-link:hover { -fx-text-fill:derive(-app-accent,25%); -fx-underline:true; }
+.dialog-pane .forgot-password-link:focused { -fx-border-color:-app-accent; -fx-border-style:dotted; -fx-border-width:1; }
+.dialog-pane .forgot-password-link:disabled { -fx-opacity:0.55; }

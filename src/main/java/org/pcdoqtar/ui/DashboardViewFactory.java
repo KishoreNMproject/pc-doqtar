@@ -3,6 +3,9 @@ package org.pcdoqtar.ui;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.pcdoqtar.auth.AuthSession;
+import org.pcdoqtar.auth.AuthenticationCoordinator;
+import org.pcdoqtar.auth.FirebaseAuthService;
 import org.pcdoqtar.diagnostics.SystemDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
 import org.pcdoqtar.settings.AppSettings;
@@ -29,6 +32,16 @@ public final class DashboardViewFactory {
     public static DashboardView create(
             SystemDiagnostics systemDiagnostics,
             NetworkDiagnostics networkDiagnostics) {
+        return create(systemDiagnostics, networkDiagnostics, null, null, null);
+    }
+
+    public static DashboardView create(
+            SystemDiagnostics systemDiagnostics,
+            NetworkDiagnostics networkDiagnostics,
+            AuthSession authSession,
+            FirebaseAuthService authService,
+            AuthenticationCoordinator coordinator) {
+
         Objects.requireNonNull(systemDiagnostics, "System diagnostics is required.");
         Objects.requireNonNull(networkDiagnostics, "Network diagnostics is required.");
 
@@ -40,7 +53,9 @@ public final class DashboardViewFactory {
         registry.register("Diagnostics", new DiagnosticsPage(systemDiagnostics));
         registry.register("Network", new NetworkPage(networkDiagnostics));
         registry.register("Processes", new ProcessesPage());
-        registry.register("Settings", new SettingsPage());
+
+        SettingsPage settingsPage = new SettingsPage(authSession, authService, coordinator);
+        registry.register("Settings", settingsPage);
 
         VBox sidebar = SidebarFactory.create(page -> {
             NavigationController controller = navigationReference.get();
@@ -65,6 +80,9 @@ public final class DashboardViewFactory {
                 new NavigationController(registry, shell, page -> {
                     SidebarFactory.setActive(page);
                     sectionTitle.setText(page);
+                    if ("Settings".equals(page)) {
+                        settingsPage.refreshAccount();
+                    }
                 });
         navigationReference.set(navigation);
 

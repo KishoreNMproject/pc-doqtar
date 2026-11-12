@@ -44,7 +44,10 @@ public final class ApplicationLifecycle {
 
             DashboardView dashboard = DashboardViewFactory.create(
                     services.getSystemDiagnostics(),
-                    services.getNetworkDiagnostics());
+                    services.getNetworkDiagnostics(),
+                    services.getAuthSession(),
+                    services.getAuthService(),
+                    services.getAuthenticationCoordinator());
 
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setTitle("PC DOQTAR | System Health");
@@ -60,7 +63,8 @@ public final class ApplicationLifecycle {
                     services.getAuthService(),
                     services.getAuthSession(),
                     services.getDiagnosticTaskManager(),
-                    services.getServerHandover()));
+                    services.getServerHandover(),
+                    services.getSyncCoordinator()));
 
             BorderPane root = dashboard.getRoot();
             root.setTop(titleBar);

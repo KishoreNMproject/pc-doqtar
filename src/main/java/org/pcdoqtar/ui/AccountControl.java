@@ -7,6 +7,8 @@ import org.pcdoqtar.auth.FirebaseAuthService;
 import org.pcdoqtar.auth.LoginDialog;
 import org.pcdoqtar.connection.ServerHandover;
 import org.pcdoqtar.connection.ServerHandover.UploadOutcome;
+import org.pcdoqtar.connection.SyncCoordinator;
+import org.pcdoqtar.connection.SyncCoordinator.SyncStatus;
 import org.pcdoqtar.diagnostics.DiagnosticTaskManager;
 
 import javafx.application.Platform;
@@ -30,6 +32,7 @@ public final class AccountControl extends HBox {
     private final AuthSession session;
     private final DiagnosticTaskManager taskManager;
     private final ServerHandover handover;
+    private final SyncCoordinator syncCoordinator;
 
     private final Label status = new Label();
     private final Button signInButton = new Button("Sign in to sync");
@@ -44,12 +47,23 @@ public final class AccountControl extends HBox {
             AuthSession session,
             DiagnosticTaskManager taskManager,
             ServerHandover handover) {
+        this(owner, authService, session, taskManager, handover, null);
+    }
+
+    public AccountControl(
+            Window owner,
+            FirebaseAuthService authService,
+            AuthSession session,
+            DiagnosticTaskManager taskManager,
+            ServerHandover handover,
+            SyncCoordinator syncCoordinator) {
 
         this.owner = owner;
         this.authService = Objects.requireNonNull(authService);
         this.session = Objects.requireNonNull(session);
         this.taskManager = Objects.requireNonNull(taskManager);
         this.handover = Objects.requireNonNull(handover);
+        this.syncCoordinator = syncCoordinator;
 
         setAlignment(Pos.CENTER_RIGHT);
         setSpacing(8);
@@ -72,7 +86,48 @@ public final class AccountControl extends HBox {
         signOutButton.setOnAction(event -> signOut());
 
         getChildren().addAll(status, signInButton, syncButton, signOutButton);
+
+        if (syncCoordinator != null) {
+            syncCoordinator.addStatusListener(syncStatus ->
+                    Platform.runLater(() -> applyCoordinatorStatus(syncStatus)));
+        }
+
         refresh();
+    }
+
+    private void applyCoordinatorStatus(SyncStatus syncStatus) {
+        if (!session.isLoggedIn()) {
+            refresh();
+            return;
+        }
+
+        switch (syncStatus) {
+            case SYNCING -> {
+                busy = true;
+                syncButton.setDisable(true);
+                setStatus("Syncing…");
+            }
+            case SYNCED -> {
+                busy = false;
+                syncButton.setDisable(false);
+                setStatus("Synced \u2713");
+            }
+            case SYNC_FAILED -> {
+                busy = false;
+                syncButton.setDisable(false);
+                setStatus("Sync failed");
+            }
+            case OFFLINE -> {
+                busy = false;
+                syncButton.setDisable(false);
+                setStatus("Offline");
+            }
+            case UNAUTHENTICATED -> {
+                busy = false;
+                syncButton.setDisable(false);
+                refresh();
+            }
+        }
     }
 
     private void signIn() {
@@ -86,7 +141,7 @@ public final class AccountControl extends HBox {
 
     private void signOut() {
         authService.logout();
-        setStatus("Signed out. Working offline.");
+        setStatus("Offline");
         refresh();
     }
 
@@ -104,6 +159,16 @@ public final class AccountControl extends HBox {
         syncButton.setDisable(true);
         setStatus("Syncing…");
 
+        if (syncCoordinator != null) {
+            syncCoordinator.syncNow().whenComplete((outcome, error) ->
+                    Platform.runLater(() -> {
+                        busy = false;
+                        syncButton.setDisable(false);
+                        finish(outcome, error);
+                    }));
+            return;
+        }
+
         try {
             taskManager.collectSnapshot()
                     .thenApply(handover::uploadSnapshot)
@@ -120,12 +185,16 @@ public final class AccountControl extends HBox {
 
         if (error != null || outcome == null) {
             System.err.println("[PC DOQTAR] Sync failed: " + error);
-            setStatus("Sync failed: could not collect or send diagnostics.");
+            setStatus("Sync failed");
         } else if (outcome.success()) {
-            setStatus("Synced \u2713  (record #" + outcome.recordId() + ")");
+            setStatus("Synced \u2713");
         } else {
             System.err.println("[PC DOQTAR] Sync failed: " + outcome.message());
-            setStatus("Sync failed: " + outcome.message());
+            if (!SyncCoordinator.probeInternetConnectivity()) {
+                setStatus("Offline");
+            } else {
+                setStatus("Sync failed");
+            }
         }
 
         refresh();
@@ -138,18 +207,46 @@ public final class AccountControl extends HBox {
         show(syncButton, signedIn);
         show(signOutButton, signedIn);
 
-        if (signedIn && (status.getText() == null || status.getText().isBlank())) {
-            setStatus("Signed in as " + session.getEmail());
-        }
-        if (!signedIn && (status.getText() == null || status.getText().isBlank()
-                || status.getText().startsWith("Syncing"))) {
-            setStatus("Offline");
+        if (signedIn) {
+            if (status.getText() == null || status.getText().isBlank()) {
+                setStatus("Signed in as " + session.getEmail());
+            }
+        } else {
+            if (!SyncCoordinator.probeInternetConnectivity()) {
+                setStatus("Offline");
+            } else if (status.getText() == null || status.getText().isBlank()
+                    || status.getText().startsWith("Syncing")
+                    || status.getText().startsWith("Signed")) {
+                status.setText("");
+                status.setTooltip(null);
+            }
         }
     }
 
     private void setStatus(String text) {
         status.setText(text);
-        status.setTooltip(new Tooltip(text));
+        status.setTooltip(text == null || text.isBlank() ? null : new Tooltip(text));
+    }
+
+    // Accessors for unit testing
+    public String getStatusText() {
+        return status.getText();
+    }
+
+    public Button getSyncButton() {
+        return syncButton;
+    }
+
+    public Button getSignInButton() {
+        return signInButton;
+    }
+
+    public Button getSignOutButton() {
+        return signOutButton;
+    }
+
+    public void finishForTest(UploadOutcome outcome, Throwable error) {
+        finish(outcome, error);
     }
 
     private static void show(Button button, boolean visible) {

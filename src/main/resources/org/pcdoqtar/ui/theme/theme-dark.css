@@ -1,5 +1,5 @@
 /* PC DOQTAR dark theme: shared palette + reusable component classes. */
-.theme-dark {
+.root, .theme-dark {
  -app-background:#090B10; -app-surface:#141821; -app-surface-raised:#202633;
  -app-input:#10141C; -app-text:#F2F5FA; -app-muted:#A0A9B8; -app-border:#2B3240;
  -app-accent:#B8FF3B; -app-accent-text:#090B10; -app-warning:#FFB020;

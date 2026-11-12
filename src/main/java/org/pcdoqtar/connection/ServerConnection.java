@@ -123,7 +123,7 @@ public final class ServerConnection {
                 .header("Accept", "application/json");
     }
 
-    private static String resolveServerUrl() {
+    public static String resolveServerUrl() {
         String url = System.getProperty("pcdoqtar.server.url");
 
         if (url == null || url.isBlank()) {
@@ -137,11 +137,32 @@ public final class ServerConnection {
         return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
     }
 
+    public static class ServerHttpException extends IOException {
+        private static final long serialVersionUID = 1L;
+        private final int statusCode;
+        private final long retryAfterSeconds;
+
+        public ServerHttpException(String message, int statusCode, long retryAfterSeconds) {
+            super(message);
+            this.statusCode = statusCode;
+            this.retryAfterSeconds = retryAfterSeconds;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
+        }
+
+        public long getRetryAfterSeconds() {
+            return retryAfterSeconds;
+        }
+    }
+
     private static IOException createHttpException(
             String operation,
             HttpResponse<String> response) {
 
         int status = response.statusCode();
+        long retryAfter = response.headers().firstValueAsLong("Retry-After").orElse(-1L);
 
         // Developer console only (never shown in the UI).
         String body = response.body() == null ? "" : response.body();
@@ -161,6 +182,6 @@ public final class ServerConnection {
 
         // Do not include raw response bodies, which may contain
         // implementation details or sensitive server information.
-        return new IOException(operation + " failed. " + reason);
+        return new ServerHttpException(operation + " failed. " + reason, status, retryAfter);
     }
 }

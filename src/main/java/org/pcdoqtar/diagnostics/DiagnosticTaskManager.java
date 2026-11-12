@@ -17,7 +17,7 @@ import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics.AdapterInfo;
 import org.pcdoqtar.model.SystemHealthSnapshot;
 
-public final class DiagnosticTaskManager implements AutoCloseable {
+public class DiagnosticTaskManager implements AutoCloseable {
 
     private static final int WORKER_COUNT = 3;
     private static final int QUEUE_CAPACITY = 24;

@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.pcdoqtar.auth.FirebaseAuthService;
 import org.pcdoqtar.model.SystemHealthSnapshot;
 
-public final class ServerHandover {
+public class ServerHandover {
 
     private final FirebaseAuthService authService;
 
@@ -82,25 +82,43 @@ public final class ServerHandover {
             return UploadOutcome.failed("Upload was interrupted.");
 
         } catch (IOException | RuntimeException exception) {
+            int statusCode = -1;
+            long retryAfter = -1;
+            if (exception instanceof ServerConnection.ServerHttpException httpEx) {
+                statusCode = httpEx.getStatusCode();
+                retryAfter = httpEx.getRetryAfterSeconds();
+            }
             String message = exception.getMessage();
             return UploadOutcome.failed(
                     message == null || message.isBlank()
                             ? "Unable to reach the server."
-                            : message);
+                            : message,
+                    statusCode,
+                    retryAfter);
         }
     }
 
     public record UploadOutcome(
             boolean success,
             long recordId,
-            String message) {
+            String message,
+            int httpStatusCode,
+            long retryAfterSeconds) {
 
-        static UploadOutcome saved(long recordId) {
-            return new UploadOutcome(true, recordId, "Saved to server.");
+        public UploadOutcome(boolean success, long recordId, String message) {
+            this(success, recordId, message, -1, -1);
         }
 
-        static UploadOutcome failed(String message) {
-            return new UploadOutcome(false, -1L, message);
+        public static UploadOutcome saved(long recordId) {
+            return new UploadOutcome(true, recordId, "Saved to server.", 200, -1);
+        }
+
+        public static UploadOutcome failed(String message) {
+            return new UploadOutcome(false, -1L, message, -1, -1);
+        }
+
+        public static UploadOutcome failed(String message, int httpStatusCode, long retryAfterSeconds) {
+            return new UploadOutcome(false, -1L, message, httpStatusCode, retryAfterSeconds);
         }
     }
 

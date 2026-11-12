@@ -1,5 +1,5 @@
 /* PC DOQTAR light theme: shared palette + reusable component classes. */
-.theme-light {
+.root, .theme-light {
  -app-background:#EEF2F7; -app-surface:#FFFFFF; -app-surface-raised:#E2E8F0;
  -app-input:#FFFFFF; -app-text:#243247; -app-muted:#58677B; -app-border:#CBD5E1;
  -app-accent:#647D35; -app-accent-text:#FFFFFF; -app-warning:#925400;

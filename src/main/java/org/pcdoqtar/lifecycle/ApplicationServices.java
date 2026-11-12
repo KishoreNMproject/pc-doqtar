@@ -7,6 +7,7 @@ import org.pcdoqtar.auth.AuthSession;
 import org.pcdoqtar.auth.AuthenticationCoordinator;
 import org.pcdoqtar.auth.FirebaseAuthService;
 import org.pcdoqtar.connection.ServerHandover;
+import org.pcdoqtar.connection.SyncCoordinator;
 import org.pcdoqtar.diagnostics.DiagnosticTaskManager;
 import org.pcdoqtar.diagnostics.SystemDiagnostics;
 import org.pcdoqtar.diagnostics.network.NetworkDiagnostics;
@@ -20,6 +21,7 @@ public final class ApplicationServices implements AutoCloseable {
     private final NetworkDiagnostics networkDiagnostics;
     private final DiagnosticTaskManager diagnosticTaskManager;
     private final ServerHandover serverHandover;
+    private final SyncCoordinator syncCoordinator;
 
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -37,6 +39,11 @@ public final class ApplicationServices implements AutoCloseable {
                 networkDiagnostics);
 
         serverHandover = new ServerHandover(authService);
+        syncCoordinator = new SyncCoordinator(
+                authSession,
+                authService,
+                diagnosticTaskManager,
+                serverHandover);
     }
 
     public AuthSession getAuthSession() {
@@ -67,12 +74,17 @@ public final class ApplicationServices implements AutoCloseable {
         return serverHandover;
     }
 
+    public SyncCoordinator getSyncCoordinator() {
+        return syncCoordinator;
+    }
+
     @Override
     public void close() {
         if (!closed.compareAndSet(false, true)) {
             return;
         }
 
+        syncCoordinator.close();
         diagnosticTaskManager.close();
         authenticationCoordinator.close();
         authService.logout();

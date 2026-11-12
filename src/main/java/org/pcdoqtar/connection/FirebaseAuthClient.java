@@ -22,6 +22,19 @@ public final class FirebaseAuthClient {
         return credentialCall("signUp", email, password);
     }
 
+    public static void sendPasswordReset(String email) throws IOException, InterruptedException {
+        if (API_KEY == null || API_KEY.isBlank())
+            throw new IOException("FIREBASE_API_KEY environment variable is not set");
+        if (email == null || email.isBlank())
+            throw new IOException("Enter your email address");
+        String body = "{\"requestType\":\"PASSWORD_RESET\",\"email\":\"" + esc(email.trim()) + "\"}";
+        HttpRequest req = HttpRequest.newBuilder(
+                URI.create("https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=" + API_KEY))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body)).build();
+        send(req);
+    }
+
     /** Call before every upload: returns a fresh session if the token is about to expire. */
     public static AuthSession refreshIfNeeded(AuthSession s) throws IOException, InterruptedException {
         if (!s.isExpiring()) return s;

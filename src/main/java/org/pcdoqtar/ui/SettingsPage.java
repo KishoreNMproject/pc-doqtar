@@ -1,19 +1,31 @@
-
 package org.pcdoqtar.ui;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import org.pcdoqtar.auth.AuthSession;
+import org.pcdoqtar.auth.AuthenticationCoordinator;
+import org.pcdoqtar.auth.FirebaseAuthService;
 import org.pcdoqtar.settings.AppSettings;
 import org.pcdoqtar.ui.theme.ThemeManager;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.VBox;
 
 public class SettingsPage extends VBox {
+
+    private final AuthSession session;
+    private final FirebaseAuthService authService;
+    private final AuthenticationCoordinator coordinator;
 
     private final ComboBox<String> themeSelector = new ComboBox<>();
     private final Slider warningSlider =
@@ -22,7 +34,24 @@ public class SettingsPage extends VBox {
     private final Label thresholdValue = new Label();
     private final Label statusLabel = new Label();
 
+    private final Label accountDescription = new Label();
+    private final Label accountEmailLabel = new Label();
+    private final Button resetPasswordButton = new Button("Reset password");
+    private final Label accountStatusLabel = new Label();
+
     public SettingsPage() {
+        this(null, null, null);
+    }
+
+    public SettingsPage(
+            AuthSession session,
+            FirebaseAuthService authService,
+            AuthenticationCoordinator coordinator) {
+
+        this.session = session;
+        this.authService = authService;
+        this.coordinator = coordinator;
+
         getStyleClass().add("settings-page");
         setSpacing(20);
         setPadding(new Insets(28));
@@ -39,11 +68,34 @@ public class SettingsPage extends VBox {
                 + "; -fx-font-size: 30px; -fx-font-weight: bold;");
 
         Label description = new Label(
-                "Configure appearance and diagnostic warning thresholds.");
+                "Configure appearance, diagnostic warning thresholds, and account security.");
         description.setWrapText(true);
         description.setStyle("-fx-text-fill: "
                 + ThemeManager.getColour("muted") + ";");
 
+        // Account security card
+        VBox accountCard = createCard();
+        Label accountHeading = heading("Account security", 18);
+        accountDescription.setWrapText(true);
+        accountDescription.setStyle(mutedStyle());
+
+        accountEmailLabel.setStyle(headingStyle(14));
+        accountEmailLabel.setWrapText(true);
+
+        resetPasswordButton.getStyleClass().add("primary-action");
+        resetPasswordButton.setFocusTraversable(true);
+        resetPasswordButton.setOnAction(event -> handleResetPassword());
+
+        accountStatusLabel.setWrapText(true);
+        accountStatusLabel.setStyle(mutedStyle());
+
+        accountCard.getChildren().addAll(
+                accountHeading, accountDescription, accountEmailLabel,
+                resetPasswordButton, accountStatusLabel);
+
+        refreshAccount();
+
+        // Appearance card
         VBox themeCard = createCard();
         Label themeHeading = heading("Appearance", 18);
         Label themeDescription = new Label(
@@ -74,6 +126,7 @@ public class SettingsPage extends VBox {
         themeCard.getChildren().addAll(
                 themeHeading, themeDescription, themeSelector);
 
+        // Warning threshold card
         VBox thresholdCard = createCard();
         Label thresholdHeading = heading("Warning threshold", 18);
 
@@ -110,6 +163,7 @@ public class SettingsPage extends VBox {
                 thresholdHeading, thresholdDescription,
                 thresholdValue, warningSlider, saveButton);
 
+        // Navigation menu card
         VBox navigationCard = createCard();
         Label navigationHeading = heading("Navigation menu", 18);
         Label navigationDescription = new Label("Choose whether the hamburger navigation drawer starts collapsed when PC DOQTAR launches. The drawer starts expanded by default.");
@@ -125,7 +179,94 @@ public class SettingsPage extends VBox {
 
         getChildren().addAll(
                 eyebrow, heading, description,
-                themeCard, navigationCard, thresholdCard, statusLabel);
+                accountCard, themeCard, navigationCard, thresholdCard, statusLabel);
+    }
+
+    public void refreshAccount() {
+        boolean signedIn = session != null && session.isLoggedIn();
+        if (signedIn) {
+            String email = session.getEmail();
+            accountDescription.setText(
+                    "Request a password reset email for your currently signed-in account without signing out.");
+            accountEmailLabel.setText("Signed in email: " + (email != null ? email : ""));
+            accountEmailLabel.setVisible(true);
+            accountEmailLabel.setManaged(true);
+            resetPasswordButton.setDisable(false);
+            resetPasswordButton.setVisible(true);
+            resetPasswordButton.setManaged(true);
+        } else {
+            accountDescription.setText(
+                    "No account is currently signed in. You must sign in before resetting your password through Settings, or use the 'Forgot Password' link in the sign-in dialog.");
+            accountEmailLabel.setText("");
+            accountEmailLabel.setVisible(false);
+            accountEmailLabel.setManaged(false);
+            resetPasswordButton.setDisable(true);
+            resetPasswordButton.setVisible(false);
+            resetPasswordButton.setManaged(false);
+        }
+    }
+
+    private void handleResetPassword() {
+        if (session == null || !session.isLoggedIn() || session.getEmail() == null || session.getEmail().isBlank()) {
+            accountStatusLabel.setText("You must sign in before resetting your password through Settings.");
+            return;
+        }
+
+        String email = session.getEmail().trim();
+
+        // Confirmation dialog
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Reset Password");
+        confirm.setHeaderText("Send password reset link to " + email + "?");
+        confirm.setContentText("A password reset link will be sent to your account email address (" + email + ").\n\nYour current session will remain active. Do you want to continue?");
+
+        if (getScene() != null && getScene().getWindow() != null) {
+            confirm.initOwner(getScene().getWindow());
+        }
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            accountStatusLabel.setText("Password reset cancelled.");
+            return;
+        }
+
+        // Prevent repeated clicks while processing
+        resetPasswordButton.setDisable(true);
+        accountStatusLabel.setText("Sending password reset email…");
+
+        if (coordinator != null) {
+            coordinator.resetPassword(email).thenAccept(authResult ->
+                    Platform.runLater(() -> {
+                        resetPasswordButton.setDisable(false);
+                        accountStatusLabel.setText(authResult.message());
+                    }));
+        } else if (authService != null) {
+            Thread worker = new Thread(() -> {
+                String message;
+                try {
+                    authService.sendPasswordResetEmail(email);
+                    message = "If this email is registered, a password reset link has been sent. Check your inbox.";
+                } catch (IOException e) {
+                    message = e.getMessage() == null ? "Password reset request failed." : e.getMessage();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    message = "Password reset request was interrupted.";
+                } catch (RuntimeException e) {
+                    message = "Password reset could not be completed.";
+                }
+
+                final String finalMsg = message;
+                Platform.runLater(() -> {
+                    resetPasswordButton.setDisable(false);
+                    accountStatusLabel.setText(finalMsg);
+                });
+            }, "pc-doqtar-settings-reset-password");
+            worker.setDaemon(true);
+            worker.start();
+        } else {
+            resetPasswordButton.setDisable(false);
+            accountStatusLabel.setText("Authentication service is not available.");
+        }
     }
 
     private VBox createCard() {
@@ -165,5 +306,18 @@ public class SettingsPage extends VBox {
         } catch (IllegalArgumentException exception) {
             statusLabel.setText("Unable to save: " + exception.getMessage());
         }
+    }
+
+    // Accessors for automated testing
+    public Button getResetPasswordButton() {
+        return resetPasswordButton;
+    }
+
+    public Label getAccountStatusLabel() {
+        return accountStatusLabel;
+    }
+
+    public Label getAccountEmailLabel() {
+        return accountEmailLabel;
     }
 }

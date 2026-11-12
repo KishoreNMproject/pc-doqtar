@@ -9,15 +9,20 @@ import org.pcdoqtar.ui.theme.ThemeManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -74,12 +79,22 @@ public final class LoginDialog {
         Label passwordLabel = new Label("PASSWORD");
         passwordLabel.getStyleClass().add("login-field-label");
 
+        Hyperlink forgotPasswordLink = new Hyperlink("Forgot password?");
+        forgotPasswordLink.getStyleClass().add("forgot-password-link");
+        forgotPasswordLink.setFocusTraversable(true);
+
+        HBox passwordHeader = new HBox();
+        passwordHeader.setAlignment(Pos.CENTER_LEFT);
+        Region passwordSpacer = new Region();
+        HBox.setHgrow(passwordSpacer, Priority.ALWAYS);
+        passwordHeader.getChildren().addAll(passwordLabel, passwordSpacer, forgotPasswordLink);
+
         GridPane form = new GridPane();
         form.setVgap(6);
         form.setHgap(10);
         form.add(emailLabel, 0, 0);
         form.add(email, 0, 1);
-        form.add(passwordLabel, 0, 2);
+        form.add(passwordHeader, 0, 2);
         form.add(password, 0, 3);
         email.setPrefColumnCount(26);
         password.setPrefColumnCount(26);
@@ -87,7 +102,7 @@ public final class LoginDialog {
         Label message = new Label(" ");
         message.setWrapText(true);
         message.setMaxWidth(360);
-        message.setMinHeight(34);
+        message.setMinHeight(40);
 
         VBox content = new VBox(12, title, info, form, message);
         content.setPadding(new Insets(22, 22, 4, 22));
@@ -102,11 +117,14 @@ public final class LoginDialog {
         // Consume ACTION so the dialog stays open until Firebase answers.
         loginButton.addEventFilter(ActionEvent.ACTION, event -> {
             event.consume();
-            attempt(false, dialog, authService, email, password, message, all);
+            attempt(false, dialog, authService, email, password, message, all, forgotPasswordLink);
         });
         registerButton.addEventFilter(ActionEvent.ACTION, event -> {
             event.consume();
-            attempt(true, dialog, authService, email, password, message, all);
+            attempt(true, dialog, authService, email, password, message, all, forgotPasswordLink);
+        });
+        forgotPasswordLink.setOnAction(event -> {
+            handleForgotPassword(authService, email, message, all, forgotPasswordLink);
         });
 
         // Closing with "Not now" / Esc simply means "stay offline".
@@ -116,6 +134,61 @@ public final class LoginDialog {
         return dialog.showAndWait().orElse(Boolean.FALSE);
     }
 
+    private static void handleForgotPassword(
+            FirebaseAuthService authService,
+            TextField emailField,
+            Label message,
+            Button[] buttons,
+            Hyperlink forgotPasswordLink) {
+
+        String emailText = emailField.getText() == null ? "" : emailField.getText().trim();
+
+        if (emailText.isEmpty()) {
+            show(message, "Enter your email address to reset your password.", true);
+            emailField.requestFocus();
+            return;
+        }
+
+        if (!FirebaseAuthService.isValidEmail(emailText)) {
+            show(message, "Enter a valid email address.", true);
+            emailField.requestFocus();
+            return;
+        }
+
+        setBusy(buttons, forgotPasswordLink, true);
+        show(message, "Sending password reset email…", false);
+
+        Thread worker = new Thread(() -> {
+            String error = null;
+
+            try {
+                authService.sendPasswordResetEmail(emailText);
+            } catch (IOException exception) {
+                error = exception.getMessage() == null || exception.getMessage().isBlank()
+                        ? "Unable to send reset email. Check your connection and try again."
+                        : exception.getMessage();
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                error = "Password reset request was interrupted.";
+            } catch (RuntimeException exception) {
+                error = "Password reset could not be completed.";
+            }
+
+            final String failure = error;
+            Platform.runLater(() -> {
+                setBusy(buttons, forgotPasswordLink, false);
+                if (failure == null) {
+                    show(message, "If this email is registered, a password reset link has been sent. Check your inbox.", false);
+                } else {
+                    show(message, failure, true);
+                }
+            });
+        }, "pc-doqtar-forgot-password");
+
+        worker.setDaemon(true);
+        worker.start();
+    }
+
     private static void attempt(
             boolean register,
             Dialog<Boolean> dialog,
@@ -123,7 +196,8 @@ public final class LoginDialog {
             TextField emailField,
             PasswordField passwordField,
             Label message,
-            Button[] buttons) {
+            Button[] buttons,
+            Hyperlink forgotPasswordLink) {
 
         String emailText = emailField.getText().trim();
         String passwordText = passwordField.getText();
@@ -133,7 +207,7 @@ public final class LoginDialog {
             return;
         }
 
-        setDisabled(buttons, true);
+        setBusy(buttons, forgotPasswordLink, true);
         show(message, register ? "Creating your account…" : "Signing in…", false);
 
         Thread worker = new Thread(() -> {
@@ -162,7 +236,7 @@ public final class LoginDialog {
                     dialog.setResult(Boolean.TRUE); // closes the dialog
                 } else {
                     show(message, failure, true);
-                    setDisabled(buttons, false);
+                    setBusy(buttons, forgotPasswordLink, false);
                 }
             });
         }, "pc-doqtar-login");
@@ -171,9 +245,12 @@ public final class LoginDialog {
         worker.start();
     }
 
-    private static void setDisabled(Button[] buttons, boolean disabled) {
+    private static void setBusy(Button[] buttons, Hyperlink link, boolean busy) {
         for (Button button : buttons) {
-            button.setDisable(disabled);
+            button.setDisable(busy);
+        }
+        if (link != null) {
+            link.setDisable(busy);
         }
     }
 

@@ -9,6 +9,10 @@ public class DiagnosticResult {
     private final HealthStatus status;
     private final String message;
 
+    public DiagnosticResult() {
+        this("Unknown", 0.0, "", HealthStatus.NORMAL, "");
+    }
+
     public DiagnosticResult(
             String metric,
             double value,

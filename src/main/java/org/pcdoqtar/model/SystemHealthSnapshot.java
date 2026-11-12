@@ -11,6 +11,13 @@ public class SystemHealthSnapshot {
     private final DiagnosticResult memory;
     private final List<DiagnosticResult> storage;
 
+    public SystemHealthSnapshot() {
+        this(LocalDateTime.now(),
+                new DiagnosticResult("CPU", 0.0, "%", HealthStatus.NORMAL, "OK"),
+                new DiagnosticResult("Memory", 0.0, "%", HealthStatus.NORMAL, "OK"),
+                List.of());
+    }
+
     public SystemHealthSnapshot(
             LocalDateTime timestamp,
             DiagnosticResult cpu,

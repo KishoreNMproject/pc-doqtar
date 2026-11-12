@@ -96,6 +96,36 @@ public final class AuthenticationCoordinator implements AutoCloseable {
         }, executor);
     }
 
+    /**
+     * Sends a password reset request asynchronously via the executor.
+     */
+    public CompletableFuture<AuthenticationResult> resetPassword(String email) {
+        if (email == null || email.isBlank()) {
+            return CompletableFuture.completedFuture(
+                    AuthenticationResult.failure("Enter your email address."));
+        }
+
+        if (!FirebaseAuthService.isValidEmail(email)) {
+            return CompletableFuture.completedFuture(
+                    AuthenticationResult.failure("Enter a valid email address."));
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                authService.sendPasswordResetEmail(email.trim());
+                return AuthenticationResult.success(
+                        "If this email is registered, a password reset link has been sent. Check your inbox.");
+            } catch (IOException exception) {
+                return AuthenticationResult.failure(safeMessage(exception));
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                return AuthenticationResult.failure("Password reset was interrupted.");
+            } catch (RuntimeException exception) {
+                return AuthenticationResult.failure("Password reset could not be completed.");
+            }
+        }, executor);
+    }
+
     private String authServiceSessionEmail() {
         // FirebaseAuthService owns the session and confirms sign-in
         // by returning normally. Keep the coordinator independent
