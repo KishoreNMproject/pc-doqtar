@@ -2,3 +2,4 @@ dist/
 build/
 *.exe
 /target/
+PROJECT_REPORT.md
