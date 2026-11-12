@@ -1,16 +1,15 @@
 package org.pcdoqtar.lifecycle;
 
-public final class StartupConfiguration {
+import org.pcdoqtar.auth.FirebaseAuthService;
 
-    private static final String FIREBASE_API_KEY =
-            "FIREBASE_WEB_API_KEY";
+public final class StartupConfiguration {
 
     private StartupConfiguration() {
         // Utility class.
     }
 
     public static boolean hasFirebaseApiKey() {
-        String value = System.getenv(FIREBASE_API_KEY);
+        String value = FirebaseAuthService.resolveApiKey();
         return value != null && !value.isBlank();
     }
 

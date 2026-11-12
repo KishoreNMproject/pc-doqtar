@@ -108,15 +108,19 @@ class FirebaseAuthServiceTest {
         @Test
         void throwsWhenApiKeyNotConfigured() {
             AuthSession session = new AuthSession();
-            FirebaseAuthService service = new FirebaseAuthService(session);
+            FirebaseAuthService service = new FirebaseAuthService(session, null);
 
-            String configuredKey = System.getenv("FIREBASE_WEB_API_KEY");
-            if (configuredKey == null || configuredKey.isBlank()) {
-                IOException ex = assertThrows(IOException.class, () ->
-                        service.sendPasswordResetEmail("test@example.com"));
-                assertTrue(ex.getMessage().contains("FIREBASE_WEB_API_KEY is not configured"),
-                        "Expected missing key error message.");
-            }
+            IOException ex = assertThrows(IOException.class, () ->
+                    service.sendPasswordResetEmail("test@example.com"));
+            assertTrue(ex.getMessage().contains("FIREBASE_WEB_API_KEY is not configured"),
+                    "Expected missing key error message.");
+        }
+
+        @Test
+        void resolvesApiKeyFromSystemOrRegistry() {
+            String resolved = FirebaseAuthService.resolveApiKey();
+            assertNotNull(resolved, "Firebase Web API key should be resolved from environment or registry.");
+            assertFalse(resolved.isBlank(), "Resolved Firebase Web API key must not be blank.");
         }
 
         @Test

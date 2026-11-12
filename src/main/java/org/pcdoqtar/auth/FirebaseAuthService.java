@@ -7,10 +7,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.WinReg;
 
 public class FirebaseAuthService {
 
@@ -32,15 +35,115 @@ public class FirebaseAuthService {
     private static final java.util.regex.Pattern EMAIL_PATTERN =
             java.util.regex.Pattern.compile("^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$");
 
-    private final String apiKey;
+    private final String explicitApiKey;
+    private final boolean explicitKeyProvided;
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
     private final AuthSession session;
 
     public FirebaseAuthService(AuthSession session) {
         this.session = session;
-        this.apiKey = System.getenv("FIREBASE_WEB_API_KEY");
+        this.explicitApiKey = null;
+        this.explicitKeyProvided = false;
+    }
 
+    public FirebaseAuthService(AuthSession session, String apiKey) {
+        this.session = session;
+        this.explicitApiKey = apiKey != null && !apiKey.isBlank() ? apiKey.trim() : null;
+        this.explicitKeyProvided = true;
+    }
+
+    /**
+     * Resolves the Firebase Web API key across multiple sources:
+     * 1. Java system properties (-DFIREBASE_WEB_API_KEY=..., -Dfirebase.web.api.key=..., -DFIREBASE_API_KEY=...)
+     * 2. Process environment variables (FIREBASE_WEB_API_KEY, FIREBASE_API_KEY)
+     * 3. Windows User/System Registry (HKCU\Environment, HKLM\...\Environment) so that keys
+     *    configured via Windows Settings are resolved even if the current IDE/process was launched
+     *    before the environment variable was broadcast.
+     */
+    public static String resolveApiKey() {
+        String key = System.getProperty("FIREBASE_WEB_API_KEY");
+        if (isNonEmpty(key)) return key.trim();
+
+        key = System.getProperty("firebase.web.api.key");
+        if (isNonEmpty(key)) return key.trim();
+
+        key = System.getProperty("FIREBASE_API_KEY");
+        if (isNonEmpty(key)) return key.trim();
+
+        key = System.getenv("FIREBASE_WEB_API_KEY");
+        if (isNonEmpty(key)) return key.trim();
+
+        key = System.getenv("FIREBASE_API_KEY");
+        if (isNonEmpty(key)) return key.trim();
+
+        if (isWindows()) {
+            key = readWindowsRegistryEnvironment("FIREBASE_WEB_API_KEY");
+            if (isNonEmpty(key)) return key.trim();
+
+            key = readWindowsRegistryEnvironment("FIREBASE_API_KEY");
+            if (isNonEmpty(key)) return key.trim();
+        }
+
+        return null;
+    }
+
+    public String getApiKey() {
+        if (explicitKeyProvided) {
+            return explicitApiKey;
+        }
+        return resolveApiKey();
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
+    }
+
+    private static boolean isNonEmpty(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    private static String readWindowsRegistryEnvironment(String variableName) {
+        try {
+            if (Advapi32Util.registryValueExists(WinReg.HKEY_CURRENT_USER, "Environment", variableName)) {
+                String val = Advapi32Util.registryGetStringValue(WinReg.HKEY_CURRENT_USER, "Environment", variableName);
+                if (isNonEmpty(val)) return val.trim();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (Advapi32Util.registryValueExists(WinReg.HKEY_LOCAL_MACHINE,
+                    "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", variableName)) {
+                String val = Advapi32Util.registryGetStringValue(WinReg.HKEY_LOCAL_MACHINE,
+                        "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", variableName);
+                if (isNonEmpty(val)) return val.trim();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        // Fallback: query via reg command
+        try {
+            Process process = new ProcessBuilder("reg", "query", "HKCU\\Environment", "/v", variableName)
+                    .redirectErrorStream(true)
+                    .start();
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains(variableName)) {
+                        String[] parts = line.trim().split("\\s+");
+                        if (parts.length >= 3) {
+                            return parts[2].trim();
+                        }
+                    }
+                }
+            }
+            process.waitFor();
+        } catch (Throwable ignored) {
+        }
+
+        return null;
     }
 
     public void signIn(String email, String password)
@@ -57,7 +160,8 @@ public class FirebaseAuthService {
     private void requestTokens(String endpoint, String email, String password)
             throws IOException, InterruptedException {
 
-        if (apiKey == null || apiKey.isBlank()) {
+        String effectiveKey = getApiKey();
+        if (effectiveKey == null || effectiveKey.isBlank()) {
             throw new IOException(
                     "Optional sign-in is unavailable because FIREBASE_WEB_API_KEY is not configured.");
         }
@@ -72,7 +176,7 @@ public class FirebaseAuthService {
         body.put("returnSecureToken", true);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(endpoint + apiKey))
+                .uri(URI.create(endpoint + effectiveKey))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
                         mapper.writeValueAsString(body),
@@ -102,7 +206,8 @@ public class FirebaseAuthService {
     public synchronized String getValidIdToken()
             throws IOException, InterruptedException {
 
-        if (apiKey == null || apiKey.isBlank() || !session.isLoggedIn()) {
+        String effectiveKey = getApiKey();
+        if (effectiveKey == null || effectiveKey.isBlank() || !session.isLoggedIn()) {
             return null;
         }
 
@@ -124,7 +229,7 @@ public class FirebaseAuthService {
         body.put("refresh_token", refreshToken);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(REFRESH_URL + apiKey))
+                .uri(URI.create(REFRESH_URL + effectiveKey))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(
                         "grant_type=refresh_token&refresh_token="
@@ -167,7 +272,8 @@ public class FirebaseAuthService {
     public void sendPasswordResetEmail(String email)
             throws IOException, InterruptedException {
 
-        if (apiKey == null || apiKey.isBlank()) {
+        String effectiveKey = getApiKey();
+        if (effectiveKey == null || effectiveKey.isBlank()) {
             throw new IOException(
                     "Password reset is unavailable because FIREBASE_WEB_API_KEY is not configured.");
         }
@@ -186,7 +292,7 @@ public class FirebaseAuthService {
         body.put("email", trimmedEmail);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(RESET_PASSWORD_URL + apiKey))
+                .uri(URI.create(RESET_PASSWORD_URL + effectiveKey))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
                         mapper.writeValueAsString(body),

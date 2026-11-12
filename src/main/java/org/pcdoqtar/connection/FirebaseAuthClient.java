@@ -5,10 +5,14 @@ import java.net.URI;
 import java.net.http.*;
 import java.util.regex.*;
 
+import org.pcdoqtar.auth.FirebaseAuthService;
+
 public final class FirebaseAuthClient {
-    // Firebase Console > Project settings > Web API key
-    private static final String API_KEY = System.getenv("FIREBASE_WEB_API_KEY");
     private static final HttpClient HTTP = HttpClient.newHttpClient();
+
+    private static String getApiKey() {
+        return FirebaseAuthService.resolveApiKey();
+    }
 
     public record AuthSession(String email, String idToken, String refreshToken, long expiresAtMillis) {
         public boolean isExpiring() { return System.currentTimeMillis() > expiresAtMillis - 60_000; }
@@ -23,13 +27,14 @@ public final class FirebaseAuthClient {
     }
 
     public static void sendPasswordReset(String email) throws IOException, InterruptedException {
-        if (API_KEY == null || API_KEY.isBlank())
-            throw new IOException("FIREBASE_API_KEY environment variable is not set");
+        String apiKey = getApiKey();
+        if (apiKey == null || apiKey.isBlank())
+            throw new IOException("FIREBASE_WEB_API_KEY environment variable is not configured");
         if (email == null || email.isBlank())
             throw new IOException("Enter your email address");
         String body = "{\"requestType\":\"PASSWORD_RESET\",\"email\":\"" + esc(email.trim()) + "\"}";
         HttpRequest req = HttpRequest.newBuilder(
-                URI.create("https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=" + API_KEY))
+                URI.create("https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=" + apiKey))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body)).build();
         send(req);
@@ -38,9 +43,12 @@ public final class FirebaseAuthClient {
     /** Call before every upload: returns a fresh session if the token is about to expire. */
     public static AuthSession refreshIfNeeded(AuthSession s) throws IOException, InterruptedException {
         if (!s.isExpiring()) return s;
+        String apiKey = getApiKey();
+        if (apiKey == null || apiKey.isBlank())
+            throw new IOException("FIREBASE_WEB_API_KEY environment variable is not configured");
         String body = "grant_type=refresh_token&refresh_token=" + s.refreshToken();
         HttpRequest req = HttpRequest.newBuilder(
-                URI.create("https://securetoken.googleapis.com/v1/token?key=" + API_KEY))
+                URI.create("https://securetoken.googleapis.com/v1/token?key=" + apiKey))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(body)).build();
         String json = send(req);
@@ -50,12 +58,13 @@ public final class FirebaseAuthClient {
 
     private static AuthSession credentialCall(String op, String email, String password)
             throws IOException, InterruptedException {
-        if (API_KEY == null || API_KEY.isBlank())
-            throw new IOException("FIREBASE_API_KEY environment variable is not set");
+        String apiKey = getApiKey();
+        if (apiKey == null || apiKey.isBlank())
+            throw new IOException("FIREBASE_WEB_API_KEY environment variable is not configured");
         String body = "{\"email\":\"" + esc(email) + "\",\"password\":\"" + esc(password)
                 + "\",\"returnSecureToken\":true}";
         HttpRequest req = HttpRequest.newBuilder(
-                URI.create("https://identitytoolkit.googleapis.com/v1/accounts:" + op + "?key=" + API_KEY))
+                URI.create("https://identitytoolkit.googleapis.com/v1/accounts:" + op + "?key=" + apiKey))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body)).build();
         String json = send(req);

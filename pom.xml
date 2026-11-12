@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.pcdoqtar</groupId>
   <artifactId>pc-doqtar</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <name>PC DOQTAR</name>
   <description>A Light Weight PC Health Monitoring System</description>
   
@@ -20,9 +20,10 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>dist/gui/PCDOQTAR</directory>
+              <directory>dist/gui</directory>
               <includes>
-                <include>**/*</include>
+                <include>PCDOQTAR/**</include>
+                <include>PCDOQTAR</include>
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
@@ -101,7 +102,7 @@
                 <configuration>
                     <executable>jpackage</executable>
                     <!-- Flattened Single-Line Argument with the CORRECT Icon Path -->
-                    <commandlineArgs>--type app-image --name "PCDOQTAR" --dest "E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\dist\gui" --input "${project.build.directory}/jpackage-input" --main-jar "${project.build.finalName}.jar" --main-class org.pcdoqtar.app.DashboardApp --app-version 1.1.1 --vendor "PC DOQTAR" --module-path "E:\javafx-jmods-21" --add-modules javafx.controls,javafx.fxml,java.net.http,java.sql,java.management,java.logging --icon "E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\resources\org\pcdoqtar\app\pc-doqtar.ico"</commandlineArgs>
+                    <commandlineArgs>--type app-image --name "PCDOQTAR" --dest "E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\dist\gui" --input "${project.build.directory}/jpackage-input" --main-jar "${project.build.finalName}.jar" --main-class org.pcdoqtar.app.DashboardApp --app-version 1.1.2 --vendor "PC DOQTAR" --module-path "E:\javafx-jmods-21" --add-modules javafx.controls,javafx.fxml,java.net.http,java.sql,java.management,java.logging --icon "E:\@AJD_AI JAVA COURSE\Project\CODE\pc-doqtar\src\main\resources\org\pcdoqtar\app\pc-doqtar.ico"</commandlineArgs>
                 </configuration>
             </execution>
         </executions>

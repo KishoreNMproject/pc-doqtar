@@ -1,0 +1,308 @@
+{
+  "project": {
+    "name": "PC DOQTAR",
+    "version": "1.1.2",
+    "description": "Native Windows desktop system-monitoring, diagnostics, and PC health application with optional cloud synchronisation and background diagnostic reporting.",
+    "repository": "KishoreNMproject/pc-doqtar",
+    "backend_repository": "KishoreNMproject/pc-doqtar-connection-service",
+    "backend_service_url": "https://pc-doqtar-connection-service.vercel.app"
+  },
+  "technology_stack": {
+    "desktop_application": {
+      "language": "Java 21 (BellSoft Liberica JDK 21.0.4 recommended for packaging)",
+      "ui_toolkit": "JavaFX 21.0.8 (controls, graphics, fxml)",
+      "build_system": "Apache Maven (compiler release 21, source encoding UTF-8)",
+      "system_diagnostics": "OSHI 7.7.1 (oshi-core, JNA 5.19.1)",
+      "persistence_orm": "Hibernate Core 7.4.10.Final (Jakarta Persistence API 3.2.0)",
+      "database_driver": "MySQL Connector/J 26.7.0",
+      "json_parser": "Jackson Databind 2.19.2",
+      "logging_silencer": "SLF4J NOP 2.0.20",
+      "testing_framework": "JUnit Jupiter 5.10.2",
+      "packaging_tools": [
+        "jpackage (app-image runtime generation)",
+        "WinSW (PCDOQTARService background Windows service)",
+        "Inno Setup 6.7.1 (PCDOQTAR-Setup.exe single installer)"
+      ]
+    },
+    "connection_service": {
+      "framework": "Spring Boot 3.x",
+      "orm": "Spring Data JPA / Hibernate Core",
+      "database": "MySQL (hosted on Aiven Cloud, service host: mysql-pc-doqtar-pc-doqtar.c.aivencloud.com, db: pc_doqtar)",
+      "cloud_auth": "Firebase Admin SDK (Firebase ID token verification filter)",
+      "deployment_platform": "Vercel / Serverless container deployment"
+    }
+  },
+  "directory_and_package_structure": {
+    "pc_doqtar_desktop": {
+      "root": "E:\\@AJD_AI JAVA COURSE\\Project\\CODE\\pc-doqtar",
+      "packages": {
+        "org.pcdoqtar.app": "Application entry point (DashboardApp).",
+        "org.pcdoqtar.lifecycle": "Application lifecycle, dependency wiring (ApplicationServices), clean shutdown (ShutdownManager), error alerts.",
+        "org.pcdoqtar.ui": "UI views, custom title bar, page definitions (Overview, Diagnostics, Network, Processes, Settings), and AccountControl.",
+        "org.pcdoqtar.ui.navigation": "Page registry, sidebar navigation factory, view switcher controller.",
+        "org.pcdoqtar.ui.components": "Reusable UI cards, metric displays, warning indicators.",
+        "org.pcdoqtar.ui.theme": "ThemeManager (Light and Dark theme switching, inline style re-tinting, CSS loading).",
+        "org.pcdoqtar.diagnostics": "Diagnostics orchestrator (SystemDiagnostics), health evaluation rules, async task execution (DiagnosticTaskManager).",
+        "org.pcdoqtar.diagnostics.cpu": "CPU utilisation and load diagnostics.",
+        "org.pcdoqtar.diagnostics.memory": "RAM utilisation, available/used bytes diagnostics.",
+        "org.pcdoqtar.diagnostics.storage": "Physical disk and file store capacity diagnostics.",
+        "org.pcdoqtar.diagnostics.network": "Network interface collection (physical/virtual filtering, traffic counters, Cloudflare speed test).",
+        "org.pcdoqtar.diagnostics.process": "Running processes retrieval, PID inspection, and resource tracking.",
+        "org.pcdoqtar.model": "Diagnostic models: DiagnosticResult, HealthStatus, SystemHealthSnapshot.",
+        "org.pcdoqtar.auth": "Firebase authentication REST client, AuthSession, AuthenticationCoordinator, LoginDialog.",
+        "org.pcdoqtar.connection": "Backend HTTP client (ServerConnection), payload transformation (SnapshotMapper), handover orchestration (ServerHandover), and retry queue (SyncCoordinator).",
+        "org.pcdoqtar.service": "Standalone background diagnostic process (DiagnosticServiceMain).",
+        "org.pcdoqtar.settings": "Persistent user preferences via Java Preferences API (AppSettings)."
+      },
+      "resources": {
+        "theme_dark": "src/main/resources/org/pcdoqtar/ui/theme/theme-dark.css",
+        "theme_light": "src/main/resources/org/pcdoqtar/ui/theme/theme-light.css",
+        "login_css": "src/main/resources/org/pcdoqtar/auth/login.css",
+        "dashboard_css": "src/main/resources/org/pcdoqtar/app/dashboard.css",
+        "icons": "src/main/resources/org/pcdoqtar/app/pc-doqtar.ico and pc-doqtar.png",
+        "hibernate_config": "src/main/resources/hibernate.cfg.xml"
+      },
+      "dist": {
+        "installer_script": "dist/PCDOQTAR-Setup.iss",
+        "service_wrapper": "dist/PCDOQTAR-Service/PCDOQTARService.exe and PCDOQTARService.xml",
+        "app_image": "dist/gui/PCDOQTAR/PCDOQTAR.exe"
+      }
+    },
+    "pc_doqtar_connection_service": {
+      "root": "E:\\@AJD_AI JAVA COURSE\\Project\\CODE\\pc-doqtar-connection-service",
+      "packages": {
+        "com.pcdoqtar.application.controller": "REST endpoints: AuthController, DiagnosticController, SystemController.",
+        "com.pcdoqtar.application.security": "FirebaseAuthenticationFilter (Bearer token validation via Firebase Admin).",
+        "com.pcdoqtar.application.service": "DiagnosticService (save, compare, and historical query logic).",
+        "com.pcdoqtar.application.entities": "JPA entities: Diagnosticrecord, DiagnosticSnapshot, MetricDetail, StorageMetric.",
+        "com.pcdoqtar.application.dto": "Transfer objects: DiagnosticUploadRequest, DiagnosticUploadResponse, HistoricalComparisonDto.",
+        "com.pcdoqtar.application.repository": "Spring Data JPA repositories (DiagnosticrecordRepository).",
+        "com.pcdoqtar.application.error": "GlobalExceptionHandler, ErrorResponse, ErrorType."
+      }
+    }
+  },
+  "important_classes_and_responsibilities": {
+    "DashboardApp": "JavaFX entry point; invokes ApplicationLifecycle.",
+    "ApplicationLifecycle": "Orchestrates primary Stage initialisation, custom window styling, unhandled startup errors, and clean shutdown.",
+    "ApplicationServices": "Central service container holding singletons for AuthSession, FirebaseAuthService, AuthenticationCoordinator, SystemDiagnostics, NetworkDiagnostics, DiagnosticTaskManager, ServerHandover, and SyncCoordinator.",
+    "ThemeManager": "Manages Dark/Light palette switching, applies theme CSS files, dynamically re-tints inline node styling at runtime without page reconstruction.",
+    "CustomTitleBar": "Undecorated window title bar handling window dragging, double-click maximisation, minimize, maximize, close, and embeds AccountControl.",
+    "AccountControl": "Title-bar component providing optional Firebase Sign-in, sign-out, manual 'Sync now', and real-time synchronisation status pills.",
+    "SystemDiagnostics": "Facade collecting system snapshots across CPU, memory, storage, and coordinating diagnostic sub-services.",
+    "DiagnosticTaskManager": "ThreadPoolExecutor-backed worker manager handling async diagnostic collections on background threads.",
+    "DiagnosticServiceMain": "Background Windows service that writes periodic diagnostic snapshots every 5 minutes to %PROGRAMDATA%\\PCDOQTAR\\latest-diagnostics.json.",
+    "SyncCoordinator": "Single-flight cloud sync manager with persistent on-disk queue (%PROGRAMDATA%\\PCDOQTAR\\pending-sync), exponential backoff with jitter (5s, 10s, 20s, 30s, 60s), and live network probe detection.",
+    "ServerConnection": "HTTP client handling REST communication with the backend (/sessions, /getsession, /api/diagnostics/upload).",
+    "SnapshotMapper": "Maps client SystemHealthSnapshot models into the backend DiagnosticUploadRequest JSON schema.",
+    "AppSettings": "Persistent user preferences (theme, warning threshold, navigation collapsed by default) backed by Windows Registry via Java Preferences."
+  },
+  "application_startup_and_shutdown_flow": {
+    "startup_flow": [
+      "1. JVM executes org.pcdoqtar.app.DashboardApp.main(args).",
+      "2. JavaFX runtime initialises and invokes DashboardApp.start(Stage).",
+      "3. ApplicationLifecycle instantiates ApplicationServices (AuthSession, FirebaseAuthService, SystemDiagnostics, NetworkDiagnostics, DiagnosticTaskManager, ServerHandover, SyncCoordinator).",
+      "4. SyncCoordinator loads any pending offline records from %PROGRAMDATA%\\PCDOQTAR\\pending-sync.",
+      "5. DashboardViewFactory builds Overview, Diagnostics, Network, Processes, and Settings pages, wiring NavigationController and SidebarFactory.",
+      "6. CustomTitleBar is attached to root top, AccountControl is injected, and undecorated Stage parameters (min width 1000, min height 700) are configured.",
+      "7. Active theme from AppSettings is applied via ThemeManager.apply(scene).",
+      "8. Stage is shown, and initial Overview scan is triggered on background daemon thread."
+    ],
+    "shutdown_flow": [
+      "1. Stage close requested via CustomTitleBar close button or window event.",
+      "2. ShutdownManager catches event and invokes ApplicationLifecycle.shutdown().",
+      "3. ApplicationServices closes SyncCoordinator (cancels scheduler, flushes pending state).",
+      "4. DiagnosticTaskManager shuts down thread pool immediately (shutdownNow).",
+      "5. AuthenticationCoordinator executor is closed.",
+      "6. FirebaseAuthService logs out in-memory session.",
+      "7. Platform.exit() terminates JavaFX runtime and JVM exits cleanly."
+    ]
+  },
+  "ui_architecture_and_navigation": {
+    "shell_structure": "BorderPane root containing CustomTitleBar (Top) and dashboard shell (Center). Dashboard shell contains HBox navigation toolbar (Top with hamburger button and page title), Collapsible Sidebar (Left), and ScrollPane-wrapped active page (Center).",
+    "navigation_drawer": "Hamburger button toggles sidebar visibility (shell.setLeft(sidebar / null)). Configurable default collapsed state stored persistently via AppSettings.isNavigationCollapsedByDefault().",
+    "sidebar": "190px width brand block with navigation buttons: Overview, Diagnostics, Network, Processes, Settings. Active page marked with '.active' CSS class.",
+    "theming": "Immediate runtime switching between Dark (default) and Light. Colors defined as CSS variables (-app-background, -app-surface, -app-accent, -app-warning, -app-critical, etc.) bound to .root, .theme-dark, and .theme-light. ThemeManager automatically re-tints existing nodes."
+  },
+  "diagnostic_and_monitoring_implementation": {
+    "cpu": "CpuDiagnostics uses OSHI CentralProcessor; calculates system-wide CPU load percentage and per-core distribution; flags normal (<80%), warning (>=80%), or critical (>=90%).",
+    "memory": "MemoryDiagnostics uses OSHI GlobalMemory; calculates available vs total RAM bytes, page file usage, and utilisation percentage.",
+    "storage": "StorageDiagnostics iterates OSHI OSFileStore list; computes free/total bytes and utilisation for each active drive letter.",
+    "network": "NetworkDiagnostics collects NetworkInterface and OSHI NetworkIF metrics (link speed, RX/TX byte totals, IPv4/IPv6, MAC). Filters out virtual, loopback, and filter miniports. NetworkPerformanceTest runs HTTP latency and throughput benchmarks via Cloudflare endpoints.",
+    "processes": "ProcessesPage queries OSHI OperatingSystem.getProcesses (top 200 sorted by resident RAM). Normalises cumulative CPU load to available processor count. Supports PID/name filtering.",
+    "process_termination": "End Task validates against protected system processes (PID <= 4, self PID, and Windows system processes). Requires explicit user confirmation dialog. Uses ProcessHandle.destroy() with permission error reporting."
+  },
+  "database_architecture_and_entity_relationships": {
+    "provider": "MySQL on Aiven Cloud (pc_doqtar database).",
+    "primary_table": "diagnostic_records (mapped by com.pcdoqtar.application.entities.Diagnosticrecord).",
+    "indexes": [
+      "idx_diag_firebase_uid_created on (firebase_uid, created_at)",
+      "idx_diag_session_id on (session_id)"
+    ],
+    "key_columns": [
+      "id (BIGINT AUTO_INCREMENT PRIMARY KEY)",
+      "firebase_uid (VARCHAR(128) NOT NULL)",
+      "user_email (VARCHAR(255))",
+      "session_id (VARCHAR(64))",
+      "hostname (VARCHAR(128))",
+      "os_info (VARCHAR(255))",
+      "cpu_usage_percent (DOUBLE)",
+      "memory_usage_percent (DOUBLE)",
+      "memory_used_bytes (BIGINT)",
+      "memory_total_bytes (BIGINT)",
+      "storage_usage_percent (DOUBLE)",
+      "storage_free_bytes (BIGINT)",
+      "storage_total_bytes (BIGINT)",
+      "network_connected (BOOLEAN)",
+      "network_latency_ms (DOUBLE)",
+      "running_process_count (INT)",
+      "overall_health_status (VARCHAR(32) NOT NULL)",
+      "diagnostic_summary (VARCHAR(1000))",
+      "raw_snapshot_json (LONGTEXT)",
+      "captured_at (DATETIME(6) NOT NULL)",
+      "created_at (DATETIME(6) NOT NULL)"
+    ]
+  },
+  "backend_integration_and_api_contracts": {
+    "strict_rule": "NEVER change or invent API endpoints, paths, query parameters, payloads, or authentication headers without explicit user instruction.",
+    "base_url": "https://pc-doqtar-connection-service.vercel.app (configurable via PC_DOQTAR_SERVER_URL environment variable)",
+    "endpoints": {
+      "GET /": {
+        "auth_required": false,
+        "purpose": "Public liveness health check.",
+        "response": "200 text/plain: 'PC DOQTAR Server is running.'"
+      },
+      "GET /sessions": {
+        "auth_required": true,
+        "purpose": "Verifies server MySQL database connectivity via SessionFactory native query.",
+        "response": "200 text/plain: boolean ('true' or 'false')"
+      },
+      "GET /getsession": {
+        "auth_required": true,
+        "purpose": "Generates and returns a unique session UUID string.",
+        "response": "200 text/plain: UUID string"
+      },
+      "GET /auth/me": {
+        "auth_required": true,
+        "purpose": "Returns authenticated user identity.",
+        "response": "200 JSON: {\"uid\": \"...\", \"email\": \"...\"}"
+      },
+      "POST /api/diagnostics/upload": {
+        "auth_required": true,
+        "purpose": "Uploads single diagnostic snapshot from desktop client.",
+        "request_headers": {
+          "Authorization": "Bearer <Firebase_ID_Token>",
+          "Content-Type": "application/json"
+        },
+        "request_body": {
+          "sessionId": "string (max 64)",
+          "hostname": "string (max 128)",
+          "osInfo": "string (max 255)",
+          "cpuUsagePercent": "double (0-100)",
+          "memoryUsagePercent": "double (0-100)",
+          "storageUsagePercent": "double (0-100)",
+          "runningProcessCount": "integer",
+          "overallHealthStatus": "string (NORMAL, WARNING, CRITICAL, UNAVAILABLE)",
+          "diagnosticSummary": "string (max 1000)",
+          "capturedAt": "ISO-8601 UTC timestamp string"
+        },
+        "response": "201 Created JSON with recordId, status, and historicalComparison."
+      },
+      "POST /api/diagnostics/upload-batch": {
+        "auth_required": true,
+        "purpose": "Uploads an array of diagnostic snapshots in a single call.",
+        "response": "201 Created JSON array of upload responses."
+      },
+      "GET /api/diagnostics/latest": {
+        "auth_required": true,
+        "purpose": "Retrieves the most recent diagnostic snapshot for the authenticated user.",
+        "response": "200 OK JSON or 204 No Content."
+      },
+      "GET /api/diagnostics/history?limit=20": {
+        "auth_required": true,
+        "purpose": "Retrieves historical diagnostic records for authenticated user.",
+        "response": "200 OK JSON array."
+      }
+    }
+  },
+  "authentication_and_synchronisation_workflows": {
+    "auth_flow": [
+      "1. Client uses Firebase Authentication REST API (Identity Toolkit v1).",
+      "2. LoginDialog requests email/password; calls FirebaseAuthService.signIn() or signUp().",
+      "3. Tokens (idToken, refreshToken, uid, email, expiresIn) stored in AuthSession.",
+      "4. Valid ID token is refreshed automatically when within 60s of expiration.",
+      "5. Password reset requests dispatched via sendOobCode REST API with privacy preservation (does not leak email existence).",
+      "6. Client authenticates to Spring Boot connection service via HTTP Authorization: Bearer <idToken>."
+    ],
+    "sync_flow": [
+      "1. Sync is triggered manually via 'Sync now' or queued upon scan/handover.",
+      "2. SyncCoordinator uses Single-Flight lock (atomic boolean); drops duplicate parallel uploads.",
+      "3. Connectivity is verified via socket ping to server host and public DNS resolvers (1.1.1.1:443 / 8.8.8.8:53).",
+      "4. Failed uploads are persisted locally to disk in %PROGRAMDATA%\\PCDOQTAR\\pending-sync as JSON files.",
+      "5. SyncCoordinator schedules exponential backoff retries (5s, 10s, 20s, 30s, 60s max) with random jitter.",
+      "6. On HTTP 401, attempts token refresh before re-queueing. On HTTP 429, respects Retry-After header. On 4xx client errors, ceases retry loop to prevent infinite loops.",
+      "7. On HTTP 200/201 success, pending disk file is deleted and status is updated to 'Sync Success'."
+    ]
+  },
+  "configuration_and_environment_variables": {
+    "desktop_app": {
+      "FIREBASE_WEB_API_KEY": "Required for optional cloud authentication and password reset. Resolved dynamically across Java system properties (-DFIREBASE_WEB_API_KEY=..., -Dfirebase.web.api.key=...), process environment variables (FIREBASE_WEB_API_KEY, FIREBASE_API_KEY), and Windows User Registry (HKCU\\Environment) so that keys set via Windows User Settings are resolved even if the parent terminal/IDE process was started before setting the variable.",
+      "PC_DOQTAR_SERVER_URL": "Optional URL override for local backend testing (default: https://pc-doqtar-connection-service.vercel.app).",
+      "PROGRAMDATA": "Windows system variable pointing to C:\\ProgramData (used for PCDOQTAR diagnostic JSON storage)."
+    },
+    "connection_service": {
+      "DB_URL": "JDBC connection URL for Aiven MySQL (jdbc:mysql://mysql-pc-doqtar-pc-doqtar.c.aivencloud.com:port/pc_doqtar?sslmode=require).",
+      "DB_USERNAME": "Database username.",
+      "DB_PASSWORD": "Database password.",
+      "PORT": "HTTP server listen port (defaults to 8080).",
+      "GOOGLE_APPLICATION_CREDENTIALS": "Path to Firebase Admin Service Account JSON or inline credentials."
+    }
+  },
+  "packaging_and_deployment_procedures": {
+    "maven_build": "mvn clean package (compiles JAR, copies dependencies and application JAR to target/jpackage-input, runs jpackage).",
+    "gui_app_image": "jpackage --type app-image --name 'PCDOQTAR' --dest 'dist/gui' --input 'target/jpackage-input' --main-jar 'pc-doqtar-1.1.1.jar' --main-class org.pcdoqtar.app.DashboardApp --app-version 1.1.1 --vendor 'PC DOQTAR' --module-path 'E:\\javafx-jmods-21' --add-modules javafx.controls,javafx.fxml,java.net.http,java.sql,java.management,java.logging --icon 'src/main/resources/org/pcdoqtar/app/pc-doqtar.ico'",
+    "service_bundle": "Staged under dist/PCDOQTAR-Service with PCDOQTARService.exe (WinSW), classes, and lib-minimal.",
+    "installer_compilation": "Inno Setup Compiler (ISCC.exe) dist/PCDOQTAR-Setup.iss producing dist/PCDOQTAR-Setup.exe.",
+    "installer_actions": "Installs GUI to {autopf}\\PC DOQTAR\\GUI, Service to {autopf}\\PC DOQTAR\\Service, adds HKCU Run autostart key PCDOQTAR_GUI, installs and starts PCDOQTARService."
+  },
+  "completed_features": [
+    "Core system diagnostics collecting real CPU, RAM, and drive utilization via OSHI.",
+    "Overview page with CPU, Memory, and Storage usage PieCharts and health status cards.",
+    "Detailed Diagnostics page with individual metric evaluation (Normal, Warning, Critical).",
+    "Process Manager displaying top 200 processes sorted by RAM with search filter and safe End Task termination.",
+    "Network page showing filtered physical active adapters, MAC, IPv4, IPv6, throughput, and Cloudflare speed test.",
+    "Full Dark and Light themes with dynamic runtime switching via ThemeManager without UI restarts.",
+    "Custom title bar with window controls (drag, minimize, maximize, close) and integrated AccountControl.",
+    "Optional Firebase email/password authentication (Sign in, Sign up, Forgot password, and Settings password reset).",
+    "Single-flight cloud synchronization with exponential backoff retry and persistent disk storage in %PROGRAMDATA%\\PCDOQTAR\\pending-sync.",
+    "Background Windows Diagnostic Service (DiagnosticServiceMain) updating latest-diagnostics.json every 5 minutes.",
+    "Spring Boot connection service deployed to Vercel with MySQL persistence on Aiven and Firebase Bearer authentication.",
+    "Comprehensive automated JUnit 5 test suite (46 passing tests covering auth, sync, account control, settings, and themes)."
+  ],
+  "known_bugs_and_outstanding_work": [
+    "Session persistence across restarts: AuthSession is currently purely in-memory; tokens are lost when the desktop application closes. User is required to re-authenticate on every launch.",
+    "Network diagnostics missing Default Gateway and DNS: AdapterInfo currently collects IP and MAC, but does not query NetworkParams for default gateway and DNS servers.",
+    "Process Manager post-termination UX: The process list does not automatically re-scan after 'End task' succeeds; it requires the user to click 'Scan processes' manually.",
+    "Hardcoded inline styles in ProcessesPage: ProcessesPage contains hardcoded inline styles (e.g. #101010) instead of clean CSS class references.",
+    "Unused legacy classes: LoginFrame (Swing-based JFrame) and duplicate FirebaseAuthClient regex-based client remain in the codebase.",
+    "Network interface filtering: Some VPN or tunnel virtual adapters may still slip past name-based filter list."
+  ],
+  "architectural_decisions_and_constraints": {
+    "strict_api_stability": "Never modify existing backend endpoints, routes, methods, or request/response payloads.",
+    "offline_first": "Local diagnostics must run with zero internet connection or account requirements; cloud sync is strictly optional.",
+    "ui_thread_safety": "All background tasks must dispatch JavaFX updates via Platform.runLater().",
+    "theme_coherence": "Theme styles must be managed centrally; avoid hardcoding static dark colors in component Java code.",
+    "process_safety": "Never terminate critical Windows OS processes (PID <= 4, csrss, lsass, winlogon, svchost, etc.) or PC DOQTAR itself."
+  },
+  "build_run_and_testing_instructions": {
+    "compile_and_test": "mvn test",
+    "run_desktop_app_via_maven": "mvn javafx:run",
+    "package_desktop_distribution": "mvn clean package",
+    "compile_installer": "iscc dist/PCDOQTAR-Setup.iss"
+  },
+  "git_and_development_status": {
+    "current_branch": "main",
+    "latest_commit": "pending release commit",
+    "working_tree_status": "in-progress",
+    "version": "1.1.2"
+  }
+}
