@@ -1,48 +1,69 @@
-# 🩺 PC DOQTAR
+# PC DOQTAR 🩺💻
+### *Smart, Lightweight System Health & Diagnostics Companion for Windows*
 
-> **Your Intelligent, Lightweight Personal Computer Health & Diagnostic Companion**
-
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Cross--Platform-blue.svg)](https://github.com/KishoreNMproject/pc-doqtar)
-[![UI Framework](https://img.shields.io/badge/UI-JavaFX-green.svg)](https://openjfx.io/)
-[![Cloud Sync](https://img.shields.io/badge/Cloud%20Sync-Firebase%20%2B%20Spring%20Boot-red.svg)](https://github.com/KishoreNMproject/pc-doqtar-connection-service)
-[![License](https://img.shields.io/badge/License-Proprietary-lightgrey.svg)](#)
-
----
-
-## 🌟 Overview
-
-**PC DOQTAR** is a modern, responsive desktop application built to take the guesswork out of computer performance and maintenance. Designed with a clean, user-friendly interface, PC DOQTAR continuously monitors your system hardware and operating system metrics, performs in-depth diagnostics, alerts you to emerging bottlenecks, and synchronizes health snapshots with the cloud for long-term health tracking.
-
-Whether you are a casual user wanting a smooth, fast PC, a power user monitoring demanding workloads, or an IT professional maintaining client machines, **PC DOQTAR acts as your personal system physician**.
+[![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)](https://github.com/KishoreNMproject/pc-doqtar/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6.svg)](https://www.microsoft.com/windows)
+[![Architecture](https://img.shields.io/badge/architecture-x64-brightgreen.svg)]()
+[![Privacy](https://img.shields.io/badge/privacy-local--first-success.svg)]()
+[![Cloud Sync](https://img.shields.io/badge/cloud%20sync-optional-orange.svg)]()
 
 ---
 
-## 🚀 Key Features for Users & Customers
+## 🌟 What is PC DOQTAR?
 
-### 1. 📊 Real-Time System Vitals
-- **Live Health Overview**: Get an instant summary score of your computer's vital signs (CPU, RAM, Disks, Network, and active tasks) directly from the primary dashboard.
-- **Intuitive Status Badges**: Clear, color-coded health states (**Healthy**, **Warning**, **Critical**) replace cryptic system error codes.
-- **Ultra-Low Overhead**: Engineered with lightweight architecture to ensure monitoring never drags down your gaming, streaming, or work productivity.
+**PC DOQTAR** is your personal computer's digital physician. Designed from the ground up for **Windows 10 and 11**, PC DOQTAR provides crystal-clear visibility into your computer's health, hardware performance, and system stability—all packaged inside a sleek, modern desktop interface that uses virtually zero background resources.
 
-### 2. 🔍 Comprehensive Diagnostic Suites
-| Diagnostic Module | What It Checks | Why It Matters To You |
-| :--- | :--- | :--- |
-| **CPU Diagnostics** | Core utilization, workload distribution, clock speeds, and thermal spikes | Prevents overheating and identifies applications causing performance stutter. |
-| **Memory (RAM)** | Active consumption, available RAM, swap file pressure, and leak heuristics | Ensures your system has enough memory for smooth multitasking without freezing. |
-| **Storage & Disks** | Partition capacities, read/write throughput, drive wear, and space alerts | Alerts you before drives run out of storage space or experience read/write failures. |
-| **Network Performance**| Latency (ping), active network interfaces, connection stability, and bandwidth | Diagnoses Wi-Fi lag, dropped connections, and apps hogging bandwidth. |
-| **Process Inspection** | High-consumption background tasks and unresponsive services | Pinpoints background software slowing down your startup or everyday workflow. |
+Whether you are a **gamer** tracking resource bottlenecks, a **remote professional** ensuring system stability for work, or an **everyday PC user** wanting to know why your computer is slowing down, PC DOQTAR delivers instant, actionable health assessments without confusing jargon or heavy background bloat.
 
-### 3. ☁️ Secure Cloud Sync & Historical Trends
-- **Track Health Over Time**: Connect your PC DOQTAR account to securely synchronize your diagnostic snapshots to the **PC DOQTAR Connection Service**.
-- **Trend & Degradation Analysis**: Compare your current system performance against historical baselines to identify gradual slowdowns, memory leaks, or thermal deterioration before they cause hardware damage.
-- **Offline Resilient**: Take diagnostic snapshots while offline; PC DOQTAR automatically syncs them to the cloud once you reconnect.
+---
 
-### 4. 🎨 Modern & Accessible Experience
-- **Dark & Light Themes**: Easily toggle between sleek Dark Mode and high-contrast Light Mode to suit your environment.
-- **Personalized Alerts**: Configure notification thresholds so you're only alerted when it matters to you.
-- **Dedicated Account Control**: Simple sign-in and session management powered by secure industry-standard authentication.
+## ✨ Key Customer Benefits & Features
+
+### 🩺 1. Instant PC Health Checkup
+- **One-Glance Health Status:** Get immediate clarity on your PC's condition with intuitive status badges: **Healthy**, **Warning**, or **Critical**.
+- **Plain-English Diagnosis:** Instead of confusing hex codes, PC DOQTAR tells you exactly what requires attention (e.g., *"RAM utilization is exceeding 85%"* or *"Storage drive C: has under 10% free space"*).
+- **Proactive Warnings:** Configurable health thresholds give you early notice before memory exhaustion or disk bottlenecks cause application freezes.
+
+### ⚡ 2. Real-Time Hardware Diagnostics
+- **CPU Performance:** Track live multi-core CPU load, system idle capacity, and core frequencies in real time.
+- **Memory (RAM) Health:** Monitor available memory vs. in-use memory with dynamic visual gauges.
+- **Storage Drive Health:** Inspect all connected physical drives and partitions, reviewing total storage, used space, and free capacity.
+- **High-Precision Telemetry:** Powered by the proven OSHI hardware abstraction library for fast, reliable hardware queries.
+
+### 🌐 3. Network Health & Speed Testing
+- **Smart Adapter Filtering:** Automatically detects and displays your active physical network interfaces (Wi-Fi and Ethernet) while filtering out confusing virtual adapters.
+- **Live Bandwidth Counters:** View sent and received traffic counters and link speeds.
+- **Built-in Cloudflare Speed Test:** Run latency and speed tests directly within the application to diagnose internet connectivity issues.
+
+### 🔍 4. Process Explorer & Bottleneck Finder
+- **Active Process Tracking:** See exactly which programs and background services are consuming your CPU cycles and memory.
+- **PID & Resource Visibility:** Easily identify rogue or unneeded background processes that are draining your laptop's battery or slowing down your workflow.
+
+### ☁️ 5. Optional Cloud Synchronization & Historical Trends
+- **Track Health Over Time:** Connect to the optional **PC DOQTAR Cloud Service** to store diagnostic snapshots and observe your computer’s performance trends across days, weeks, and months.
+- **Automatic Degradation Detection:** The cloud service analyzes trends between your diagnostic uploads to alert you if your system's performance is gradually degrading.
+- **Offline-First Resilience:** No internet? No problem! PC DOQTAR queues diagnostic reports safely on your hard drive and seamlessly synchronizes them when you reconnect.
+
+### 🎨 6. Sleek, Distraction-Free User Experience
+- **Custom Modern Window Design:** Clean, frameless layout with a custom title bar, smooth navigation, and responsive cards.
+- **Dark & Light Mode:** Toggle between Dark and Light themes with a single click in Settings. Your preference is automatically remembered across app restarts.
+- **Lightweight Footprint:** Built to monitor your computer without impacting its performance.
+
+---
+
+## 🔒 Privacy & Data Ethics: Your Data Stays Yours
+
+At PC DOQTAR, we believe your personal data belongs to you. Here is our customer privacy commitment:
+
+| What PC DOQTAR Reads | What PC DOQTAR NEVER Touches |
+| :--- | :--- |
+| ✅ CPU, RAM, and Disk utilization percentages | ❌ Personal files, photos, and documents |
+| ✅ Storage drive capacity and free space | ❌ Browsing history, cookies, or internet activity |
+| ✅ Network adapter speeds and byte counters | ❌ Passwords, keystrokes, or screen contents |
+| ✅ Active process names and memory footprint | ❌ Any sensitive or confidential user files |
+
+- **Local-First by Default:** PC DOQTAR operates 100% locally. You do not need an account or internet access to use all core diagnostics.
+- **Secure Cloud Sync:** When you choose to sync your reports to the cloud, all diagnostic payloads are transmitted over encrypted TLS/HTTPS and protected by Firebase Authentication.
 
 ---
 
@@ -50,103 +71,106 @@ Whether you are a casual user wanting a smooth, fast PC, a power user monitoring
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│  🩺 PC DOQTAR  [ Dashboard ]                          -  □  ×          │
-├─────────────┬──────────────────────────────────────────────────────────┤
-│             │  System Health: 96% [ EXCELLENT ]                        │
-│  📊 Overview│  ──────────────────────────────────────────────────────  │
-│  🔬 Diags   │  [ CPU: 18% ]     [ RAM: 4.2 / 16 GB ]   [ Disk: 62% ]   │
-│  🌐 Network │  Intel Core i7    DDR4 Dual Channel      NVMe SSD        │
-│  ⚙️ Tasks   │                                                          │
-│  ⚙️ Settings│  Recent Alerts:                                          │
-│             │  • No critical issues detected. System is running cool.  │
-│             │                                                          │
-│  [ Sign In ]│  [ Run Full Diagnostic Scan ]   [ Sync to Cloud ]        │
-└─────────────┴──────────────────────────────────────────────────────────┘
+│  PC DOQTAR                                      [👤 Sign In]  —  □  ✕  │
+├──────────────┬─────────────────────────────────────────────────────────┤
+│  📊 Overview │  System Health: 🟢 HEALTHY                              │
+│              │                                                         │
+│  🩺 Diags    │  [ CPU Load: 18% ]     [ Memory: 6.2 / 16.0 GB ]        │
+│              │  [ Disk C: 68% Used ]  [ Network: 120 Mbps Down ]       │
+│  🌐 Network  │                                                         │
+│              │  Recent Alerts:                                         │
+│  ⚙️ Processes│  • All hardware sensors operating within safe limits.   │
+│              │  • Storage drive has 142 GB available.                  │
+│  🔧 Settings │                                                         │
+└──────────────┴─────────────────────────────────────────────────────────┘
 ```
 
-- **Overview Page**: High-level telemetry cards for quick glances at CPU load, RAM usage, and drive capacity.
-- **Diagnostics Page**: Deep dive into hardware sub-systems with automated recommendations.
-- **Network Page**: Test ping, latency, and interface throughput in real-time.
-- **Processes Page**: Sort and inspect running tasks by CPU and memory footprint.
-- **Settings Page**: Theme configuration, auto-sync intervals, and connection preferences.
+1. **Overview Dashboard:** Your daily high-level summary. View overall health status and quick vital cards.
+2. **Diagnostics Page:** Deep dive into CPU details, RAM allocation, and individual drive partitions.
+3. **Network Page:** Live network adapter statuses and integrated connection speed testing.
+4. **Processes Page:** Top resource-consuming processes sorted by CPU and memory impact.
+5. **Settings Page:** Customize alert thresholds, switch between Dark/Light themes, and manage your cloud account.
 
 ---
 
-## 🔒 Privacy & Data Security
-
-Your privacy and peace of mind are paramount:
-- **No Personal File Scanning**: PC DOQTAR only reads hardware and operating system telemetry (temperatures, percentages, speeds). It **never** scans or reads your personal documents, browsing history, or private data.
-- **Encrypted Transmission**: All communication with the PC DOQTAR cloud is encrypted end-to-end via TLS/HTTPS.
-- **Secure Authentication**: User sign-in and cloud sessions are managed through Firebase Authentication with cryptographically verified identity tokens.
-
----
-
-## 📥 Getting Started
+## 📥 Installation & Getting Started
 
 ### System Requirements
-- **Operating System**: Windows 10 / Windows 11 (64-bit) or compatible Linux/macOS environment
-- **Runtime**: Java 21 or higher (or the bundled standalone installer)
-- **Memory**: Minimum 512 MB RAM free for the application
-- **Disk Space**: ~100 MB free space
+* **Operating System:** Windows 10 (64-bit) or Windows 11 (64-bit)
+* **Processor:** 64-bit Intel or AMD processor
+* **Memory (RAM):** 4 GB minimum (8 GB recommended)
+* **Disk Space:** ~150 MB of free storage space
 
-### Quick Launch (For Users)
-1. Download the latest release installer or packaged executable from the [Releases](https://github.com/KishoreNMproject/pc-doqtar/releases) tab.
-2. Run the application installer or executable (`PCDOQTAR.exe`).
-3. (Optional) Sign in with your PC DOQTAR account in the bottom-left corner to enable cloud sync and historical reports.
-4. Click **Run Diagnostics** on the main dashboard to evaluate your system's health.
+### Quick Start Guide
 
-### Running from Source (For Developers & Advanced Users)
-If you are building from source:
+1. **Download the Installer:**
+   - Grab the latest `PCDOQTAR-Setup.exe` from the [Releases](https://github.com/KishoreNMproject/pc-doqtar/releases) page.
+2. **Run Setup:**
+   - Double-click `PCDOQTAR-Setup.exe` and follow the guided on-screen installation wizard.
+3. **Launch PC DOQTAR:**
+   - Open PC DOQTAR from your Start Menu or Desktop shortcut.
+4. **Instant Diagnostic:**
+   - The application immediately runs an initial diagnostic scan and presents your system health status.
+5. **(Optional) Connect to the Cloud:**
+   - Click the **Sign In** button in the top right corner.
+   - Create a free account or log in with your email to start recording your PC's health history.
+
+---
+
+## ❓ Frequently Asked Questions (FAQ)
+
+<details>
+<summary><b>Do I need an active internet connection to use PC DOQTAR?</b></summary>
+No. All core hardware monitoring, diagnostics, and process exploration run entirely offline on your local machine. An internet connection is only needed if you want to use the optional Cloudflare speed test or sync diagnostic reports to your cloud account.
+</details>
+
+<details>
+<summary><b>Will PC DOQTAR slow down my games or demanding apps?</b></summary>
+No. PC DOQTAR is designed to be ultra-lightweight. Diagnostic background updates run on low-overhead worker threads and consume minimal CPU and RAM resources.
+</details>
+
+<details>
+<summary><b>How does cloud synchronization work?</b></summary>
+When you log in with your account, clicking "Sync Now" (or enabling background reporting) uploads a compact JSON snapshot of your hardware statistics to the secure PC DOQTAR Connection Service. You can then compare snapshots over time to identify trends such as memory leaks or disk usage growth.
+</details>
+
+<details>
+<summary><b>Can I reset my password if I forget it?</b></summary>
+Yes. In the Sign-In window, click "Forgot Password?", enter your account email address, and a secure password reset link will be sent to your inbox immediately.
+</details>
+
+---
+
+## 🛠️ For Developers & Builders
+
+If you are interested in compiling PC DOQTAR from source or packaging your own installer:
+
 ```bash
 # Clone the repository
 git clone https://github.com/KishoreNMproject/pc-doqtar.git
 cd pc-doqtar
 
-# Launch the desktop UI via Maven JavaFX plugin
-mvn clean javafx:run
+# Build and run tests with Maven
+mvn clean test
+
+# Run the desktop application
+mvn javafx:run
 ```
 
----
-
-## 🌐 Connecting to Cloud Services
-
-PC DOQTAR works entirely offline out-of-the-box. When you choose to connect your account:
-- By default, it communicates with the secure cloud endpoint:  
-  `https://pc-doqtar-connection-service.vercel.app`
-- For private enterprise deployments or local network test setups, you can override the target server by setting:
-  ```bash
-  PC_DOQTAR_SERVER_URL=http://your-server-address:8080
-  ```
-
----
-
-## 💬 Frequently Asked Questions (FAQ)
-
-<details>
-<summary><b>Does PC DOQTAR slow down my computer while running?</b></summary>
-No. PC DOQTAR is engineered to be extremely lightweight. Background telemetry polling consumes less than 1% of modern CPU capacity and stays dormant when not actively viewing real-time charts.
-</details>
-
-<details>
-<summary><b>Can I use PC DOQTAR without creating an account?</b></summary>
-Yes! All local diagnostic scans, real-time monitors, and hardware health checks work 100% offline without requiring any login or account creation. An account is only needed if you want cloud backup and cross-scan trend analytics.
-</details>
-
-<details>
-<summary><b>What should I do if PC DOQTAR shows a "Warning" or "Critical" status?</b></summary>
-Click directly on the warning card on the dashboard or navigate to the Diagnostics tab. PC DOQTAR displays a clear explanation of what triggered the threshold (e.g., low disk space, high memory usage, or thermal throttling) alongside actionable recommendations to resolve it.
-</details>
+*Requires JDK 21+ and JavaFX 21.*
 
 ---
 
 ## 🤝 Support & Feedback
 
-If you encounter issues or have feature suggestions:
-- Report a bug or request a feature via [GitHub Issues](https://github.com/KishoreNMproject/pc-doqtar/issues).
-- Check the companion cloud service at [pc-doqtar-connection-service](https://github.com/KishoreNMproject/pc-doqtar-connection-service).
+We want PC DOQTAR to be the most helpful, user-friendly PC health tool on Windows. If you encounter any bugs, have questions, or would like to request a new feature:
+
+- 🐛 **Report an Issue:** [GitHub Issues](https://github.com/KishoreNMproject/pc-doqtar/issues)
+- 💡 **Request a Feature:** [GitHub Discussions](https://github.com/KishoreNMproject/pc-doqtar/discussions)
+- 🌐 **Backend Cloud Service:** [pc-doqtar-connection-service](https://github.com/KishoreNMproject/pc-doqtar-connection-service)
 
 ---
 
 <p align="center">
-  <b>PC DOQTAR — Proactive Care for Peak PC Performance.</b>
+  <b>PC DOQTAR</b> — <i>Keep your PC running at its best, every single day.</i>
 </p>
