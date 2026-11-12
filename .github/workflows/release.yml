@@ -1,0 +1,77 @@
+# .github/workflows/release.yml
+name: Build, Sign & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Set up JDK 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      # 3. Download JavaFX JMODs (needed for jpackage --module-path)
+      - name: Download JavaFX JMODs
+        run: |
+          Invoke-WebRequest -Uri "https://download2.gluonhq.com/openjfx/21.0.8/openjfx-21.0.8_windows-x64_bin-jmods.zip" -OutFile javafx-jmods.zip
+          Expand-Archive javafx-jmods.zip -DestinationPath javafx-jmods
+
+      # 4. Build with Maven (produces JAR + jpackage app-image)
+      - name: Maven Build
+        run: |
+          # Override the jpackage module-path and dest to use CI paths
+          mvn clean package -DskipTests `
+            -Dexec.commandlineArgs="--type app-image --name PCDOQTAR --dest dist/gui --input target/jpackage-input --main-jar pc-doqtar-1.1.2.jar --main-class org.pcdoqtar.app.DashboardApp --app-version 1.1.2 --vendor 'PC DOQTAR' --module-path javafx-jmods/javafx-jmods-21.0.8 --add-modules javafx.controls,javafx.fxml,java.net.http,java.sql,java.management,java.logging --icon src/main/resources/org/pcdoqtar/app/pc-doqtar.ico"
+
+      # 5. Build Inno Setup installer
+      - name: Build Installer (Inno Setup)
+        run: |
+          choco install innosetup -y
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" dist/PCDOQTAR-Setup.iss
+
+      # ── OPTION A: SignPath (free for OSS) ──
+      - name: Sign with SignPath
+        uses: SignPath/github-action-submit-signing-request@v1
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: '${{ secrets.SIGNPATH_ORG_ID }}'
+          project-slug: 'pc-doqtar'
+          signing-policy-slug: 'release-signing'
+          artifact-configuration-slug: 'installer'
+          github-artifact-id: ''  # or use primary-artifact-path
+          primary-artifact-path: 'dist/PCDOQTAR-Setup.exe'
+          wait-for-completion: true
+          output-artifact-directory: 'dist/signed'
+
+      # ── OPTION B: signtool with purchased certificate ──
+      # - name: Sign with signtool
+      #   run: |
+      #     # Decode certificate from GitHub secret
+      #     [IO.File]::WriteAllBytes("cert.pfx", [Convert]::FromBase64String("${{ secrets.CODE_SIGN_CERT }}"))
+      #     & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe" sign `
+      #       /f cert.pfx /p "${{ secrets.CODE_SIGN_PASSWORD }}" `
+      #       /tr http://timestamp.digicert.com /td sha256 /fd sha256 `
+      #       dist/PCDOQTAR-Setup.exe
+      #     Remove-Item cert.pfx
+
+      # 6. Create GitHub Release with signed installer
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/signed/PCDOQTAR-Setup.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
