@@ -1,0 +1,20 @@
+﻿<service>
+  <id>PCDOQTARDiagnosticService</id>
+  <name>PC DOQTAR Service &amp; GUI Launcher</name>
+  <description>Runs PC DOQTAR background diagnostics and launches GUI.</description>
+
+	<executable>%BASE%\runtime-service\bin\java.exe</executable>
+	<arguments>-cp "%BASE%\classes;%BASE%\lib-minimal\*" org.pcdoqtar.service.DiagnosticServiceMain</arguments>
+
+    <workingdirectory>%BASE%</workingdirectory>
+
+  <startmode>Automatic</startmode>
+  <delayedAutoStart>true</delayedAutoStart>
+  <onfailure action="restart" delay="10 sec"/>
+
+  <logpath>%PROGRAMDATA%\PCDOQTAR\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>5</keepFiles>
+  </log>
+</service>
