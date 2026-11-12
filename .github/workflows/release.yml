@@ -1,0 +1,175 @@
+# ============================================================
+# PC DOQTAR — Build, Package & Release
+# ============================================================
+# Triggered by pushing a version tag:  git tag v1.2.0 && git push origin v1.2.0
+#
+# Pipeline:
+#   1. Build JAR with Maven
+#   2. Create GUI app-image with jpackage
+#   3. Create Windows Service bundle (WinSW + jlink runtime)
+#   4. Compile Inno Setup installer
+#   5. (Future) Sign with SignPath
+#   6. Publish GitHub Release
+
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # needed for creating GitHub Releases
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      # ── Checkout ──
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Extract version from tag (v1.2.0 → 1.2.0) ──
+      - name: Extract version
+        id: version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $ver = $tag -replace '^v', ''
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+          echo "Resolved version: $ver"
+
+      # ── JDK 21 ──
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      # ── JavaFX JMODs (needed for jpackage --module-path) ──
+      - name: Download JavaFX JMODs
+        shell: pwsh
+        run: |
+          Invoke-WebRequest `
+            -Uri "https://download2.gluonhq.com/openjfx/21.0.8/openjfx-21.0.8_windows-x64_bin-jmods.zip" `
+            -OutFile javafx-jmods.zip
+          Expand-Archive javafx-jmods.zip -DestinationPath javafx-jmods
+          # The JMODs are inside javafx-jmods/javafx-jmods-21.0.8/
+          echo "JavaFX JMODs path: javafx-jmods/javafx-jmods-21.0.8"
+
+      # ── Maven Build (JAR only, skip jpackage in pom.xml) ──
+      - name: Build JAR
+        shell: pwsh
+        run: |
+          # Build but skip the exec-maven-plugin (jpackage) since we run it manually with CI paths
+          mvn clean package -DskipTests -Dexec.skip=true
+
+      # ── jpackage: Create GUI app-image ──
+      - name: Create GUI app-image (jpackage)
+        shell: pwsh
+        run: |
+          $projectRoot = "${{ github.workspace }}"
+          $version     = "${{ steps.version.outputs.VERSION }}"
+
+          New-Item -ItemType Directory -Path "dist/gui" -Force | Out-Null
+
+          jpackage `
+            --type app-image `
+            --name "PCDOQTAR" `
+            --dest "dist/gui" `
+            --input "target/jpackage-input" `
+            --main-jar "pc-doqtar-$version.jar" `
+            --main-class org.pcdoqtar.app.DashboardApp `
+            --app-version $version `
+            --vendor "PC DOQTAR" `
+            --module-path "javafx-jmods/javafx-jmods-21.0.8" `
+            --add-modules javafx.controls,javafx.fxml,java.net.http,java.sql,java.management,java.logging,jdk.crypto.ec,jdk.crypto.mscapi,jdk.crypto.cryptoki,java.naming `
+            --icon "src/main/resources/org/pcdoqtar/app/pc-doqtar.ico"
+
+          echo "✅ GUI app-image created at dist/gui/PCDOQTAR/"
+          Get-ChildItem "dist/gui/PCDOQTAR" -Depth 0
+
+      # ── WinSW Service Bundle ──
+      - name: Create Service bundle
+        shell: pwsh
+        run: |
+          $serviceDir = "dist/PCDOQTAR-Service"
+          New-Item -ItemType Directory -Path $serviceDir -Force | Out-Null
+
+          # 1. Copy compiled classes
+          Copy-Item -Path "target/classes" -Destination "$serviceDir/classes" -Recurse
+
+          # 2. Copy runtime dependencies (JARs)
+          New-Item -ItemType Directory -Path "$serviceDir/lib-minimal" -Force | Out-Null
+          Copy-Item -Path "target/jpackage-input/*.jar" -Destination "$serviceDir/lib-minimal/" -Exclude "pc-doqtar-*.jar"
+
+          # 3. Create a minimal JRE for the service via jlink
+          jlink `
+            --module-path "javafx-jmods/javafx-jmods-21.0.8" `
+            --add-modules java.base,java.sql,java.management,java.logging,java.naming,java.net.http,jdk.crypto.ec,jdk.crypto.mscapi,jdk.crypto.cryptoki `
+            --output "$serviceDir/runtime-service" `
+            --strip-debug --compress zip-6 --no-header-files --no-man-pages
+
+          # 4. Download WinSW
+          $winswUrl = "https://github.com/winsw/winsw/releases/download/v3.0.0-alpha.11/WinSW-x64.exe"
+          Invoke-WebRequest -Uri $winswUrl -OutFile "$serviceDir/PCDOQTARService.exe"
+
+          # 5. Copy the service XML config from source
+          Copy-Item "packaging/PCDOQTARService.xml" "$serviceDir/PCDOQTARService.xml" -ErrorAction SilentlyContinue
+
+          echo "✅ Service bundle created at $serviceDir"
+          Get-ChildItem $serviceDir -Depth 0
+
+      # ── Inno Setup: Build Installer ──
+      - name: Build Installer (Inno Setup)
+        shell: pwsh
+        run: |
+          # Install Inno Setup
+          choco install innosetup -y --no-progress
+
+          # Compile the installer — BaseDir points to repo root
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
+            /DBaseDir="${{ github.workspace }}" `
+            packaging/PCDOQTAR-Setup.iss
+
+          echo "✅ Installer built"
+          Get-ChildItem dist/PCDOQTAR-Setup.exe
+
+      # ────────────────────────────────────────────────────────
+      # CODE SIGNING (uncomment after SignPath approval)
+      # ────────────────────────────────────────────────────────
+      # - name: Sign with SignPath
+      #   uses: SignPath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+      #     organization-id: '${{ secrets.SIGNPATH_ORG_ID }}'
+      #     project-slug: 'pc-doqtar'
+      #     signing-policy-slug: 'release-signing'
+      #     artifact-configuration-slug: 'installer'
+      #     primary-artifact-path: 'dist/PCDOQTAR-Setup.exe'
+      #     wait-for-completion: true
+      #     output-artifact-directory: 'dist/signed'
+
+      # ── GitHub Release ──
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "PC DOQTAR v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## PC DOQTAR v${{ steps.version.outputs.VERSION }}
+
+            ### Installation
+            1. Download `PCDOQTAR-Setup.exe` below
+            2. Run the installer
+            3. Follow the setup wizard
+
+            ---
+            *Built automatically from tag `${{ github.ref_name }}`*
+          files: |
+            dist/PCDOQTAR-Setup.exe
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
