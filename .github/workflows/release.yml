@@ -61,17 +61,19 @@ jobs:
 
       # ── Maven Build (JAR only, skip jpackage in pom.xml) ──
       - name: Build JAR
-        shell: pwsh
-        run: |
-          # Build but skip the exec-maven-plugin (jpackage) since we run it manually with CI paths
-          mvn clean package -DskipTests -Dexec.skip=true
+        shell: cmd
+        run: mvn clean package -DskipTests "-Dexec.skip=true"
 
       # ── jpackage: Create GUI app-image ──
       - name: Create GUI app-image (jpackage)
         shell: pwsh
         run: |
-          $projectRoot = "${{ github.workspace }}"
-          $version     = "${{ steps.version.outputs.VERSION }}"
+          $version = "${{ steps.version.outputs.VERSION }}"
+
+          # Find the actual JAR produced by Maven (pom.xml version may differ from tag)
+          $mainJar = Get-ChildItem "target/jpackage-input/pc-doqtar-*.jar" | Select-Object -First 1
+          if (-not $mainJar) { throw "No pc-doqtar JAR found in target/jpackage-input/" }
+          echo "Using JAR: $($mainJar.Name)"
 
           New-Item -ItemType Directory -Path "dist/gui" -Force | Out-Null
 
@@ -80,7 +82,7 @@ jobs:
             --name "PCDOQTAR" `
             --dest "dist/gui" `
             --input "target/jpackage-input" `
-            --main-jar "pc-doqtar-$version.jar" `
+            --main-jar $mainJar.Name `
             --main-class org.pcdoqtar.app.DashboardApp `
             --app-version $version `
             --vendor "PC DOQTAR" `
@@ -126,12 +128,14 @@ jobs:
       - name: Build Installer (Inno Setup)
         shell: pwsh
         run: |
+          $version = "${{ steps.version.outputs.VERSION }}"
           # Install Inno Setup
           choco install innosetup -y --no-progress
 
-          # Compile the installer — BaseDir points to repo root
+          # Compile the installer — BaseDir points to repo root and pass dynamic version
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
             /DBaseDir="${{ github.workspace }}" `
+            /DMyAppVersion="$version" `
             packaging/PCDOQTAR-Setup.iss
 
           echo "✅ Installer built"

@@ -1,5 +1,7 @@
 ﻿#define MyAppName "PC DOQTAR"
-#define MyAppVersion "1.1.2"
+#ifndef MyAppVersion
+  #define MyAppVersion "1.1.4"
+#endif
 
 ; BaseDir defaults to the repo root (one level up from packaging/)
 ; CI can override: ISCC.exe /DBaseDir=C:\path\to\repo packaging\PCDOQTAR-Setup.iss
