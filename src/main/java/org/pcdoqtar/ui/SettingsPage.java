@@ -6,11 +6,16 @@ import java.util.Optional;
 import org.pcdoqtar.auth.AuthSession;
 import org.pcdoqtar.auth.AuthenticationCoordinator;
 import org.pcdoqtar.auth.FirebaseAuthService;
+import org.pcdoqtar.ota.AppVersion;
+import org.pcdoqtar.ota.UpdateDialog;
+import org.pcdoqtar.ota.UpdateInfo;
+import org.pcdoqtar.ota.UpdateService;
 import org.pcdoqtar.settings.AppSettings;
 import org.pcdoqtar.ui.theme.ThemeManager;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -19,6 +24,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class SettingsPage extends VBox {
@@ -174,12 +180,75 @@ public class SettingsPage extends VBox {
         collapsedByDefault.setOnAction(event -> AppSettings.setNavigationCollapsedByDefault(collapsedByDefault.isSelected()));
         navigationCard.getChildren().addAll(navigationHeading, navigationDescription, collapsedByDefault);
 
+        // Software updates (OTA) card
+        VBox updateCard = createCard();
+        Label updateHeading = heading("Software updates (OTA)", 18);
+        Label updateDescription = new Label(
+                "Check for new releases, review release notes, and install updates over the air.");
+        updateDescription.setWrapText(true);
+        updateDescription.setStyle(mutedStyle());
+
+        String currentVersionStr = AppVersion.get();
+        Label currentVersionLabel = new Label("Current version: v" + currentVersionStr);
+        currentVersionLabel.setStyle(headingStyle(14));
+
+        CheckBox autoCheckUpdates = new CheckBox("Automatically check for updates on startup");
+        autoCheckUpdates.setSelected(AppSettings.isAutoUpdateCheckEnabled());
+        autoCheckUpdates.setOnAction(event -> AppSettings.setAutoUpdateCheckEnabled(autoCheckUpdates.isSelected()));
+
+        Label updateStatusLabel = new Label();
+        updateStatusLabel.setWrapText(true);
+        updateStatusLabel.setStyle(mutedStyle());
+
+        Button checkUpdatesButton = new Button("Check for updates");
+        checkUpdatesButton.setStyle(
+                "-fx-background-color: " + ThemeManager.getColour("accent")
+                + "; -fx-text-fill: " + ThemeManager.getColour("background")
+                + "; -fx-font-weight: bold; -fx-padding: 8 16 8 16;");
+
+        HBox updateActionRow = new HBox(12, checkUpdatesButton, updateStatusLabel);
+        updateActionRow.setAlignment(Pos.CENTER_LEFT);
+
+        checkUpdatesButton.setOnAction(event -> {
+            checkUpdatesButton.setDisable(true);
+            updateStatusLabel.setText("Checking GitHub for updates…");
+
+            UpdateService.getInstance().checkForUpdates().thenAccept(optionalInfo -> {
+                Platform.runLater(() -> {
+                    checkUpdatesButton.setDisable(false);
+                    if (optionalInfo.isEmpty()) {
+                        updateStatusLabel.setText("Unable to check for updates. Check your internet connection.");
+                    } else {
+                        UpdateInfo info = optionalInfo.get();
+                        if (info.updateAvailable()) {
+                            updateStatusLabel.setText("Update available: " + info.tagName() + " (" + info.getFormattedSize() + ")");
+                            updateStatusLabel.setStyle("-fx-text-fill: " + ThemeManager.getColour("accent") + "; -fx-font-weight: bold;");
+                            UpdateDialog.showUpdateAvailable(getScene().getWindow(), info, UpdateService.getInstance());
+                        } else {
+                            updateStatusLabel.setText("PC DOQTAR is up to date (v" + currentVersionStr + ").");
+                            updateStatusLabel.setStyle("-fx-text-fill: " + ThemeManager.getColour("text") + ";");
+                        }
+                    }
+                });
+            }).exceptionally(ex -> {
+                Platform.runLater(() -> {
+                    checkUpdatesButton.setDisable(false);
+                    updateStatusLabel.setText("Update check failed: " + ex.getMessage());
+                });
+                return null;
+            });
+        });
+
+        updateCard.getChildren().addAll(
+                updateHeading, updateDescription, currentVersionLabel,
+                autoCheckUpdates, updateActionRow);
+
         statusLabel.setWrapText(true);
         statusLabel.setStyle(mutedStyle());
 
         getChildren().addAll(
                 eyebrow, heading, description,
-                accountCard, themeCard, navigationCard, thresholdCard, statusLabel);
+                accountCard, updateCard, themeCard, navigationCard, thresholdCard, statusLabel);
     }
 
     public void refreshAccount() {

@@ -1,6 +1,6 @@
 ﻿#define MyAppName "PC DOQTAR"
 #ifndef MyAppVersion
-  #define MyAppVersion "1.1.4"
+  #define MyAppVersion "1.2.0"
 #endif
 
 ; BaseDir defaults to the repo root (one level up from packaging/)

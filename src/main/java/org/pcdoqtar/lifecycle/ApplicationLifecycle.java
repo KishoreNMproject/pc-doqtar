@@ -8,6 +8,8 @@ import javafx.stage.StageStyle;
 import javafx.scene.image.Image;
 
 import org.pcdoqtar.app.DashboardApp;
+import org.pcdoqtar.ota.UpdateService;
+import org.pcdoqtar.settings.AppSettings;
 import org.pcdoqtar.ui.AccountControl;
 import org.pcdoqtar.ui.CustomTitleBar;
 import org.pcdoqtar.ui.DashboardView;
@@ -81,6 +83,10 @@ public final class ApplicationLifecycle {
                 stage.getIcons().add(new Image(iconUrl.toExternalForm()));
             }
             stage.show();
+
+            if (AppSettings.isAutoUpdateCheckEnabled()) {
+                UpdateService.getInstance().scheduleStartupCheck(stage);
+            }
 
         } catch (RuntimeException exception) {
             ApplicationErrorHandler.showStartupError(

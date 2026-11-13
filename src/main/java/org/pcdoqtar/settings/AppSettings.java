@@ -10,6 +10,8 @@ public final class AppSettings {
     private static final String THEME_KEY = "theme";
     private static final String WARNING_THRESHOLD_KEY = "warningThreshold";
     private static final String NAV_COLLAPSED_KEY = "navigationCollapsedByDefault";
+    private static final String AUTO_UPDATE_CHECK_KEY = "autoUpdateCheck";
+    private static final String LAST_UPDATE_CHECK_KEY = "lastUpdateCheckTime";
     private static final double DEFAULT_WARNING_THRESHOLD = 80.0;
     
     private AppSettings() { }
@@ -48,5 +50,23 @@ public final class AppSettings {
 
     public static void setNavigationCollapsedByDefault(boolean collapsed) {
         PREFS.putBoolean(NAV_COLLAPSED_KEY, collapsed);
+    }
+
+    /** Whether the application should automatically check for updates on startup. */
+    public static boolean isAutoUpdateCheckEnabled() {
+        return PREFS.getBoolean(AUTO_UPDATE_CHECK_KEY, true);
+    }
+
+    public static void setAutoUpdateCheckEnabled(boolean enabled) {
+        PREFS.putBoolean(AUTO_UPDATE_CHECK_KEY, enabled);
+    }
+
+    /** Timestamp in epoch milliseconds when updates were last checked. */
+    public static long getLastUpdateCheckTime() {
+        return PREFS.getLong(LAST_UPDATE_CHECK_KEY, 0L);
+    }
+
+    public static void setLastUpdateCheckTime(long timestamp) {
+        PREFS.putLong(LAST_UPDATE_CHECK_KEY, timestamp);
     }
 }
